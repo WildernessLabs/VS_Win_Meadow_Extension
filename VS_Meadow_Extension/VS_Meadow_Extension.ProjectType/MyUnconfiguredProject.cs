@@ -43,7 +43,7 @@ namespace Meadow
         /// </remarks>
         internal const string UniqueCapability = "Meadow";
 
-        internal const string Language = "CSharp";
+        internal const string Language = "C#";
 
         [ImportingConstructor]
         public MyUnconfiguredProject(UnconfiguredProject unconfiguredProject)

@@ -6,9 +6,9 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
 
-    <DebuggerFlavor>ScriptDebugger</DebuggerFlavor>
-    <RunCommand>$(WinDir)\System32\cscript.exe</RunCommand>
-    <RunWorkingDirectory>$(MSBuildProjectDirectory)</RunWorkingDirectory>
-    <StartItem>Start.js</StartItem>
+    <!--<DebuggerFlavor>ScriptDebugger</DebuggerFlavor>
+    <RunCommand>$(WinDir)\System32\cscript.exe</RunCommand>-->
+    <!--<RunWorkingDirectory>$(MSBuildProjectDirectory)</RunWorkingDirectory>-->
+    <!--<StartItem>Start.js</StartItem>-->
   </PropertyGroup>
 </Project>

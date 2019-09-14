@@ -13,9 +13,9 @@
         <DataSource Persistence="ProjectFile" Label="Configuration" />
     </Rule.DataSource>
 
-    <StringProperty Name="StartItem" DisplayName="Start Item">
+    <StringProperty Name="StartItem" DisplayName="Start Item Brtian">
         <StringProperty.DataSource>
-            <DataSource Persistence="ProjectFile" HasConfigurationCondition="False" />
+            <DataSource ItemType="" Persistence="ProjectFile" HasConfigurationCondition="False" />
         </StringProperty.DataSource>
     </StringProperty>
 
@@ -36,4 +36,6 @@
             <DataSource Persistence="UserFile" HasConfigurationCondition="False" />
         </BoolProperty.DataSource>
     </BoolProperty>
+
+    <StringProperty Name="DeviceId" DisplayName="Device ID" Visible="false" />
 </Rule>
