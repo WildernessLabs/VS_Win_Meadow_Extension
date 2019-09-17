@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS_Meadow_Extension.Project
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.CLI.Core", "..\Meadow.CLI\Meadow.CLI.Core\Meadow.CLI.Core.csproj", "{00F05278-9F3F-40B0-B377-64E26B028888}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Sdk", "..\Meadow.Sdk\Meadow_DotNet_SDK\Meadow.SDK\Meadow.Sdk.csproj", "{FE5140A0-267A-429B-A781-A63967632845}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.Template", "Meadow.Template\Meadow.Template.csproj", "{2CA2AE75-18E0-4EF2-80A7-63E51446BBFE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{00F05278-9F3F-40B0-B377-64E26B028888}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{00F05278-9F3F-40B0-B377-64E26B028888}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{00F05278-9F3F-40B0-B377-64E26B028888}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE5140A0-267A-429B-A781-A63967632845}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE5140A0-267A-429B-A781-A63967632845}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE5140A0-267A-429B-A781-A63967632845}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE5140A0-267A-429B-A781-A63967632845}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CA2AE75-18E0-4EF2-80A7-63E51446BBFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CA2AE75-18E0-4EF2-80A7-63E51446BBFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CA2AE75-18E0-4EF2-80A7-63E51446BBFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CA2AE75-18E0-4EF2-80A7-63E51446BBFE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

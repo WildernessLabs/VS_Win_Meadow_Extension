@@ -10,36 +10,43 @@ using Microsoft.VisualStudio.ProjectSystem.VS.Debug;
 
 namespace Meadow
 {
-    //[ExportDebugger(ScriptDebugger.SchemaName)]
+    [ExportDebugger("asdf")] // name of the schema from above
     [AppliesTo("Meadow")]
-    public class ScriptDebuggerLaunchProvider : DebugLaunchProviderBase
+    internal class MyDebugLaunchProvider : DebugLaunchProviderBase
     {
+        //[Import]
+        //// Code-generated type from compiling "XamlPropertyRule"
+        //private readonly ProjectProperties projectProperties;
+
         [ImportingConstructor]
-        public ScriptDebuggerLaunchProvider(ConfiguredProject configuredProject)
+        public MyDebugLaunchProvider(ConfiguredProject configuredProject)
             : base(configuredProject)
         {
+            //this.projectProperties = projectProperties;
         }
 
-        [ExportPropertyXamlRuleDefinition("Meadow, Version=1.0.0.0, Culture=neutral, PublicKeyToken=9be6e469bc4921f1", "XamlRuleToCode:ScriptDebugger.xaml", "Project")]
-        [AppliesTo("Meadow")]
-        private object DebuggerXaml { get { throw new NotImplementedException(); } }
-
-        /// <summary>
-        /// Gets project properties that the debugger needs to launch.
-        /// </summary>
         [Import]
         private ProjectProperties ProjectProperties { get; set; }
 
+        // This is one of the methods of injecting rule xaml files into the project system.
+        [ExportPropertyXamlRuleDefinition("MyPackage, Version=1.0.0.0, Culture=neutral, PublicKeyToken=9be6e469bc4921f1", "XamlRuleToCode:MyDebugger.xaml", "Project")]
+        [AppliesTo("Meadow")]
+        private object DebuggerXaml { get { throw new NotImplementedException(); } }
+
         public override async Task<bool> CanLaunchAsync(DebugLaunchOptions launchOptions)
         {
-            //var generalProperties = await this.ProjectProperties.GetConfigurationGeneralPropertiesAsync();
-            //string startupItem = await generalProperties.StartItem.GetEvaluatedValueAtEndAsync();
+            // perform any necessary logic to determine if the debugger can launch
             return false;
+        }
+
+        public override Task LaunchAsync(DebugLaunchOptions launchOptions)
+        {
+            return base.LaunchAsync(launchOptions);
         }
 
         public override async Task<IReadOnlyList<IDebugLaunchSettings>> QueryDebugTargetsAsync(DebugLaunchOptions launchOptions)
         {
-            //var settings = new DebugLaunchSettings(launchOptions);
+            var settings = new DebugLaunchSettings(launchOptions);
 
             //// The properties that are available via DebuggerProperties are determined by the property XAML files in your project.
             //var debuggerProperties = await this.ProjectProperties.GetScriptDebuggerPropertiesAsync();
@@ -67,7 +74,10 @@ namespace Meadow
             //settings.LaunchOperation = DebugLaunchOperation.CreateProcess;
             //settings.LaunchDebugEngineGuid = DebuggerEngines.ScriptEngine;
 
-            return new IDebugLaunchSettings[] { new DebugLaunchSettings(launchOptions) };
+            settings.Executable = string.Empty;
+            settings.Arguments = string.Empty;
+
+            return new IDebugLaunchSettings[] { settings };
         }
     }
 }

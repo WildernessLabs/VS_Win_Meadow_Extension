@@ -63,8 +63,9 @@
   <Import Project="$(MSBuildProjectFullPath).user" Condition="Exists('$(MSBuildProjectFullPath).user')" />
 
   <Target Name="Run">
-    <Message Text="$(RunCommandArguments)" />
-    <Exec Command='$(RunCommand) "$(MSBuildProjectDirectory)\$(StartItem)" $(RunCommandArguments)' WorkingDirectory="$(RunWorkingDirectory)" />
+    <!--<Message Text="$(RunCommandArguments)" />-->
+    <!--<Exec Command='$(RunCommand) "$(MSBuildProjectDirectory)\$(StartItem)" $(RunCommandArguments)' WorkingDirectory="$(RunWorkingDirectory)" />-->
+    <Exec Command="nocom" WorkingDirectory="nodir" />
   </Target>
 
   <Target Name="Build" >
