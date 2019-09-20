@@ -366,6 +366,10 @@
   <ItemGroup>
     <Content Include="Resources\Command2Package.ico" />
     <Content Include="Resources\MeadowWindowCommand.png" />
+    <Content Include="wildernesslabs_icon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <VSCTCompile Include="Command2Package.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
       <SubType>Designer</SubType>
