@@ -1,6 +1,6 @@
 ﻿using Meadow;
 
-namespace BasicMeadow
+namespace $safeprojectname$
 {
     class Program
     {
