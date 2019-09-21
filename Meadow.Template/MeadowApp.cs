@@ -4,7 +4,7 @@ using Meadow;
 using Meadow.Devices;
 using Meadow.Hardware;
 
-namespace BasicMeadow
+namespace $safeprojectname$
 {
     public class MeadowApp : App<F7Micro, MeadowApp>
     {
