@@ -9,8 +9,13 @@ using System.Threading.Tasks;
 using EnvDTE;
 using Meadow.Helpers;
 using MeadowCLI.DeviceManagement;
+using MeadowCLI.Hcom;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Build;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
+using Task = System.Threading.Tasks.Task;
 
 namespace Meadow
 {
@@ -48,11 +53,15 @@ namespace Meadow
 
         async Task DeployAppAsync(string target, string folder, TextWriter outputPaneWriter, CancellationToken cts)
         {
-            await outputPaneWriter.WriteAsync("Deploying to Meadow ...");
+            await outputPaneWriter.WriteAsync($"Deploying to Meadow on {target}...");
 
             try
             {
-                var meadow = await MeadowDeviceManager.GetMeadowForSerialPort(target);
+                var meadow = MeadowDeviceManager.CurrentDevice;
+                if (meadow == null)
+                {
+                     meadow = await MeadowDeviceManager.GetMeadowForSerialPort(target);
+                }
 
                 if (await InitializeMeadowDeviceAsync(meadow, outputPaneWriter, cts) == false)
                 {
@@ -131,7 +140,7 @@ namespace Meadow
 
             await WriteFileToMeadowAsync(meadow, outputPaneWriter, cts, folder, MeadowDevice.SYSTEM);
             await WriteFileToMeadowAsync(meadow, outputPaneWriter, cts, folder, MeadowDevice.SYSTEM_CORE);
-            await WriteFileToMeadowAsync(meadow, outputPaneWriter, cts, folder, MeadowDevice.MEADOW_CORE);
+            await WriteFileToMeadowAsync(meadow, outputPaneWriter, cts, folder, MeadowDevice.MEADOW_CORE, true);
             await WriteFileToMeadowAsync(meadow, outputPaneWriter, cts, folder, MeadowDevice.MSCORLIB);
         }
 
@@ -164,12 +173,11 @@ namespace Meadow
 
             await Task.Delay(2500);//wait for reboot
 
-            ////reconnect serial port
-            //if (meadow.Initialize() == false)
-            //{
-            //    //find device with matching serial
-
-            //}
+            //reconnect serial port
+            if (meadow.Initialize() == false)
+            {
+                //find device with matching serial
+            }
         }
 
         public bool IsDeploySupported
@@ -179,10 +187,26 @@ namespace Meadow
 
         public void Commit()
         {
+            IVsOutputWindow outWindow = Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
+            Guid generalPaneGuid = VSConstants.GUID_OutWindowDebugPane; // P.S. There's also the GUID_OutWindowDebugPane available.
+            IVsOutputWindowPane generalPane;
+            outWindow.GetPane(ref generalPaneGuid, out generalPane);
+            generalPane.Activate();
+            generalPane.Clear();
+
+            var meadow = MeadowDeviceManager.CurrentDevice;
+            if(meadow?.OnMeadowMessage == null)
+            {
+                meadow.OnMeadowMessage += (s, e) =>
+                {
+                    generalPane.OutputString(e.Message);
+                };
+            }
         }
 
         public void Rollback()
         {
         }
+
     }
 }
