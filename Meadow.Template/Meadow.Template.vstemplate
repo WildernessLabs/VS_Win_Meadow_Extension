@@ -1,6 +1,6 @@
 ﻿<VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Project">
   <TemplateData>
-    <Name>Meadow Console</Name>
+    <Name>Meadow Application</Name>
     <Description>Create a basic Meadow application</Description>
     <ProjectType>CSharp</ProjectType>
     <ProjectSubType>
