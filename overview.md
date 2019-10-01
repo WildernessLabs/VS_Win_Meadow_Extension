@@ -4,6 +4,9 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+#### 0.1.6
+- Add Meadow.Foundation reference to project template.
+
 #### 0.1.5
 - Support for new Meadow OS file system.
 
