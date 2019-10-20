@@ -1,6 +1,6 @@
-# VS Tools for Meadow
+# Meadow Extension for Visual Studio for Windows
 
-For step by step instructions on using this extension, [check out the tutorial](http://beta-developer.wildernesslabs.co/Meadow/Getting_Started/Hello_World/).
+This is the add-in for Visual Studio that enables Meadow projects to be built and deployed on Windows. 
 
 ## Release Notes
 
@@ -18,3 +18,11 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Known Issues
 - Debugging not supported.
+
+## License
+
+Released under the [Apache 2 license](license.md).
+
+## Authors
+
+Brian Kim
