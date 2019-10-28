@@ -56,6 +56,12 @@
     <Reference Include="envdte90, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
+    <Reference Include="LibUsbDotNet.LibUsbDotNet, Version=2.2.0.0, Culture=neutral, PublicKeyToken=c677239abe1e02a9, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\LibUsbDotNet.2.2.29\lib\net45\LibUsbDotNet.LibUsbDotNet.dll</HintPath>
+    </Reference>
+    <Reference Include="Meadow.CLI.Core, Version=0.4.3.0, Culture=neutral, PublicKeyToken=601e4acaff54b53a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\WildernessLabs.Meadow.CLI.Core.0.4.3\lib\net472\Meadow.CLI.Core.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Build, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.Build.16.0.461\lib\net472\Microsoft.Build.dll</HintPath>
     </Reference>
@@ -364,6 +370,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="libusb-1.0.dll" />
     <Content Include="Resources\Command2Package.ico" />
     <Content Include="Resources\MeadowWindowCommand.png" />
     <Content Include="wildernesslabs_icon.png">
@@ -378,6 +385,7 @@
       <ResourceName>Menus1.ctmenu</ResourceName>
     </VSCTCompile>
     <None Include="app.config" />
+    <None Include="libusb-1.0.dylib" />
     <None Include="packages.config" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
@@ -454,10 +462,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Meadow.CLI\Meadow.CLI.Core\Meadow.CLI.Core.csproj">
-      <Project>{00f05278-9f3f-40b0-b377-64e26b028888}</Project>
-      <Name>Meadow.CLI.Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Meadow.Template\Meadow.Template.csproj">
       <Project>{2CA2AE75-18E0-4EF2-80A7-63E51446BBFE}</Project>
       <Name>Meadow.Template</Name>
