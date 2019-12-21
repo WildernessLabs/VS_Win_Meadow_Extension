@@ -4,6 +4,10 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+#### 0.4.1
+- Update incorrect Ctrl+2 messaging in debug output.
+- Update project template.
+
 #### 0.4.0
 - CRC checks for efficient deployment.
 
