@@ -39,7 +39,7 @@ namespace Meadow
 
             if (string.IsNullOrEmpty(settings.DeviceTarget))
             {
-                throw new Exception("Device has not been selected. Hit Ctrl+2 to access the Device list.");
+                throw new Exception("Device has not been selected. Hit Ctrl+Shift+M to access the Device list.");
             }
 
             var attachedDevices = MeadowDeviceManager.FindSerialDevices();

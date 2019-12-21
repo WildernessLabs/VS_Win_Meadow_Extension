@@ -1,4 +1,5 @@
 ﻿using Meadow;
+using System.Threading;
 
 namespace $safeprojectname$
 {
@@ -11,6 +12,8 @@ namespace $safeprojectname$
                 
             // instantiate and run new meadow app
             app = new MeadowApp();
+
+            Thread.Sleep(Timeout.Infinite);
         }
     }
 }
