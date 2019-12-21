@@ -10,9 +10,9 @@ namespace $safeprojectname$
 {
     public class MeadowApp : App<F7Micro, MeadowApp>
     {
+        const int pulseDuration = 3000;
         RgbPwmLed rgbPwmLed;
-        const int _pulseDuration = 3000;
-
+        
         public MeadowApp()
         {
             rgbPwmLed = new RgbPwmLed(Device,
@@ -37,7 +37,7 @@ namespace $safeprojectname$
         {
             rgbPwmLed.StartPulse(color);
             Console.WriteLine($"Pulsing {color}");
-            Thread.Sleep(_pulseDuration);
+            Thread.Sleep(pulseDuration);
             rgbPwmLed.Stop();
         }
     }
