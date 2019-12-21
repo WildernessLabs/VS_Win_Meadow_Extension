@@ -1,50 +1,44 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using Meadow;
 using Meadow.Devices;
-using Meadow.Hardware;
+using Meadow.Foundation;
+using Meadow.Foundation.Leds;
 
 namespace $safeprojectname$
 {
     public class MeadowApp : App<F7Micro, MeadowApp>
     {
-        IDigitalOutputPort redLed;
-        IDigitalOutputPort blueLed;
-        IDigitalOutputPort greenLed;
+        RgbPwmLed rgbPwmLed;
+        const int _pulseDuration = 3000;
 
         public MeadowApp()
         {
-            ConfigurePorts();
-            BlinkLeds();
+            rgbPwmLed = new RgbPwmLed(Device,
+                       Device.Pins.OnboardLedRed,
+                       Device.Pins.OnboardLedGreen,
+                       Device.Pins.OnboardLedBlue);
+
+            PulseRgbPwmLed();
         }
 
-        public void ConfigurePorts()
+        protected void PulseRgbPwmLed()
         {
-            Console.WriteLine("Creating Outputs...");
-            redLed = Device.CreateDigitalOutputPort(Device.Pins.OnboardLedRed);
-            blueLed = Device.CreateDigitalOutputPort(Device.Pins.OnboardLedBlue);
-            greenLed = Device.CreateDigitalOutputPort(Device.Pins.OnboardLedGreen);
-        }
-
-        public void BlinkLeds()
-        {
-            var state = false;
-
             while (true)
             {
-                int wait = 200;
-
-                state = !state;
-
-                Console.WriteLine($"State: {state}");
-
-                redLed.State = state;
-                Thread.Sleep(wait);
-                blueLed.State = state;
-                Thread.Sleep(wait);
-                greenLed.State = state;
-                Thread.Sleep(wait);
+                Pulse(Color.Red);
+                Pulse(Color.Green);
+                Pulse(Color.Blue);
             }
+        }
+
+        protected void Pulse(Color color)
+        {
+            rgbPwmLed.StartPulse(color);
+            Console.WriteLine($"Pulsing {color}");
+            Thread.Sleep(_pulseDuration);
+            rgbPwmLed.Stop();
         }
     }
 }
