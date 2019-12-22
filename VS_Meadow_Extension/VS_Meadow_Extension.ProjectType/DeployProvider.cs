@@ -236,7 +236,7 @@ namespace Meadow
 
             try
             {
-                MeadowDeviceManager.ResetTargetMcu(meadow);
+                MeadowDeviceManager.ResetMeadow(meadow, 0);
             }
             catch
             {
@@ -271,7 +271,7 @@ namespace Meadow
             {
                 meadow.OnMeadowMessage += (s, e) =>
                 {
-                    generalPane.OutputString(e.Message);
+                    generalPane.OutputString(e.Message + Environment.NewLine);
                 };
             }
         }
