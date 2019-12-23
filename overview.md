@@ -4,6 +4,10 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+### 0.5.1
+
+- Update project template to reference latest version (0.12.0) of Meadow.Foundation.
+
 ### 0.5.0
 
 - Meadow OS beta 3.6 compatibility updates
