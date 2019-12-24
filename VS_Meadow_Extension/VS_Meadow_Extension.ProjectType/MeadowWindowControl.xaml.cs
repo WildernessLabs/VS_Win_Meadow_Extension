@@ -137,7 +137,7 @@
                     UploadFile(device, Path.Combine(Globals.FirmwareDownloadsFilePath, osKernalFileName), 0x08000000);
 
                     await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                    OutputMessage($"Uploading {osRuntimeFileName} (This could take up to a minute)");
+                    OutputMessage($"Uploading {osRuntimeFileName} (may take a minute)");
 
                     await TaskScheduler.Default;
                     UploadFile(device, Path.Combine(Globals.FirmwareDownloadsFilePath, osRuntimeFileName), 0x08040000);

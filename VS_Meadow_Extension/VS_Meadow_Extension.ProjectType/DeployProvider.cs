@@ -110,7 +110,7 @@ namespace Meadow
             {
                 MeadowDeviceManager.GetDeviceInfo(meadow);
                 await Task.Delay(1000); // wait for device info to populate
-                await outputPaneWriter.WriteAsync(meadow.DeviceInfo.MeadowOSVersion);
+                await outputPaneWriter.WriteAsync($"Device {meadow.DeviceInfo.MeadowOSVersion}");
             }
             
             return true;
@@ -128,6 +128,11 @@ namespace Meadow
             {
                 if (cts.IsCancellationRequested) break;
                 await outputPaneWriter.WriteAsync($"Found {f}").ConfigureAwait(false);
+            }
+
+            if(meadowFiles.files.Count == 0)
+            {
+                await outputPaneWriter.WriteAsync($"Deploying for the first time may take several minutes.").ConfigureAwait(false);
             }
 
             return meadowFiles;
@@ -278,7 +283,7 @@ namespace Meadow
             {
                 meadow.OnMeadowMessage += (s, e) =>
                 {
-                    generalPane.OutputString(e.Message + Environment.NewLine);
+                    generalPane.OutputString(" " + e.Message + Environment.NewLine);
                 };
             }
         }
