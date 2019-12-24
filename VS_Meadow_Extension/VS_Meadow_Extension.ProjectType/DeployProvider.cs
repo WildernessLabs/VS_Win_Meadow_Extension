@@ -106,6 +106,13 @@ namespace Meadow
                 await outputPaneWriter.WriteAsync("Couldn't initialize serial port");
                 return false;
             }
+            else
+            {
+                MeadowDeviceManager.GetDeviceInfo(meadow);
+                await Task.Delay(1000); // wait for device info to populate
+                await outputPaneWriter.WriteAsync(meadow.DeviceInfo.MeadowOSVersion);
+            }
+            
             return true;
         }
 
