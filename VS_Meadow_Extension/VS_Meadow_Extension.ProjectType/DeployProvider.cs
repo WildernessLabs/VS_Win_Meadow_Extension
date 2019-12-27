@@ -65,7 +65,7 @@ namespace Meadow
 
                 if (await InitializeMeadowDeviceAsync(meadow, outputPaneWriter, cts) == false)
                 {
-                    throw new Exception("Failed to initialize Meadow. Trying reconnecting the device.");
+                    throw new Exception("Failed to initialize Meadow. Try resetting or reconnecting the device.");
                 }
 
                 var meadowFiles = await GetFilesOnDevice(meadow, outputPaneWriter, cts);

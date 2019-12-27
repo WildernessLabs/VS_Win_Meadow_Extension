@@ -158,7 +158,8 @@
             }
             else
             {
-                OutputMessage("Device not found, double check your device in DFU mode. For more help, visit http://developer.wildernesslabs.co/Meadow/Getting_Started/Troubleshooting/VS");
+                OutputMessage("Device not found. Connect the device in bootloader mode by plugging in the device while holding down the BOOT button.");
+                OutputMessage("For more help, visit http://developer.wildernesslabs.co/Meadow/Getting_Started/Troubleshooting/VS");
             }
 
             RefreshDeviceList();
