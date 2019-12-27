@@ -29,7 +29,7 @@
             </ComboBox>
             <Button x:Name="Refresh" Width="200" Margin="0 0 0 10" Click="Refresh_Click" Content="Refresh Device Ports"/>
             <TextBlock TextAlignment="Center">
-                <Hyperlink NavigateUri="http://developer.wildernesslabs.co/Meadow/Getting_Started/Troubleshooting/VS" RequestNavigate="Hyperlink_RequestNavigate">
+                <Hyperlink NavigateUri="http://developer.wildernesslabs.co/Meadow/Meadow_Basics/Troubleshooting/VisualStudio/" RequestNavigate="Hyperlink_RequestNavigate">
                     Troubleshooting Guide
                 </Hyperlink>    
             </TextBlock>

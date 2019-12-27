@@ -1,8 +1,12 @@
 # VS Tools for Meadow
 
-For step by step instructions on using this extension, [check out the tutorial](http://beta-developer.wildernesslabs.co/Meadow/Getting_Started/Hello_World/).
+For step by step instructions on using this extension, [check out the tutorial](http://developer.wildernesslabs.co/Meadow/Getting_Started/Hello_World/).
 
 ## Release Notes
+
+### 0.6.0
+
+- Add support to update device firmware from within the extension.
 
 ### 0.5.1
 

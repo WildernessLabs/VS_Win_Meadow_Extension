@@ -26,6 +26,7 @@
     using System.Net;
     using System.IO.Compression;
     using System.Windows.Ink;
+    using System.Threading;
 
     /// <summary>
     /// Interaction logic for MeadowWindowControl.
@@ -148,6 +149,10 @@
                     await TaskScheduler.Default;
                     device.LeaveDfuMode();
                     device.Dispose();
+
+                    System.Threading.Thread.Sleep(2000);
+
+                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                     OutputMessage($"Complete");
                 });
             }
@@ -155,6 +160,8 @@
             {
                 OutputMessage("Device not found, double check your device in DFU mode. For more help, visit http://developer.wildernesslabs.co/Meadow/Getting_Started/Troubleshooting/VS");
             }
+
+            RefreshDeviceList();
         }
 
         private void UploadFile(STDfuDevice device, string filepath, uint address)
