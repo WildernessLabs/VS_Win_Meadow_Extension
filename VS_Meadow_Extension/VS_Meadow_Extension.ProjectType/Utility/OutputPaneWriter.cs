@@ -38,6 +38,7 @@ namespace Meadow.Utility
             else
             {
                 await this.textWriter.WriteAsync($"{CurrentTimeStamp} {text}").ConfigureAwait(false);
+                this.stopwatch.Start();
             }
         }
     }
