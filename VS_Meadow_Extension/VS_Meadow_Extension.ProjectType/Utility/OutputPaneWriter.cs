@@ -26,18 +26,20 @@ namespace Meadow.Utility
             this.stopwatch = new Stopwatch();
         }
 
-        public string CurrentTimeStamp => DateTime.Now.ToLocalTime().ToString();
+        public string CurrentTimeStamp => $"[{DateTime.Now.ToLocalTime()}]";
+
+        public string ElapsedTime => $"({this.stopwatch.Elapsed} since last.)";
 
         public async Task WriteAsync(string text)
         {
             if (this.stopwatch.IsRunning)
             {
-                await this.textWriter.WriteAsync($"{CurrentTimeStamp} {text} ({this.stopwatch.Elapsed} since last log.)").ConfigureAwait(false);
+                await this.textWriter.WriteAsync($"{CurrentTimeStamp,-25} {text,-120} {ElapsedTime}").ConfigureAwait(false);
                 this.stopwatch.Restart();
             }
             else
             {
-                await this.textWriter.WriteAsync($"{CurrentTimeStamp} {text}").ConfigureAwait(false);
+                await this.textWriter.WriteAsync($"{CurrentTimeStamp,-25} {text,-120}").ConfigureAwait(false);
                 this.stopwatch.Start();
             }
         }
