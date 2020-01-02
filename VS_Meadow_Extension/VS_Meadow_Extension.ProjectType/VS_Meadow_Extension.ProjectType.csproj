@@ -373,6 +373,7 @@
     <Compile Include="ProjectProperties.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="STDfuDevice.cs" />
+    <Compile Include="Utility\OutputPaneWriter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="libusb-1.0.dll" />
