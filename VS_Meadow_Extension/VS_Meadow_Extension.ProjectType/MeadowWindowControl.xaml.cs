@@ -159,7 +159,7 @@
             else
             {
                 OutputMessage("Device not found. Connect the device in bootloader mode by plugging in the device while holding down the BOOT button.");
-                OutputMessage("For more help, visit http://developer.wildernesslabs.co/Meadow/Getting_Started/Troubleshooting/VS");
+                OutputMessage("For more help, visit http://developer.wildernesslabs.co/Meadow/Meadow_Basics/Troubleshooting/VisualStudio/");
             }
 
             RefreshDeviceList();
