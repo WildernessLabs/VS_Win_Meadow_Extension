@@ -54,6 +54,7 @@ namespace Meadow
 
         async Task DeployAppAsync(string target, string folder, IOutputPaneWriter outputPaneWriter, CancellationToken cts)
         {
+            Stopwatch sw = Stopwatch.StartNew();
             await outputPaneWriter.WriteAsync($"Deploying to Meadow on {target}...");
 
             try
@@ -84,6 +85,9 @@ namespace Meadow
             {
                 throw ex;
             }
+
+            sw.Stop();
+            await outputPaneWriter.WriteAsync($"Deployment Duration: {sw.Elapsed}");
         }
 
         async Task<bool> InitializeMeadowDeviceAsync(MeadowSerialDevice meadow, IOutputPaneWriter outputPaneWriter, CancellationToken cts)
@@ -131,7 +135,7 @@ namespace Meadow
                 await outputPaneWriter.WriteAsync($"Found {f}").ConfigureAwait(false);
             }
 
-            if(meadowFiles.files.Count == 0)
+            if (meadowFiles.files.Count == 0)
             {
                 await outputPaneWriter.WriteAsync($"Deploying for the first time may take several minutes.").ConfigureAwait(false);
             }
