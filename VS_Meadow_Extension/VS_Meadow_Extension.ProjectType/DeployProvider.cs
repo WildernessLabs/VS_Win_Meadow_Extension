@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EnvDTE;
 using Meadow.Helpers;
+using Meadow.Utility;
 using MeadowCLI.DeviceManagement;
 using MeadowCLI.Hcom;
 using Microsoft.VisualStudio;
@@ -48,11 +49,12 @@ namespace Meadow
                 throw new Exception($"Device on '{settings.DeviceTarget}' is not connected or busy.");
             }
 
-            await DeployAppAsync(settings.DeviceTarget, Path.Combine(projectDir, outputPath), outputPaneWriter, cts);
+            await DeployAppAsync(settings.DeviceTarget, Path.Combine(projectDir, outputPath), new OutputPaneWriter(outputPaneWriter), cts);
         }
 
-        async Task DeployAppAsync(string target, string folder, TextWriter outputPaneWriter, CancellationToken cts)
+        async Task DeployAppAsync(string target, string folder, IOutputPaneWriter outputPaneWriter, CancellationToken cts)
         {
+            Stopwatch sw = Stopwatch.StartNew();
             await outputPaneWriter.WriteAsync($"Deploying to Meadow on {target}...");
 
             try
@@ -83,9 +85,12 @@ namespace Meadow
             {
                 throw ex;
             }
+
+            sw.Stop();
+            await outputPaneWriter.WriteAsync($"Deployment Duration: {sw.Elapsed}");
         }
 
-        async Task<bool> InitializeMeadowDeviceAsync(MeadowSerialDevice meadow, TextWriter outputPaneWriter, CancellationToken cts)
+        async Task<bool> InitializeMeadowDeviceAsync(MeadowSerialDevice meadow, IOutputPaneWriter outputPaneWriter, CancellationToken cts)
         {
             if (cts.IsCancellationRequested) return true;
 
@@ -116,7 +121,7 @@ namespace Meadow
             return true;
         }
 
-        async Task<(List<string> files, List<UInt32> crcs)> GetFilesOnDevice(MeadowSerialDevice meadow, TextWriter outputPaneWriter, CancellationToken cts)
+        async Task<(List<string> files, List<UInt32> crcs)> GetFilesOnDevice(MeadowSerialDevice meadow, IOutputPaneWriter outputPaneWriter, CancellationToken cts)
         {
             if (cts.IsCancellationRequested) { return (new List<string>(), new List<UInt32>()); }
 
@@ -130,7 +135,7 @@ namespace Meadow
                 await outputPaneWriter.WriteAsync($"Found {f}").ConfigureAwait(false);
             }
 
-            if(meadowFiles.files.Count == 0)
+            if (meadowFiles.files.Count == 0)
             {
                 await outputPaneWriter.WriteAsync($"Deploying for the first time may take several minutes.").ConfigureAwait(false);
             }
@@ -138,7 +143,7 @@ namespace Meadow
             return meadowFiles;
         }
 
-        async Task<(List<string> files, List<UInt32> crcs)> GetLocalFiles(TextWriter outputPaneWriter, CancellationToken cts, string folder)
+        async Task<(List<string> files, List<UInt32> crcs)> GetLocalFiles(IOutputPaneWriter outputPaneWriter, CancellationToken cts, string folder)
         {
             // get list of files in folder
             // var files = Directory.GetFiles(folder, "*.dll");
@@ -177,7 +182,7 @@ namespace Meadow
             return (files, crcs);
         }
 
-        async Task DeleteUnusedFiles(MeadowSerialDevice meadow, TextWriter outputPaneWriter, CancellationToken cts,
+        async Task DeleteUnusedFiles(MeadowSerialDevice meadow, IOutputPaneWriter outputPaneWriter, CancellationToken cts,
             (List<string> files, List<UInt32> crcs) meadowFiles, (List<string> files, List<UInt32> crcs) localFiles)
         {
             if (cts.IsCancellationRequested)
@@ -195,7 +200,7 @@ namespace Meadow
             }
         }
 
-        async Task DeployApp(MeadowSerialDevice meadow, TextWriter outputPaneWriter, CancellationToken cts, string folder,
+        async Task DeployApp(MeadowSerialDevice meadow, IOutputPaneWriter outputPaneWriter, CancellationToken cts, string folder,
             (List<string> files, List<UInt32> crcs) meadowFiles, (List<string> files, List<UInt32> crcs) localFiles)
         {
             if (cts.IsCancellationRequested)
@@ -209,7 +214,7 @@ namespace Meadow
             }
         }
 
-        async Task<List<string>> GetFilesOnDeviceAsync(MeadowSerialDevice meadow, TextWriter outputPaneWriter, CancellationToken cts)
+        async Task<List<string>> GetFilesOnDeviceAsync(MeadowSerialDevice meadow, IOutputPaneWriter outputPaneWriter, CancellationToken cts)
         {
             if (cts.IsCancellationRequested) { return new List<string>(); }
 
@@ -225,7 +230,7 @@ namespace Meadow
             return files;
         }
 
-        async Task WriteFileToMeadowAsync(MeadowSerialDevice meadow, TextWriter outputPaneWriter, CancellationToken cts, string folder, string file, bool overwrite = false)
+        async Task WriteFileToMeadowAsync(MeadowSerialDevice meadow, IOutputPaneWriter outputPaneWriter, CancellationToken cts, string folder, string file, bool overwrite = false)
         {
             if (cts.IsCancellationRequested) { return; }
 
@@ -236,7 +241,7 @@ namespace Meadow
             }
         }
 
-        async Task ResetMeadowAndStartMonoAsync(MeadowSerialDevice meadow, TextWriter outputPaneWriter, CancellationToken cts)
+        async Task ResetMeadowAndStartMonoAsync(MeadowSerialDevice meadow, IOutputPaneWriter outputPaneWriter, CancellationToken cts)
         {
             if (cts.IsCancellationRequested) { return; }
 
