@@ -283,12 +283,14 @@ namespace Meadow
             generalPane.Activate();
             generalPane.Clear();
 
+            generalPane.OutputString(" Launching application..." + Environment.NewLine);
+
             var meadow = MeadowDeviceManager.CurrentDevice;
             if (meadow?.OnMeadowMessage == null)
             {
                 meadow.OnMeadowMessage += (s, e) =>
                 {
-                    generalPane.OutputString(" " + e.Message + Environment.NewLine);
+                    generalPane.OutputString(" " + e.Message);
                 };
             }
         }
