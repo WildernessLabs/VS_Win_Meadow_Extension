@@ -4,6 +4,10 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+### 0.7.0
+
+- Compatibility updates for Meadow OS beta 3.7.
+
 ### 0.6.0
 
 - Add support to update device firmware from within the extension.
