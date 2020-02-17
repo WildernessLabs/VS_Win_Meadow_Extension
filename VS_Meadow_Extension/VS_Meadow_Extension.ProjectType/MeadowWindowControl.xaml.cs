@@ -34,8 +34,7 @@
     public partial class MeadowWindowControl : UserControl
     {
         readonly Guid DEVICE_INTERFACE_GUID_STDFU = new Guid(0x3fe809ab, 0xfb91, 0x4cb5, 0xa6, 0x43, 0x69, 0x67, 0x0d, 0x52, 0x36, 0x6e);
-        readonly string osKernalFileName = "Meadow.OS_Kernel.bin";
-        readonly string osRuntimeFileName = "Meadow.OS_Runtime.bin";
+        readonly string osFileName = "Meadow.OS.bin";
         static Guid windowGuid = new Guid("AD01DF73-6990-4361-8587-4FC3CB91A65F");
         readonly string versionCheckUrl = "https://s3-us-west-2.amazonaws.com/downloads.wildernesslabs.co/Meadow_Beta/latest.json";
         string latestJson = "latest.json";
@@ -98,7 +97,7 @@
                 files = di.GetFiles().ToList();
             }
 
-            if(!files.Any(x=>x.Name == osKernalFileName) || !files.Any(x=>x.Name == osRuntimeFileName) || !files.Any(x => x.Name == latestJson))
+            if(!files.Any(x=>x.Name == osFileName) || !files.Any(x => x.Name == latestJson))
             {
                 OutputMessage("Download the latest firmware before flashing the device.");
                 return;
@@ -132,16 +131,10 @@
                     device.EraseAllSectors();
 
                     await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                    OutputMessage($"Uploading {osKernalFileName}");
+                    OutputMessage($"Uploading {osFileName}");
 
                     await TaskScheduler.Default;
-                    UploadFile(device, Path.Combine(Globals.FirmwareDownloadsFilePath, osKernalFileName), 0x08000000);
-
-                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                    OutputMessage($"Uploading {osRuntimeFileName} (may take a minute)");
-
-                    await TaskScheduler.Default;
-                    UploadFile(device, Path.Combine(Globals.FirmwareDownloadsFilePath, osRuntimeFileName), 0x08040000);
+                    UploadFile(device, Path.Combine(Globals.FirmwareDownloadsFilePath, osFileName), 0x08000000);
 
                     await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                     OutputMessage($"Resetting device");
@@ -200,26 +193,23 @@
 
         private async void Download_Firmware(object sender, RoutedEventArgs e)
         {
-            OutputMessage($"Checking for updates...", true);
-            HttpClient httpClient = new HttpClient();
-            var payload = await httpClient.GetStringAsync(versionCheckUrl);
-            var json = JObject.Parse(payload);
-            var version = GetVersionFromPayload(payload);
-
-            Uri download = new Uri(GetDownloadUrlFromPayload(payload));
-            var fileName = download.Segments.ToList().Last();
-
-            if (!Directory.Exists(Globals.FirmwareDownloadsFilePath))
+            try
             {
+                HttpClient httpClient = new HttpClient();
+                var payload = await httpClient.GetStringAsync(versionCheckUrl);
+                var version = GetVersionFromPayload(payload);
+
+                Uri download = new Uri(GetDownloadUrlFromPayload(payload));
+                var fileName = download.Segments.ToList().Last();
+
+                if (Directory.Exists(Globals.FirmwareDownloadsFilePath))
+                {
+                    Directory.Delete(Globals.FirmwareDownloadsFilePath, true);
+                }
+
                 Directory.CreateDirectory(Globals.FirmwareDownloadsFilePath);
-            }
+                DirectoryInfo di = new DirectoryInfo(Globals.FirmwareDownloadsFilePath);
 
-            DirectoryInfo di = new DirectoryInfo(Globals.FirmwareDownloadsFilePath);
-
-            var files = di.GetFiles();
-
-            if(!files.ToList().Any(x=> string.Compare(x.Name, fileName, StringComparison.OrdinalIgnoreCase) == 0))
-            {
                 OutputMessage($"Downloading firmware version: {version}.");
                 di.Delete(true);
                 Directory.CreateDirectory(Globals.FirmwareDownloadsFilePath);
@@ -230,10 +220,11 @@
                 ZipFile.ExtractToDirectory(Path.Combine(Globals.FirmwareDownloadsFilePath, fileName), Globals.FirmwareDownloadsFilePath);
                 OutputMessage($"Download complete.");
             }
-            else
+            catch(Exception ex)
             {
-                OutputMessage($"No updates found {DateTime.Now.ToLongTimeString()}.");
+                OutputMessage($"Error occurred while downloading latest OS. Please try again later.");
             }
+            
         }
 
         private void OutputMessage(string message, bool clear = false)
@@ -251,7 +242,7 @@
             {
                 customPane.Clear();
             }
-            customPane.OutputString(message + Environment.NewLine);
+            customPane.OutputString($"[{DateTime.Now.ToLocalTime()}] {message}" + Environment.NewLine);
         }
 
         private string GetVersionFromPayload(string payload)
