@@ -9,35 +9,60 @@ namespace $safeprojectname$
 {
     public class MeadowApp : App<F7Micro, MeadowApp>
     {
-        const int pulseDuration = 3000;
-        RgbPwmLed rgbPwmLed;
-        
-        public MeadowApp()
-        {
-            rgbPwmLed = new RgbPwmLed(Device,
-                       Device.Pins.OnboardLedRed,
-                       Device.Pins.OnboardLedGreen,
-                       Device.Pins.OnboardLedBlue);
+		RgbPwmLed onboardLed;
 
-            PulseRgbPwmLed();
-        }
+		public MeadowApp()
+		{
+			Initialize();
+			CycleColors(1000);
+		}
 
-        protected void PulseRgbPwmLed()
-        {
-            while (true)
-            {
-                Pulse(Color.Red);
-                Pulse(Color.Green);
-                Pulse(Color.Blue);
-            }
-        }
+		void Initialize()
+		{
+			Console.WriteLine("Initialize hardware...");
 
-        protected void Pulse(Color color)
-        {
-            rgbPwmLed.StartPulse(color);
-            Console.WriteLine($"Pulsing {color}");
-            Thread.Sleep(pulseDuration);
-            rgbPwmLed.Stop();
-        }
-    }
+			onboardLed = new RgbPwmLed(device: Device,
+				redPwmPin: Device.Pins.OnboardLedRed,
+				greenPwmPin: Device.Pins.OnboardLedGreen,
+				bluePwmPin: Device.Pins.OnboardLedBlue,
+				3.3f, 3.3f, 3.3f,
+				Meadow.Peripherals.Leds.IRgbLed.CommonType.CommonAnode);
+		}
+
+		void CycleColors(int duration)
+		{
+			Console.WriteLine("Cycle colors...");
+
+			while (true)
+			{
+				ShowColorPulse(Color.Blue, duration);
+				ShowColorPulse(Color.Cyan, duration);
+				ShowColorPulse(Color.Green, duration);
+				ShowColorPulse(Color.GreenYellow, duration);
+				ShowColorPulse(Color.Yellow, duration);
+				ShowColorPulse(Color.Orange, duration);
+				ShowColorPulse(Color.OrangeRed, duration);
+				ShowColorPulse(Color.Red, duration);
+				ShowColorPulse(Color.MediumVioletRed, duration);
+				ShowColorPulse(Color.Purple, duration);
+				ShowColorPulse(Color.Magenta, duration);
+				ShowColorPulse(Color.Pink, duration);
+			}
+		}
+
+		void ShowColorPulse(Color color, int duration = 1000)
+		{
+			onboardLed.StartPulse(color, (uint)(duration / 2));
+			Thread.Sleep(duration);
+			onboardLed.Stop();
+		}
+
+		void ShowColor(Color color, int duration = 1000)
+		{
+			Console.WriteLine($"Color: {color}");
+			onboardLed.SetColor(color);
+			Thread.Sleep(duration);
+			onboardLed.Stop();
+		}
+	}
 }
