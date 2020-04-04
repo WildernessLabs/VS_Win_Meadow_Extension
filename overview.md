@@ -4,6 +4,10 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+### 0.9.0
+
+- Compatibility updates for Meadow OS beta 3.10.
+
 ### 0.8.0
 
 - Compatibility updates for Meadow OS beta 3.9.

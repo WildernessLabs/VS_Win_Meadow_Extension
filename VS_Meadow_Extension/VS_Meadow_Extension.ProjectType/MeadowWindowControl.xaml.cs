@@ -130,6 +130,8 @@
                     await TaskScheduler.Default;
                     device.EraseAllSectors();
 
+                    OutputMessage($"Starting upload, this may take a couple minutes...");
+
                     await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                     OutputMessage($"Uploading {osFileName}");
 
