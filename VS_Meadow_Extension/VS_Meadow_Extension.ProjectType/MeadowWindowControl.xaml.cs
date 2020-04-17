@@ -27,6 +27,8 @@
     using System.IO.Compression;
     using System.Windows.Ink;
     using System.Threading;
+    using Task = System.Threading.Tasks.Task;
+    using Microsoft.Win32;
 
     /// <summary>
     /// Interaction logic for MeadowWindowControl.
@@ -34,10 +36,9 @@
     public partial class MeadowWindowControl : UserControl
     {
         readonly Guid DEVICE_INTERFACE_GUID_STDFU = new Guid(0x3fe809ab, 0xfb91, 0x4cb5, 0xa6, 0x43, 0x69, 0x67, 0x0d, 0x52, 0x36, 0x6e);
-        readonly string osFileName = "Meadow.OS.bin";
         static Guid windowGuid = new Guid("AD01DF73-6990-4361-8587-4FC3CB91A65F");
         readonly string versionCheckUrl = "https://s3-us-west-2.amazonaws.com/downloads.wildernesslabs.co/Meadow_Beta/latest.json";
-        string latestJson = "latest.json";
+        public string VersionCheckFile { get { return new Uri(versionCheckUrl).Segments.Last(); } }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MeadowWindowControl"/> class.
@@ -88,76 +89,80 @@
 
         private async void Flash_Device(object sender, RoutedEventArgs e)
         {
-            OutputMessage("Preparing to update device firmware...", true);
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.Filter = "Binary (*.BIN;)|*.BIN;";
+            dlg.InitialDirectory = Globals.FirmwareDownloadsFilePath;
 
-            List<FileInfo> files = new List<FileInfo>();
-            if (Directory.Exists(Globals.FirmwareDownloadsFilePath))
-            {
-                DirectoryInfo di = new DirectoryInfo(Globals.FirmwareDownloadsFilePath);
-                files = di.GetFiles().ToList();
-            }
+            Nullable<bool> result = dlg.ShowDialog();
 
-            if(!files.Any(x=>x.Name == osFileName) || !files.Any(x => x.Name == latestJson))
+            if (result.HasValue && result.Value)
             {
-                OutputMessage("Download the latest firmware before flashing the device.");
-                return;
-            }
+                ToggleControls(false);
 
-            var query = "SELECT * FROM Win32_USBHub";
-            ManagementObjectSearcher device_searcher = new ManagementObjectSearcher(query);
-            string deviceId = string.Empty;
-            foreach (ManagementObject usb_device in device_searcher.Get())
-            {
-                if(usb_device.Properties["Name"].Value.ToString() == "STM Device in DFU Mode")
+                FileInfo fi = new FileInfo(dlg.FileName);
+
+                string display = $"file: {dlg.FileName}";
+                if (dlg.FileName.StartsWith(Globals.FirmwareDownloadsFilePath))
                 {
-                    deviceId = usb_device.Properties["DeviceID"].Value.ToString();
+                    var payload = File.ReadAllText(Path.Combine(Globals.FirmwareDownloadsFilePath, VersionCheckFile));
+                    display = $"downloaded version {ExtractJsonValue(payload, "version")}";
                 }
-            }
 
-            var payload = File.ReadAllText(Path.Combine(Globals.FirmwareDownloadsFilePath, latestJson));
+                await OutputMessageAsync($"Preparing to update device firmware with {display}", true);
 
-            if (!string.IsNullOrEmpty(deviceId))
-            {
-                OutputMessage($"Deploying firmare version {GetVersionFromPayload(payload)} to device.");
-
-                var device = new STDfuDevice($@"\\?\{deviceId.Replace("\\", "#")}#{{{DEVICE_INTERFACE_GUID_STDFU.ToString()}}}");
-
-                await task.Task.Run(async() =>
+                var query = "SELECT * FROM Win32_USBHub";
+                ManagementObjectSearcher device_searcher = new ManagementObjectSearcher(query);
+                string deviceId = string.Empty;
+                foreach (ManagementObject usb_device in device_searcher.Get())
                 {
-                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                    OutputMessage("Erasing sectors");
+                    if (usb_device.Properties["Name"].Value.ToString() == "STM Device in DFU Mode")
+                    {
+                        deviceId = usb_device.Properties["DeviceID"].Value.ToString();
+                        break;
+                    }
+                }
 
-                    await TaskScheduler.Default;
-                    device.EraseAllSectors();
+                if (!string.IsNullOrEmpty(deviceId))
+                {
+                    var device = new STDfuDevice($@"\\?\{deviceId.Replace("\\", "#")}#{{{DEVICE_INTERFACE_GUID_STDFU.ToString()}}}");
 
-                    OutputMessage($"Starting upload, this may take a couple minutes...");
+                    await Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await OutputMessageAsync("Erasing sectors");
+                            device.EraseAllSectors();
 
-                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                    OutputMessage($"Uploading {osFileName}");
+                            await OutputMessageAsync($"Uploading {fi.Name}, this may take several minutes...");
+                            UploadFile(device, dlg.FileName, 0x08000000);
 
-                    await TaskScheduler.Default;
-                    UploadFile(device, Path.Combine(Globals.FirmwareDownloadsFilePath, osFileName), 0x08000000);
+                            await OutputMessageAsync($"Resetting device");
+                            device.LeaveDfuMode();
+                            device.Dispose();
+                            System.Threading.Thread.Sleep(2000);
 
-                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                    OutputMessage($"Resetting device");
+                            await OutputMessageAsync($"Complete");
+                        }
+                        catch(Exception ex)
+                        {
+                            await OutputMessageAsync($"An error occurred while flashing the device: {ex.Message}");
+                        }
+                        
+                    });
+                }
+                else
+                {
+                    await OutputMessageAsync("Device not found. Connect the device in bootloader mode by plugging in the device while holding down the BOOT button.");
+                    await OutputMessageAsync("For more help, visit http://developer.wildernesslabs.co/Meadow/Meadow_Basics/Troubleshooting/VisualStudio/");
+                }
 
-                    await TaskScheduler.Default;
-                    device.LeaveDfuMode();
-                    device.Dispose();
-
-                    System.Threading.Thread.Sleep(2000);
-
-                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                    OutputMessage($"Complete");
-                });
+                ToggleControls(true);
+                RefreshDeviceList();
             }
             else
             {
-                OutputMessage("Device not found. Connect the device in bootloader mode by plugging in the device while holding down the BOOT button.");
-                OutputMessage("For more help, visit http://developer.wildernesslabs.co/Meadow/Meadow_Basics/Troubleshooting/VisualStudio/");
+                await OutputMessageAsync($"Flash aborted.");
             }
-
-            RefreshDeviceList();
         }
 
         private void UploadFile(STDfuDevice device, string filepath, uint address)
@@ -182,14 +187,6 @@
                 {
                     Console.WriteLine("write failed");
                 }
-
-                //// verify written block
-                //byte[] verifyBuffer = new byte[buffer.Length];
-                //success = device.ReadMemoryBlock(index, verifyBuffer);
-                //if (!success || !buffer.SequenceEqual(verifyBuffer))
-                //{
-                //    Console.WriteLine("verify failed");
-                //}
             }
         }
 
@@ -199,9 +196,9 @@
             {
                 HttpClient httpClient = new HttpClient();
                 var payload = await httpClient.GetStringAsync(versionCheckUrl);
-                var version = GetVersionFromPayload(payload);
+                var version = ExtractJsonValue(payload, "version");
 
-                Uri download = new Uri(GetDownloadUrlFromPayload(payload));
+                Uri download = new Uri(ExtractJsonValue(payload, "downloadUrl"));
                 var fileName = download.Segments.ToList().Last();
 
                 if (Directory.Exists(Globals.FirmwareDownloadsFilePath))
@@ -212,57 +209,65 @@
                 Directory.CreateDirectory(Globals.FirmwareDownloadsFilePath);
                 DirectoryInfo di = new DirectoryInfo(Globals.FirmwareDownloadsFilePath);
 
-                OutputMessage($"Downloading firmware version: {version}.");
+                await OutputMessageAsync($"Downloading firmware version: {version}.", true);
                 di.Delete(true);
                 Directory.CreateDirectory(Globals.FirmwareDownloadsFilePath);
 
                 WebClient webClient = new WebClient();
                 webClient.DownloadFile(download, Path.Combine(Globals.FirmwareDownloadsFilePath, fileName));
-                webClient.DownloadFile(versionCheckUrl, Path.Combine(Globals.FirmwareDownloadsFilePath, latestJson));
+                webClient.DownloadFile(versionCheckUrl, Path.Combine(Globals.FirmwareDownloadsFilePath, VersionCheckFile));
                 ZipFile.ExtractToDirectory(Path.Combine(Globals.FirmwareDownloadsFilePath, fileName), Globals.FirmwareDownloadsFilePath);
-                OutputMessage($"Download complete.");
+                await OutputMessageAsync($"Download complete.");
             }
             catch(Exception ex)
             {
-                OutputMessage($"Error occurred while downloading latest OS. Please try again later.");
+                await OutputMessageAsync($"Error occurred while downloading latest OS. Please try again later.");
             }
             
-        }
-
-        private void OutputMessage(string message, bool clear = false)
-        {
-            IVsOutputWindow outWindow = Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
-
-            string customTitle = "Meadow Device Explorer";
-            outWindow.CreatePane(ref windowGuid, customTitle, 1, 1);
-
-            IVsOutputWindowPane customPane;
-            outWindow.GetPane(ref windowGuid, out customPane);
-
-            customPane.Activate(); // Brings this pane into view
-            if (clear)
-            {
-                customPane.Clear();
-            }
-            customPane.OutputString($"[{DateTime.Now.ToLocalTime()}] {message}" + Environment.NewLine);
-        }
-
-        private string GetVersionFromPayload(string payload)
-        {
-            var json = JObject.Parse(payload);
-            return json["version"].Value<string>();
-        }
-
-        private string GetDownloadUrlFromPayload(string payload)
-        {
-            var json = JObject.Parse(payload);
-            return json["downloadUrl"].Value<string>();
         }
 
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {
             System.Diagnostics.Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
             e.Handled = true;
+        }
+
+        private async Task OutputMessageAsync(string message, bool clear = false)
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            IVsOutputWindowPane outputPane = null;
+            IVsWindowFrame windowFrame = null;
+            var outputWindow = ServiceProvider.GlobalProvider.GetService(typeof(SVsOutputWindow)) as IVsOutputWindow;
+            if (outputWindow != null && ErrorHandler.Failed(outputWindow.GetPane(windowGuid, out outputPane)))
+            {
+                outputWindow.CreatePane(windowGuid, "Meadow Device Explorer", 1, 1);
+                outputWindow.GetPane(windowGuid, out outputPane);
+            }
+
+            var vsUiShell = ServiceProvider.GlobalProvider.GetService(typeof(SVsUIShell)) as IVsUIShell;
+            uint flags = (uint)__VSFINDTOOLWIN.FTW_fForceCreate;
+            vsUiShell?.FindToolWindow(flags, VSConstants.StandardToolWindows.Output, out windowFrame);
+
+            if (clear) { outputPane?.Clear(); }
+
+            windowFrame?.Show();
+            outputPane?.Activate();
+            outputPane?.OutputString($"[{DateTime.Now.ToLocalTime()}] {message}" + Environment.NewLine);
+        }
+
+        private void ToggleControls(bool enabled)
+        {
+            Flash.IsEnabled = enabled;
+            Download.IsEnabled = enabled;
+            Devices.IsEnabled = enabled;
+            Refresh.IsEnabled = enabled;
+        }
+
+        private string ExtractJsonValue(string json, string field)
+        {
+            var jo = JObject.Parse(json);
+            return jo[field].Value<string>();
         }
     }
 }
