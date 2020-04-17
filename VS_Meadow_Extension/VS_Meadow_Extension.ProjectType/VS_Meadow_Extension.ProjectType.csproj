@@ -361,7 +361,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Command2Package.cs" />
+    <Compile Include="MeadowPackage.cs" />
     <Compile Include="DeployProvider.cs" />
     <Compile Include="Globals.cs" />
     <Compile Include="MeadowSettings.cs" />
@@ -377,7 +377,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="libusb-1.0.dll" />
-    <Content Include="Resources\Command2Package.ico" />
+    <Content Include="Resources\MeadowPackage.ico" />
     <Content Include="Resources\MeadowWindowCommand.png" />
     <Content Include="STDFU.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -391,7 +391,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
-    <VSCTCompile Include="Command2Package.vsct">
+    <VSCTCompile Include="MeadowPackage.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
       <SubType>Designer</SubType>
     </VSCTCompile>
