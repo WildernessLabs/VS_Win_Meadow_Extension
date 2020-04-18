@@ -38,6 +38,8 @@
         public MeadowWindowControl()
         {
             this.InitializeComponent();
+            Devices.DisplayMemberPath = "Caption";
+            Devices.SelectedValuePath = "Port";
         }
 
         //[SuppressMessage("Microsoft.Globalization", "CA1300:SpecifyMessageBoxOptions", Justification = "Sample code")]
@@ -69,29 +71,6 @@
 
                 if (port == settings.DeviceTarget) { Devices.SelectedIndex = index; }
                 index++;
-            }
-
-            Devices.DisplayMemberPath = "Caption";
-            Devices.SelectedValuePath = "Port";
-
-            var query = "SELECT * FROM Win32_USBHub";
-            ManagementObjectSearcher device_searcher = new ManagementObjectSearcher(query);
-            string deviceId = string.Empty;
-            foreach (ManagementObject usb_device in device_searcher.Get())
-            {
-                if (usb_device.Properties["Name"].Value.ToString() == "STM Device in DFU Mode")
-                {
-                    deviceId = usb_device.Properties["DeviceID"].Value.ToString();
-                    break;
-                }
-            }
-
-            if (!string.IsNullOrEmpty(deviceId))
-            {
-                var device = new STDfuDevice($@"\\?\{deviceId.Replace("\\", "#")}#{{{DEVICE_INTERFACE_GUID_STDFU.ToString()}}}");
-                device.LeaveDfuMode();
-                device.Dispose();
-                System.Threading.Thread.Sleep(2000);
             }
         }
 
@@ -157,13 +136,11 @@
                                 await TaskScheduler.Default;
                                 UploadFile(device, dlg.FileName, 0x08000000);
 
-                                await OutputMessageAsync($"Resetting device");
+                                await OutputMessageAsync($"Exiting DFU mode");
                                 await TaskScheduler.Default;
                                 device.LeaveDfuMode();
 
-
-
-                                await OutputMessageAsync($"Flash complete");
+                                await OutputMessageAsync($"Flash complete. Manually reset the device before deploying an application.");
                             }
                         }
                         catch (Exception ex)
