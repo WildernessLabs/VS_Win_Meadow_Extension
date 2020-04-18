@@ -22,7 +22,7 @@
 
   <!--The Commands section is where commands, menus, and menu groups are defined.
       This section uses a Guid to identify the package that provides the command defined inside it. -->
-  <Commands package="guidCommand2Package">
+  <Commands package="guidMeadowPackage">
     <!-- Inside this section we have different sub-sections: one for the menus, another
     for the menu groups, one for the buttons (the actual commands), one for the combos
     and the last one for the bitmaps used. Each element is identified by a command id that
@@ -36,7 +36,7 @@
          group as the part of a menu contained between two lines. The parent of a group
          must be a menu. -->
     <Groups>
-      <Group guid="guidCommand2PackageCmdSet" id="MyMenuGroup" priority="0x0600">
+      <Group guid="guidMeadowPackageCmdSet" id="MyMenuGroup" priority="0x0600">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS" />
       </Group>
     </Groups>
@@ -52,7 +52,7 @@
               <CommandFlag>DefaultInvisible</CommandFlag>
               <CommandFlag>DynamicVisibility</CommandFlag>
           If you do not want an image next to your command, remove the Icon node /> -->
-      <Button guid="guidCommand2PackageCmdSet" id="cmdidMeadowWindowCommand" priority="0x0100" type="Button">
+      <Button guid="guidMeadowPackageCmdSet" id="cmdidMeadowWindowCommand" priority="0x0100" type="Button">
         <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
         <Icon guid="guidImages1" id="bmpPic1" />
         <Strings>
@@ -75,15 +75,15 @@
   </Commands>
 
   <KeyBindings>
-    <KeyBinding guid="guidCommand2PackageCmdSet" id="cmdidMeadowWindowCommand" editor="guidVSStd97" key1="M" mod1="Control Shift" />
+    <KeyBinding guid="guidMeadowPackageCmdSet" id="cmdidMeadowWindowCommand" editor="guidVSStd97" key1="M" mod1="Control Shift" />
   </KeyBindings>
   
   <Symbols>
     <!-- This is the package guid. -->
-    <GuidSymbol name="guidCommand2Package" value="{9e640b9d-2a9e-4da3-ba5e-351adc854fd2}" />
+    <GuidSymbol name="guidMeadowPackage" value="{9e640b9d-2a9e-4da3-ba5e-351adc854fd2}" />
 
     <!-- This is the guid used to group the menu commands together -->
-    <GuidSymbol name="guidCommand2PackageCmdSet" value="{0af06414-3c09-44ff-88a1-c4e1a35b0bdf}">
+    <GuidSymbol name="guidMeadowPackageCmdSet" value="{0af06414-3c09-44ff-88a1-c4e1a35b0bdf}">
       <IDSymbol name="MyMenuGroup" value="0x1020" />
       <IDSymbol name="Command2Id" value="0x0100" />
       <IDSymbol value="4129" name="cmdidMeadowWindowCommand" />
