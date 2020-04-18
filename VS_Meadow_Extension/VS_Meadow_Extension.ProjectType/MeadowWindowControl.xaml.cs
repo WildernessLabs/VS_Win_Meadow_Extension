@@ -1,34 +1,26 @@
 ﻿namespace Meadow
 {
-    using EnvDTE;
-    using EnvDTE80;
     using Meadow.Helpers;
     using MeadowCLI.DeviceManagement;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Shell.Interop;
     using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.Composition;
     using System.Diagnostics;
-    using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
     using System.Management;
-    using task = System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Controls;
     using Microsoft.VisualStudio.Threading;
-    using System.Threading.Tasks;
     using System.Net.Http;
-    using Microsoft.VisualStudio.Settings.Internal;
     using Newtonsoft.Json.Linq;
     using System.Net;
     using System.IO.Compression;
-    using System.Windows.Ink;
-    using System.Threading;
     using Task = System.Threading.Tasks.Task;
     using Microsoft.Win32;
+    using System.Text.RegularExpressions;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Interaction logic for MeadowWindowControl.
@@ -61,29 +53,54 @@
             MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath);
 
             Devices.Items.Clear();
-            Devices.Items.Add("Select Target Device Port");
+            Devices.Items.Add(new SerialDevice { Caption = "Select Target Device Port" });
+            Devices.SelectedIndex = 0;
 
-            var devices = MeadowDeviceManager.FindSerialDevices();
-            var selectedIndex = 0;
-
-            for (int i = 0; i < devices.Count; i++)
+            var index = 1;
+            var captions = MeadowDeviceManager.GetSerialDeviceCaptions();
+            foreach (var c in captions.Distinct())
             {
-                if (devices[i] == settings.DeviceTarget)
+                var port = Regex.Match(c, @"(?<=\().+?(?=\))").Value;
+                Devices.Items.Add(new SerialDevice()
                 {
-                    selectedIndex = i + 1;
-                }
-                Devices.Items.Add(devices[i]);
+                    Caption = c,
+                    Port = port
+                });
+
+                if (port == settings.DeviceTarget) { Devices.SelectedIndex = index; }
+                index++;
             }
 
-            Devices.SelectedIndex = selectedIndex;
+            Devices.DisplayMemberPath = "Caption";
+            Devices.SelectedValuePath = "Port";
+
+            var query = "SELECT * FROM Win32_USBHub";
+            ManagementObjectSearcher device_searcher = new ManagementObjectSearcher(query);
+            string deviceId = string.Empty;
+            foreach (ManagementObject usb_device in device_searcher.Get())
+            {
+                if (usb_device.Properties["Name"].Value.ToString() == "STM Device in DFU Mode")
+                {
+                    deviceId = usb_device.Properties["DeviceID"].Value.ToString();
+                    break;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(deviceId))
+            {
+                var device = new STDfuDevice($@"\\?\{deviceId.Replace("\\", "#")}#{{{DEVICE_INTERFACE_GUID_STDFU.ToString()}}}");
+                device.LeaveDfuMode();
+                device.Dispose();
+                System.Threading.Thread.Sleep(2000);
+            }
         }
 
         private void Devices_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (Devices.SelectedIndex == 0 || Devices.SelectedItem == null) return;
-            
+            if (Devices.SelectedIndex <= 0) return;
+
             MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath, false);
-            settings.DeviceTarget = Devices.SelectedItem.ToString();
+            settings.DeviceTarget = Devices.SelectedValue.ToString();
             settings.Save();
         }
 
@@ -93,11 +110,11 @@
             dlg.Filter = "Binary (*.BIN;)|*.BIN;";
             dlg.InitialDirectory = Globals.FirmwareDownloadsFilePath;
 
-            Nullable<bool> result = dlg.ShowDialog();
+            var result = dlg.ShowDialog();
 
             if (result.HasValue && result.Value)
             {
-                ToggleControls(false);
+                EnableControls(false);
 
                 FileInfo fi = new FileInfo(dlg.FileName);
 
@@ -105,7 +122,7 @@
                 if (dlg.FileName.StartsWith(Globals.FirmwareDownloadsFilePath))
                 {
                     var payload = File.ReadAllText(Path.Combine(Globals.FirmwareDownloadsFilePath, VersionCheckFile));
-                    display = $"downloaded version {ExtractJsonValue(payload, "version")}";
+                    display = $"downloaded version: {ExtractJsonValue(payload, "version")}";
                 }
 
                 await OutputMessageAsync($"Preparing to update device firmware with {display}", true);
@@ -130,24 +147,30 @@
                     {
                         try
                         {
-                            await OutputMessageAsync("Erasing sectors");
-                            device.EraseAllSectors();
+                            using (device)
+                            {
+                                await OutputMessageAsync("Erasing sectors");
+                                await TaskScheduler.Default;
+                                device.EraseAllSectors();
 
-                            await OutputMessageAsync($"Uploading {fi.Name}, this may take several minutes...");
-                            UploadFile(device, dlg.FileName, 0x08000000);
+                                await OutputMessageAsync($"Uploading {fi.Name}, this may take several minutes...");
+                                await TaskScheduler.Default;
+                                UploadFile(device, dlg.FileName, 0x08000000);
 
-                            await OutputMessageAsync($"Resetting device");
-                            device.LeaveDfuMode();
-                            device.Dispose();
-                            System.Threading.Thread.Sleep(2000);
+                                await OutputMessageAsync($"Resetting device");
+                                await TaskScheduler.Default;
+                                device.LeaveDfuMode();
 
-                            await OutputMessageAsync($"Complete");
+
+
+                                await OutputMessageAsync($"Flash complete");
+                            }
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             await OutputMessageAsync($"An error occurred while flashing the device: {ex.Message}");
                         }
-                        
+
                     });
                 }
                 else
@@ -156,12 +179,12 @@
                     await OutputMessageAsync("For more help, visit http://developer.wildernesslabs.co/Meadow/Meadow_Basics/Troubleshooting/VisualStudio/");
                 }
 
-                ToggleControls(true);
+                EnableControls(true);
                 RefreshDeviceList();
             }
             else
             {
-                await OutputMessageAsync($"Flash aborted.");
+                await OutputMessageAsync($"Flash canceled");
             }
         }
 
@@ -205,25 +228,20 @@
                 {
                     Directory.Delete(Globals.FirmwareDownloadsFilePath, true);
                 }
-
                 Directory.CreateDirectory(Globals.FirmwareDownloadsFilePath);
-                DirectoryInfo di = new DirectoryInfo(Globals.FirmwareDownloadsFilePath);
 
                 await OutputMessageAsync($"Downloading firmware version: {version}.", true);
-                di.Delete(true);
-                Directory.CreateDirectory(Globals.FirmwareDownloadsFilePath);
-
                 WebClient webClient = new WebClient();
                 webClient.DownloadFile(download, Path.Combine(Globals.FirmwareDownloadsFilePath, fileName));
                 webClient.DownloadFile(versionCheckUrl, Path.Combine(Globals.FirmwareDownloadsFilePath, VersionCheckFile));
                 ZipFile.ExtractToDirectory(Path.Combine(Globals.FirmwareDownloadsFilePath, fileName), Globals.FirmwareDownloadsFilePath);
+
                 await OutputMessageAsync($"Download complete.");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 await OutputMessageAsync($"Error occurred while downloading latest OS. Please try again later.");
             }
-            
         }
 
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
@@ -256,7 +274,7 @@
             outputPane?.OutputString($"[{DateTime.Now.ToLocalTime()}] {message}" + Environment.NewLine);
         }
 
-        private void ToggleControls(bool enabled)
+        private void EnableControls(bool enabled)
         {
             Flash.IsEnabled = enabled;
             Download.IsEnabled = enabled;
