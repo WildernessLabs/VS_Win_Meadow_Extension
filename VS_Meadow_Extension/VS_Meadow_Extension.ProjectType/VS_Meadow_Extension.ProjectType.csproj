@@ -476,6 +476,13 @@
       <Project>{d7f7dc5f-0223-4bb6-81c0-13d961ddfe5a}</Project>
       <Name>Meadow.CLI.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Meadow.FSharp.Template\Meadow.FSharp.Template.csproj">
+      <Project>{d51c9f60-df98-4dc6-be6a-1ec2ec16381d}</Project>
+      <Name>Meadow.FSharp.Template</Name>
+      <VSIXSubPath>ProjectTemplates</VSIXSubPath>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+    </ProjectReference>
     <ProjectReference Include="..\..\Meadow.Template\Meadow.Template.csproj">
       <Project>{2CA2AE75-18E0-4EF2-80A7-63E51446BBFE}</Project>
       <Name>Meadow.Template</Name>
