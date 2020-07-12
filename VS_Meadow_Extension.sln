@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.FSharp.Template", "M
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.Library.Template", "Meadow.Library.Template\Meadow.Library.Template.csproj", "{D4B7449D-E200-4513-B32E-E6DB6BC4BC50}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.FSharp.Library.Template", "Meadow.FSharp.Library.Template\Meadow.FSharp.Library.Template.csproj", "{CE404DDC-B2DF-4E4D-B0CF-BCA50AE34041}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{D4B7449D-E200-4513-B32E-E6DB6BC4BC50}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4B7449D-E200-4513-B32E-E6DB6BC4BC50}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4B7449D-E200-4513-B32E-E6DB6BC4BC50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE404DDC-B2DF-4E4D-B0CF-BCA50AE34041}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE404DDC-B2DF-4E4D-B0CF-BCA50AE34041}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE404DDC-B2DF-4E4D-B0CF-BCA50AE34041}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE404DDC-B2DF-4E4D-B0CF-BCA50AE34041}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
