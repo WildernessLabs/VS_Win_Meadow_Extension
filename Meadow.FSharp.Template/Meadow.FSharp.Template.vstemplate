@@ -18,7 +18,7 @@
     <Icon>meadow_icon.png</Icon>
   </TemplateData>
   <TemplateContent>
-    <Project  TargetFileName="MeadowTemplate.fsproj" File="Meadow.FSharp.Template.fsproj" ReplaceParameters="true">
+    <Project TargetFileName="MeadowTemplate.fsproj" File="Meadow.FSharp.Template.fsproj" ReplaceParameters="true">
       <ProjectItem ReplaceParameters="true" TargetFileName="Program.fs">Program.fs</ProjectItem>
     </Project>
   </TemplateContent>

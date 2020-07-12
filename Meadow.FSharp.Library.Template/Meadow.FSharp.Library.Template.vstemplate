@@ -18,7 +18,7 @@
     <Icon>meadow_icon.png</Icon>
   </TemplateData>
   <TemplateContent>
-    <Project TargetFileName="MeadowLibraryTemplate.csproj" File="MeadowLibraryTemplate.fsproj" ReplaceParameters="true">
+    <Project TargetFileName="MeadowLibraryTemplate.fsproj" File="MeadowLibraryTemplate.fsproj" ReplaceParameters="true">
       <Folder Name="Properties" TargetFolderName="Properties" />
       <ProjectItem ReplaceParameters="true" TargetFileName="Class1.fs">Class1.fs</ProjectItem>
     </Project>
