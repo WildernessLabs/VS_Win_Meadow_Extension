@@ -3,6 +3,9 @@
     <Name>Meadow Application</Name>
     <Description>Create a basic Meadow application</Description>
     <ProjectType>CSharp</ProjectType>
+    <LanguageTag>C#</LanguageTag>
+    <PlatformTag>Meadow</PlatformTag>
+    <ProjectTypeTag>IoT</ProjectTypeTag>
     <ProjectSubType>
     </ProjectSubType>
     <SortOrder>1000</SortOrder>

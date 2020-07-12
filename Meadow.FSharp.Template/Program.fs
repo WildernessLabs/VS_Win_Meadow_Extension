@@ -1,12 +1,8 @@
-// Learn more about F# at http://fsharp.org
-
 open System
 open Meadow.Devices
 open Meadow
 open Meadow.Foundation.Leds
 open Meadow.Foundation
-
-
 
 type MeadowApp() =
     inherit App<F7Micro, MeadowApp>()
@@ -14,31 +10,27 @@ type MeadowApp() =
     do Console.WriteLine "Init with FSharp!"
     let led = new RgbPwmLed(MeadowApp.Device, MeadowApp.Device.Pins.OnboardLedRed,MeadowApp.Device.Pins.OnboardLedGreen, MeadowApp.Device.Pins.OnboardLedBlue,3.3f,3.3f,3.3f,Meadow.Peripherals.Leds.IRgbLed.CommonType.CommonAnode)
     
-    let ShowColourPulses colour duration = 
-        led.StartPulse(colour, (duration / 2u)) |> ignore
+    let ShowcolorPulses color duration = 
+        led.StartPulse(color, (duration / 2u)) |> ignore
         Threading.Thread.Sleep (int duration) |> ignore
         led.Stop |> ignore
     
-    let cycleColours duration = 
+    let cyclecolors duration = 
         while true do
-            ShowColourPulses Color.Blue duration 
-            ShowColourPulses Color.Cyan duration
-            ShowColourPulses Color.Green duration
-            ShowColourPulses Color.GreenYellow duration
-            ShowColourPulses Color.Yellow duration
-            ShowColourPulses Color.Orange duration
-            ShowColourPulses Color.OrangeRed duration
-            ShowColourPulses Color.Red duration
-            ShowColourPulses Color.MediumVioletRed duration
-            ShowColourPulses Color.Purple duration
-            ShowColourPulses Color.Magenta duration
-            ShowColourPulses Color.Pink duration
+            ShowcolorPulses Color.Blue duration 
+            ShowcolorPulses Color.Cyan duration
+            ShowcolorPulses Color.Green duration
+            ShowcolorPulses Color.GreenYellow duration
+            ShowcolorPulses Color.Yellow duration
+            ShowcolorPulses Color.Orange duration
+            ShowcolorPulses Color.OrangeRed duration
+            ShowcolorPulses Color.Red duration
+            ShowcolorPulses Color.MediumVioletRed duration
+            ShowcolorPulses Color.Purple duration
+            ShowcolorPulses Color.Magenta duration
+            ShowcolorPulses Color.Pink duration
             
-    do cycleColours 1000u
-
-    
-
-
+    do cyclecolors 1000u
 
 [<EntryPoint>]
 let main argv =
