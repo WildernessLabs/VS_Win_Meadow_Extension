@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Meadow.FSharp.Template")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Richard Harding")]
+[assembly: AssemblyCompany("Wilderness Labs")]
 [assembly: AssemblyProduct("Meadow.FSharp.Template")]
-[assembly: AssemblyCopyright("Copyright © Richard Harding 2020")]
+[assembly: AssemblyCopyright("Copyright © Wilderness Labs 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
