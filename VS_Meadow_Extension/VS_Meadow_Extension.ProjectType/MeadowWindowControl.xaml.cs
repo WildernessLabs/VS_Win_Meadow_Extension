@@ -21,6 +21,7 @@
     using Microsoft.Win32;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
+    using System.Windows.Input;
 
     /// <summary>
     /// Interaction logic for MeadowWindowControl.
@@ -32,6 +33,11 @@
         readonly string versionCheckUrl = "https://s3-us-west-2.amazonaws.com/downloads.wildernesslabs.co/Meadow_Beta/latest.json";
         public string VersionCheckFile { get { return new Uri(versionCheckUrl).Segments.Last(); } }
 
+        public readonly string osFilename = "Meadow.OS.bin";
+        public readonly string runtimeFilename = "Meadow.OS.Runtime.bin";
+
+        private bool _skipFlash = false;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MeadowWindowControl"/> class.
         /// </summary>
@@ -41,9 +47,6 @@
             Devices.DisplayMemberPath = "Caption";
             Devices.SelectedValuePath = "Port";
         }
-
-        //[SuppressMessage("Microsoft.Globalization", "CA1300:SpecifyMessageBoxOptions", Justification = "Sample code")]
-        //[SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:ElementMustBeginWithUpperCaseLetter", Justification = "Default event handler naming pattern")]
 
         private void Refresh_Click(object sender, RoutedEventArgs e)
         {
@@ -85,84 +88,212 @@
 
         private async void Flash_Device(object sender, RoutedEventArgs e)
         {
-            OpenFileDialog dlg = new OpenFileDialog();
-            dlg.Filter = "Binary (*.BIN;)|*.BIN;";
-            dlg.InitialDirectory = Globals.FirmwareDownloadsFilePath;
-
-            var result = dlg.ShowDialog();
-
-            if (result.HasValue && result.Value)
+            try
             {
+                MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath);
+
+                var (osFilePath, runtimeFilePath) = await GetWorkingFiles();
+                if (string.IsNullOrEmpty(osFilePath) || string.IsNullOrEmpty(runtimeFilePath)) return;
+
                 EnableControls(false);
 
-                FileInfo fi = new FileInfo(dlg.FileName);
+                await OutputMessageAsync($"Begin 'Flash Device'", true);
 
-                string display = $"file: {dlg.FileName}";
-                if (dlg.FileName.StartsWith(Globals.FirmwareDownloadsFilePath))
+                if (!await Process(() => DfuFlash(osFilePath, 0x08000000, _skipFlash))) return;
+
+                await OutputMessageAsync($"Initialize device");
+                if (MeadowDeviceManager.CurrentDevice == null)
                 {
-                    var payload = File.ReadAllText(Path.Combine(Globals.FirmwareDownloadsFilePath, VersionCheckFile));
-                    display = $"downloaded version: {ExtractJsonValue(payload, "version")}";
-                }
 
-                await OutputMessageAsync($"Preparing to update device firmware with {display}", true);
-
-                var query = "SELECT * FROM Win32_USBHub";
-                ManagementObjectSearcher device_searcher = new ManagementObjectSearcher(query);
-                string deviceId = string.Empty;
-                foreach (ManagementObject usb_device in device_searcher.Get())
-                {
-                    if (usb_device.Properties["Name"].Value.ToString() == "STM Device in DFU Mode")
+                    if (string.IsNullOrEmpty(settings.DeviceTarget))
                     {
-                        deviceId = usb_device.Properties["DeviceID"].Value.ToString();
-                        break;
+                        _skipFlash = true;
+                        await OutputMessageAsync($"Select Target Device and try again.");
+                        EnableControls(true);
+                        RefreshDeviceList();
+                        return;
+                    }
+                    else
+                    {
+                        _skipFlash = false;
+                        await MeadowDeviceManager.GetMeadowForSerialPort(settings.DeviceTarget);
                     }
                 }
 
-                if (!string.IsNullOrEmpty(deviceId))
+                if (MeadowDeviceManager.CurrentDevice == null)
                 {
-                    var device = new STDfuDevice($@"\\?\{deviceId.Replace("\\", "#")}#{{{DEVICE_INTERFACE_GUID_STDFU.ToString()}}}");
+                    await OutputMessageAsync($"Initialization failed. Try again.");
+                    return;
+                }
 
-                    await Task.Run(async () =>
+                if (!await Process(() => MeadowDeviceManager.ResetMeadow(MeadowDeviceManager.CurrentDevice, 0))) return;
+
+                if (!await Process(() => MeadowDeviceManager.MonoDisable(MeadowDeviceManager.CurrentDevice))) return;
+
+                await OutputMessageAsync($"Erase flash (~3 mins)");
+                if (!await Process(() => MeadowFileManager.EraseFlash(MeadowDeviceManager.CurrentDevice))) return;
+
+                await OutputMessageAsync($"Restart device");
+                if (!await Process(() => MeadowDeviceManager.ResetMeadow(MeadowDeviceManager.CurrentDevice, 0))) return;
+
+                await OutputMessageAsync($"Upload {runtimeFilename} (~1 min)");
+                if (!await Process(() => MeadowFileManager.WriteFileToFlash(MeadowDeviceManager.CurrentDevice, runtimeFilePath))) return;
+
+                await OutputMessageAsync($"Process {runtimeFilename} (~30 secs)");
+                if (!await Process(() => MeadowDeviceManager.MonoFlash(MeadowDeviceManager.CurrentDevice))) return;
+
+                await MeadowDeviceManager.CurrentDevice.DeleteFile(runtimeFilename);
+
+                if (!await Process(() => MeadowDeviceManager.MonoEnable(MeadowDeviceManager.CurrentDevice))) return;
+
+                await OutputMessageAsync($"Restart device");
+                if (!await Process(() => MeadowDeviceManager.ResetMeadow(MeadowDeviceManager.CurrentDevice, 0))) return;
+
+                EnableControls(true);
+                RefreshDeviceList();
+
+                await OutputMessageAsync($"'Flash Device' completed");
+            }
+            catch (Exception ex)
+            {
+                await OutputMessageAsync($"An unexpected error occurred. Please try again.");
+                EnableControls(true);
+                RefreshDeviceList();
+            }
+        }
+
+        private async Task<(string osFilePath, string runtimeFilePath)> GetWorkingFiles()
+        {
+            var selectCustom = Keyboard.IsKeyDown(Key.LeftShift);
+            if (selectCustom)
+            {
+                OpenFileDialog dlg = new OpenFileDialog();
+                dlg.Filter = "Binary (*.BIN;)|*.BIN;";
+                dlg.InitialDirectory = Globals.FirmwareDownloadsFilePath;
+                dlg.Multiselect = true;
+
+                var result = dlg.ShowDialog();
+
+                if (result.HasValue && result.Value)
+                {
+                    if (dlg.FileNames.Select(x => Path.GetFileName(x).ToLower()).Contains(osFilename.ToLower())
+                        && dlg.FileNames.Select(x => Path.GetFileName(x).ToLower()).Contains(runtimeFilename.ToLower()))
                     {
-                        try
-                        {
-                            using (device)
-                            {
-                                await OutputMessageAsync("Erasing sectors");
-                                await TaskScheduler.Default;
-                                device.EraseAllSectors();
+                        var osFilePath = dlg.FileNames
+                            .Select(x => new { Path = x, Filename = Path.GetFileName(x) })
+                            .Single(x => string.Compare(x.Filename, osFilename, StringComparison.OrdinalIgnoreCase) == 0).Path;
 
-                                await OutputMessageAsync($"Uploading {fi.Name}, this may take several minutes...");
-                                await TaskScheduler.Default;
-                                UploadFile(device, dlg.FileName, 0x08000000);
+                        var runtimeFilePath = dlg.FileNames
+                            .Select(x => new { Path = x, Filename = Path.GetFileName(x) })
+                            .Single(x => string.Compare(x.Filename, runtimeFilename, StringComparison.OrdinalIgnoreCase) == 0).Path;
 
-                                await OutputMessageAsync($"Exiting DFU mode");
-                                await TaskScheduler.Default;
-                                device.LeaveDfuMode();
+                        return (osFilePath, runtimeFilePath);
+                    }
+                    else
+                    {
+                        await OutputMessageAsync($"Please select both 'Meadow.OS.bin' and 'Meadow.OS.Runtime.bin'");
+                        return (null, null);
+                    }
+                }
+                else
+                {
+                    await OutputMessageAsync($"Flash canceled");
+                    return (null, null);
+                }
+            }
+            else
+            {
+                // get download path files
+                var osFilePath = Path.Combine(Globals.FirmwareDownloadsFilePath, osFilename);
+                var runtimeFilePath = Path.Combine(Globals.FirmwareDownloadsFilePath, runtimeFilename);
 
-                                await OutputMessageAsync($"Flash complete. Manually reset the device before deploying an application.");
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            await OutputMessageAsync($"An error occurred while flashing the device: {ex.Message}");
-                        }
+                if (File.Exists(osFilePath) && File.Exists(runtimeFilePath))
+                {
+                    return (osFilePath, runtimeFilePath);
+                }
+                else
+                {
+                    return (null, null);
+                }
+            }
+        }
 
-                    });
+        private async Task<bool> Process(Func<Task<bool>> func)
+        {
+            bool result;
+            if (!(result = await func.Invoke()))
+            {
+                await OutputMessageAsync($"An unexpected error occurred. Please try again.");
+                EnableControls(true);
+                RefreshDeviceList();
+            }
+            return result;
+        }
+
+        private async Task<bool> DfuFlash(string filepath, uint address, bool skip = false)
+        {
+            FileInfo fi = new FileInfo(filepath);
+
+            string display = $"file: {filepath}";
+            if (filepath.StartsWith(Globals.FirmwareDownloadsFilePath))
+            {
+                var payload = File.ReadAllText(Path.Combine(Globals.FirmwareDownloadsFilePath, VersionCheckFile));
+                display = $"downloaded version: {ExtractJsonValue(payload, "version")}";
+            }
+
+            var query = "SELECT * FROM Win32_USBHub";
+            ManagementObjectSearcher device_searcher = new ManagementObjectSearcher(query);
+            string deviceId = string.Empty;
+            foreach (ManagementObject usb_device in device_searcher.Get())
+            {
+                if (usb_device.Properties["Name"].Value.ToString() == "STM Device in DFU Mode")
+                {
+                    deviceId = usb_device.Properties["DeviceID"].Value.ToString();
+                    break;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(deviceId))
+            {
+                using (var device = new STDfuDevice($@"\\?\{deviceId.Replace("\\", "#")}#{{{DEVICE_INTERFACE_GUID_STDFU.ToString()}}}"))
+                {
+                    if (skip)
+                    {
+                        device.LeaveDfuMode();
+                        await OutputMessageAsync($"Resume 'Flash Device'", true);
+                        return true;
+                    }
+
+                    try
+                    {
+                        await OutputMessageAsync($"Upload {fi.Name} (~2 mins)");
+                        await Task.Run(() => device.EraseAllSectors());
+                        await Task.Run(() => UploadFile(device, filepath, address));
+                        await Task.Run(() => device.LeaveDfuMode());
+                        return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        await OutputMessageAsync($"An error occurred while flashing the device: {ex.Message}");
+                    }
+                    return false;
+                }
+            }
+            else
+            {
+                if (skip)
+                {
+                    await OutputMessageAsync($"Resume 'Flash Device'", true);
+                    return true;
                 }
                 else
                 {
                     await OutputMessageAsync("Device not found. Connect the device in bootloader mode by plugging in the device while holding down the BOOT button.");
                     await OutputMessageAsync("For more help, visit http://developer.wildernesslabs.co/Meadow/Meadow_Basics/Troubleshooting/VisualStudio/");
                 }
+            }
 
-                EnableControls(true);
-                RefreshDeviceList();
-            }
-            else
-            {
-                await OutputMessageAsync($"Flash canceled");
-            }
+            return false;
         }
 
         private void UploadFile(STDfuDevice device, string filepath, uint address)
