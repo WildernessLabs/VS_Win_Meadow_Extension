@@ -1,7 +1,7 @@
 ﻿<VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Project">
   <TemplateData>
-    <Name>Meadow Application</Name>
-    <Description>Create a basic Meadow application</Description>
+    <Name>Meadow Library</Name>
+    <Description>Create a Meadow class library</Description>
     <ProjectType>CSharp</ProjectType>
     <LanguageTag>C#</LanguageTag>
     <PlatformTag>Meadow</PlatformTag>
@@ -10,7 +10,7 @@
     </ProjectSubType>
     <SortOrder>1000</SortOrder>
     <CreateNewFolder>true</CreateNewFolder>
-    <DefaultName>MeadowApplication</DefaultName>
+    <DefaultName>MeadowLibrary</DefaultName>
     <ProvideDefaultName>true</ProvideDefaultName>
     <LocationField>Enabled</LocationField>
     <EnableLocationBrowseButton>true</EnableLocationBrowseButton>
@@ -18,10 +18,9 @@
     <Icon>meadow_icon.png</Icon>
   </TemplateData>
   <TemplateContent>
-    <Project TargetFileName="MeadowTemplate.csproj" File="MeadowTemplate.csproj" ReplaceParameters="true">
+    <Project TargetFileName="MeadowLibraryTemplate.csproj" File="MeadowLibraryTemplate.csproj" ReplaceParameters="true">
       <Folder Name="Properties" TargetFolderName="Properties" />
-      <ProjectItem ReplaceParameters="true" TargetFileName="MeadowApp.cs">MeadowApp.cs</ProjectItem>
-      <ProjectItem ReplaceParameters="true" TargetFileName="Program.cs">Program.cs</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="Class1.cs">Class1.cs</ProjectItem>
     </Project>
   </TemplateContent>
 </VSTemplate>

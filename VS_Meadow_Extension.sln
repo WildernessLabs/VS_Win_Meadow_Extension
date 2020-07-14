@@ -9,6 +9,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.Template", "Meadow.T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.CLI.Core", "..\Meadow.CLI\Meadow.CLI.Core\Meadow.CLI.Core.csproj", "{D7F7DC5F-0223-4BB6-81C0-13D961DDFE5A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.FSharp.Template", "Meadow.FSharp.Template\Meadow.FSharp.Template.csproj", "{D51C9F60-DF98-4DC6-BE6A-1EC2EC16381D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.Library.Template", "Meadow.Library.Template\Meadow.Library.Template.csproj", "{D4B7449D-E200-4513-B32E-E6DB6BC4BC50}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.FSharp.Library.Template", "Meadow.FSharp.Library.Template\Meadow.FSharp.Library.Template.csproj", "{CE404DDC-B2DF-4E4D-B0CF-BCA50AE34041}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +33,18 @@ Global
 		{D7F7DC5F-0223-4BB6-81C0-13D961DDFE5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D7F7DC5F-0223-4BB6-81C0-13D961DDFE5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D7F7DC5F-0223-4BB6-81C0-13D961DDFE5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D51C9F60-DF98-4DC6-BE6A-1EC2EC16381D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D51C9F60-DF98-4DC6-BE6A-1EC2EC16381D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D51C9F60-DF98-4DC6-BE6A-1EC2EC16381D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D51C9F60-DF98-4DC6-BE6A-1EC2EC16381D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4B7449D-E200-4513-B32E-E6DB6BC4BC50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4B7449D-E200-4513-B32E-E6DB6BC4BC50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4B7449D-E200-4513-B32E-E6DB6BC4BC50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4B7449D-E200-4513-B32E-E6DB6BC4BC50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE404DDC-B2DF-4E4D-B0CF-BCA50AE34041}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE404DDC-B2DF-4E4D-B0CF-BCA50AE34041}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE404DDC-B2DF-4E4D-B0CF-BCA50AE34041}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE404DDC-B2DF-4E4D-B0CF-BCA50AE34041}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
