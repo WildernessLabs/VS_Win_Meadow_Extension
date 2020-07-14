@@ -403,10 +403,4 @@
             return jo[field].Value<string>();
         }
     }
-
-    public enum FlashState
-    {
-        Initial,
-        OSFlashed
-    }
 }
