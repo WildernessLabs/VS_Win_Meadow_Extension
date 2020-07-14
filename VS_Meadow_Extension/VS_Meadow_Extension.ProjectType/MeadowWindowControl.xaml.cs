@@ -30,7 +30,7 @@
     {
         readonly Guid DEVICE_INTERFACE_GUID_STDFU = new Guid(0x3fe809ab, 0xfb91, 0x4cb5, 0xa6, 0x43, 0x69, 0x67, 0x0d, 0x52, 0x36, 0x6e);
         static Guid windowGuid = new Guid("AD01DF73-6990-4361-8587-4FC3CB91A65F");
-        readonly string versionCheckUrl = "https://s3-us-west-2.amazonaws.com/downloads.wildernesslabs.co/Meadow_Beta/latest_dev.json";
+        readonly string versionCheckUrl = "https://s3-us-west-2.amazonaws.com/downloads.wildernesslabs.co/Meadow_Beta/latest.json";
         public string VersionCheckFile { get { return new Uri(versionCheckUrl).Segments.Last(); } }
 
         public readonly string osFilename = "Meadow.OS.bin";
@@ -39,9 +39,8 @@
         public readonly uint osAddress = 0x08000000;
 
         public readonly string Flash_Device_Text = "Flash Device";
-        public readonly string Resume_Flash_Text = "Resume Flash";
 
-        public FlashState FlashState { get; set; } = FlashState.Initial;
+        public bool _skipFlashToSelectDevice = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MeadowWindowControl"/> class.
@@ -104,110 +103,73 @@
                     return;
                 }
 
-                if(FlashState == FlashState.Initial)
+                EnableControls(false);
+
+                await OutputMessageAsync($"Begin '{Flash_Device_Text}'", true);
+
+                if (!await DfuFlash(osFilePath, osAddress))
                 {
-                    EnableControls(false);
-
-                    await OutputMessageAsync($"Begin '{Flash_Device_Text}'", true);
-
-                    if (await DfuFlash(osFilePath, osAddress))
-                    {
-                        await OutputMessageAsync($"Manually reset device and click '{Resume_Flash_Text}' to continue. To reset device, either hit the RST button or reconnect.");
-                        NextFlashState(FlashState);
-                    }
-                    else
-                    {
-                        EnableControls(true);
-                        RefreshDeviceList();
-                    }
+                    EnableControls(true);
                     return;
                 }
-                
-                if(FlashState == FlashState.OSFlashed)
+
+                //reset skip flash flag
+                _skipFlashToSelectDevice = false;
+
+                await OutputMessageAsync($"Initialize device");
+
+                MeadowDeviceManager.CurrentDevice = null;
+
+                if (string.IsNullOrEmpty(settings.DeviceTarget))
                 {
-                    EnableControls(false);
-
-                    await OutputMessageAsync($"Initialize device");
-
-                    MeadowDeviceManager.CurrentDevice = null;
-
-                    if (string.IsNullOrEmpty(settings.DeviceTarget))
-                    {
-                        await OutputMessageAsync($"Select Target Device and click '{Resume_Flash_Text}' to continue.");
-                        EnableControls(true);
-                        RefreshDeviceList();
-                        return;
-                    }
-                    else
-                    {
-                        await MeadowDeviceManager.GetMeadowForSerialPort(settings.DeviceTarget);
-                    }
-
-                    if (MeadowDeviceManager.CurrentDevice == null)
-                    {
-                        await OutputMessageAsync($"Initialization failed. Reset device and click '{Resume_Flash_Text}' to continue.");
-                        return;
-                    }
-
-                    if (!await Process(() => MeadowDeviceManager.ResetMeadow(MeadowDeviceManager.CurrentDevice, 0))) return;
-
-                    if (!await Process(() => MeadowDeviceManager.MonoDisable(MeadowDeviceManager.CurrentDevice))) return;
-
-                    await OutputMessageAsync($"Erase flash (~3 mins)");
-                    if (!await Process(() => MeadowFileManager.EraseFlash(MeadowDeviceManager.CurrentDevice))) return;
-
-                    await OutputMessageAsync($"Restart device");
-                    if (!await Process(() => MeadowDeviceManager.ResetMeadow(MeadowDeviceManager.CurrentDevice, 0))) return;
-
-                    await OutputMessageAsync($"Upload {runtimeFilename} (~1 min)");
-                    if (!await Process(() => MeadowFileManager.WriteFileToFlash(MeadowDeviceManager.CurrentDevice, runtimeFilePath))) return;
-
-                    await OutputMessageAsync($"Process {runtimeFilename} (~30 secs)");
-                    if (!await Process(() => MeadowDeviceManager.MonoFlash(MeadowDeviceManager.CurrentDevice))) return;
-
-                    await MeadowDeviceManager.CurrentDevice.DeleteFile(runtimeFilename);
-
-                    if (!await Process(() => MeadowDeviceManager.MonoEnable(MeadowDeviceManager.CurrentDevice))) return;
-
-                    await OutputMessageAsync($"Restart device");
-                    if (!await Process(() => MeadowDeviceManager.ResetMeadow(MeadowDeviceManager.CurrentDevice, 0))) return;
-
-                    NextFlashState(FlashState);
-                    
-                    await OutputMessageAsync($"'{Flash_Device_Text}' completed");
+                    await OutputMessageAsync($"Select Target Device Port and click '{Flash_Device_Text}' to resume.");
+                    _skipFlashToSelectDevice = true;
+                    EnableControls(true);
+                    return;
                 }
-                
+                else
+                {
+                    await MeadowDeviceManager.GetMeadowForSerialPort(settings.DeviceTarget);
+                }
+
+                if (MeadowDeviceManager.CurrentDevice == null)
+                {
+                    await OutputMessageAsync($"Initialization failed. Try again.");
+                    return;
+                }
+
+                if (!await Process(() => MeadowDeviceManager.ResetMeadow(MeadowDeviceManager.CurrentDevice, 0))) return;
+
+                if (!await Process(() => MeadowDeviceManager.MonoDisable(MeadowDeviceManager.CurrentDevice))) return;
+
+                await OutputMessageAsync($"Erase flash (~3 mins)");
+                if (!await Process(() => MeadowFileManager.EraseFlash(MeadowDeviceManager.CurrentDevice))) return;
+
+                await OutputMessageAsync($"Restart device");
+                if (!await Process(() => MeadowDeviceManager.ResetMeadow(MeadowDeviceManager.CurrentDevice, 0))) return;
+
+                await OutputMessageAsync($"Upload {runtimeFilename} (~1 min)");
+                if (!await Process(() => MeadowFileManager.WriteFileToFlash(MeadowDeviceManager.CurrentDevice, runtimeFilePath))) return;
+
+                await OutputMessageAsync($"Process {runtimeFilename} (~30 secs)");
+                if (!await Process(() => MeadowDeviceManager.MonoFlash(MeadowDeviceManager.CurrentDevice))) return;
+
+                await MeadowDeviceManager.CurrentDevice.DeleteFile(runtimeFilename);
+
+                if (!await Process(() => MeadowDeviceManager.MonoEnable(MeadowDeviceManager.CurrentDevice))) return;
+
+                await OutputMessageAsync($"Restart device");
+                if (!await Process(() => MeadowDeviceManager.ResetMeadow(MeadowDeviceManager.CurrentDevice, 0))) return;
+
+                EnableControls(true);
+
+                await OutputMessageAsync($"'{Flash_Device_Text}' completed");
             }
             catch (Exception ex)
             {
                 await OutputMessageAsync($"An unexpected error occurred. Please try again.");
                 EnableControls(true);
-                RefreshDeviceList();
-                ResetFlashState();
             }
-        }
-
-        private void NextFlashState(FlashState currentState)
-        {
-            switch (currentState)
-            {
-                case FlashState.Initial:
-                    this.Flash.Content = Resume_Flash_Text;
-                    FlashState = FlashState.OSFlashed;
-                    break;
-                case FlashState.OSFlashed:
-                    this.Flash.Content = Flash_Device_Text;
-                    FlashState = FlashState.Initial;
-                    break;
-            }
-            RefreshDeviceList();
-            EnableControls(true);
-        }
-
-        private void ResetFlashState()
-        {
-            this.Flash.Content = Flash_Device_Text;
-            FlashState = FlashState.Initial;
         }
 
         private async Task<(string osFilePath, string runtimeFilePath)> GetWorkingFiles()
@@ -273,8 +235,6 @@
             {
                 await OutputMessageAsync($"An unexpected error occurred. Please try again.");
                 EnableControls(true);
-                RefreshDeviceList();
-                ResetFlashState();
             }
             return result;
         }
@@ -328,8 +288,15 @@
             }
             else
             {
-                await OutputMessageAsync("Device not found. Connect the device in bootloader mode by plugging in the device while holding down the BOOT button.");
-                await OutputMessageAsync("For more help, visit http://developer.wildernesslabs.co/Meadow/Meadow_Basics/Troubleshooting/VisualStudio/");
+                if (_skipFlashToSelectDevice)
+                {
+                    return true;
+                }
+                else
+                {
+                    await OutputMessageAsync("Device not found. Connect the device in bootloader mode by plugging in the device while holding down the BOOT button.");
+                    await OutputMessageAsync("For more help, visit http://developer.wildernesslabs.co/Meadow/Meadow_Basics/Troubleshooting/VisualStudio/");
+                }
             }
 
             return false;
@@ -427,6 +394,7 @@
             Download.IsEnabled = enabled;
             Devices.IsEnabled = enabled;
             Refresh.IsEnabled = enabled;
+            RefreshDeviceList();
         }
 
         private string ExtractJsonValue(string json, string field)
