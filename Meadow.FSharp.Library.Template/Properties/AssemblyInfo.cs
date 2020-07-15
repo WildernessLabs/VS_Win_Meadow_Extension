@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Wilderness Labs")]
-[assembly: AssemblyProduct("Meadow.Template")]
+[assembly: AssemblyProduct("Meadow.FSharp.Library.Template")]
 [assembly: AssemblyCopyright("Copyright © Wilderness Labs 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
