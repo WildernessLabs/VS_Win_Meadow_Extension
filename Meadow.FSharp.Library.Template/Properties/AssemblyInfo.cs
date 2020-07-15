@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Meadow.Template")]
+[assembly: AssemblyTitle("Meadow.FSharp.Library.Template")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Wilderness Labs")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("2ca2ae75-18e0-4ef2-80a7-63e51446bbfe")]
+[assembly: Guid("2ca2ae75-18e0-4ef2-80a7-63e5144cbbfe")]
 
 // Version information for an assembly consists of the following four values:
 //
