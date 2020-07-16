@@ -97,7 +97,7 @@
                 MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath);
 
                 var (osFilePath, runtimeFilePath) = await GetWorkingFiles();
-                if (string.IsNullOrEmpty(osFilePath) || string.IsNullOrEmpty(runtimeFilePath))
+                if (string.IsNullOrEmpty(osFilePath) && string.IsNullOrEmpty(runtimeFilePath))
                 {
                     await OutputMessageAsync($"Meadow OS files not found. 'Download Meadow OS' first.");
                     return;
@@ -107,59 +107,73 @@
 
                 await OutputMessageAsync($"Begin '{Flash_Device_Text}'", true);
 
-                if (!await DfuFlash(osFilePath, osAddress))
+                if (!string.IsNullOrEmpty(osFilePath))
                 {
-                    EnableControls(true);
-                    return;
+                    if (!await DfuFlash(osFilePath, osAddress))
+                    {
+                        EnableControls(true);
+                        return;
+                    }
+                }
+                else
+                {
+                    await OutputMessageAsync($"{osFilename} not selected. Skipping OS flash.");
                 }
 
                 //reset skip flash flag
                 _skipFlashToSelectDevice = false;
 
-                await OutputMessageAsync($"Initialize device");
-
-                MeadowDeviceManager.CurrentDevice = null;
-
-                if (string.IsNullOrEmpty(settings.DeviceTarget))
+                if (!string.IsNullOrEmpty(runtimeFilePath))
                 {
-                    await OutputMessageAsync($"Select Target Device Port and click '{Flash_Device_Text}' to resume.");
-                    _skipFlashToSelectDevice = true;
-                    EnableControls(true);
-                    return;
+                    await OutputMessageAsync($"Initialize device");
+
+                    MeadowDeviceManager.CurrentDevice = null;
+
+                    if (string.IsNullOrEmpty(settings.DeviceTarget))
+                    {
+                        await OutputMessageAsync($"Select Target Device Port and click '{Flash_Device_Text}' to resume.");
+                        _skipFlashToSelectDevice = true;
+                        EnableControls(true);
+                        return;
+                    }
+                    else
+                    {
+                        await MeadowDeviceManager.GetMeadowForSerialPort(settings.DeviceTarget);
+                    }
+
+                    if (MeadowDeviceManager.CurrentDevice == null)
+                    {
+                        await OutputMessageAsync($"Initialization failed. Try again.");
+                        return;
+                    }
+
+                    if (!await Process(() => MeadowDeviceManager.ResetMeadow(MeadowDeviceManager.CurrentDevice, 0))) return;
+
+                    if (!await Process(() => MeadowDeviceManager.MonoDisable(MeadowDeviceManager.CurrentDevice))) return;
+
+                    await OutputMessageAsync($"Erase flash (~3 mins)");
+                    if (!await Process(() => MeadowFileManager.EraseFlash(MeadowDeviceManager.CurrentDevice))) return;
+
+                    await OutputMessageAsync($"Restart device");
+                    if (!await Process(() => MeadowDeviceManager.ResetMeadow(MeadowDeviceManager.CurrentDevice, 0))) return;
+
+                    await OutputMessageAsync($"Upload {runtimeFilename} (~1 min)");
+                    if (!await Process(() => MeadowFileManager.WriteFileToFlash(MeadowDeviceManager.CurrentDevice, runtimeFilePath))) return;
+
+                    await OutputMessageAsync($"Process {runtimeFilename} (~30 secs)");
+                    if (!await Process(() => MeadowDeviceManager.MonoFlash(MeadowDeviceManager.CurrentDevice))) return;
+
+                    await MeadowDeviceManager.CurrentDevice.DeleteFile(runtimeFilename);
+
+                    if (!await Process(() => MeadowDeviceManager.MonoEnable(MeadowDeviceManager.CurrentDevice))) return;
+
+                    await OutputMessageAsync($"Restart device");
+                    if (!await Process(() => MeadowDeviceManager.ResetMeadow(MeadowDeviceManager.CurrentDevice, 0))) return;
                 }
                 else
                 {
-                    await MeadowDeviceManager.GetMeadowForSerialPort(settings.DeviceTarget);
+                    await OutputMessageAsync($"{runtimeFilename} not selected. Skipping Runtime flash.");
                 }
-
-                if (MeadowDeviceManager.CurrentDevice == null)
-                {
-                    await OutputMessageAsync($"Initialization failed. Try again.");
-                    return;
-                }
-
-                if (!await Process(() => MeadowDeviceManager.ResetMeadow(MeadowDeviceManager.CurrentDevice, 0))) return;
-
-                if (!await Process(() => MeadowDeviceManager.MonoDisable(MeadowDeviceManager.CurrentDevice))) return;
-
-                await OutputMessageAsync($"Erase flash (~3 mins)");
-                if (!await Process(() => MeadowFileManager.EraseFlash(MeadowDeviceManager.CurrentDevice))) return;
-
-                await OutputMessageAsync($"Restart device");
-                if (!await Process(() => MeadowDeviceManager.ResetMeadow(MeadowDeviceManager.CurrentDevice, 0))) return;
-
-                await OutputMessageAsync($"Upload {runtimeFilename} (~1 min)");
-                if (!await Process(() => MeadowFileManager.WriteFileToFlash(MeadowDeviceManager.CurrentDevice, runtimeFilePath))) return;
-
-                await OutputMessageAsync($"Process {runtimeFilename} (~30 secs)");
-                if (!await Process(() => MeadowDeviceManager.MonoFlash(MeadowDeviceManager.CurrentDevice))) return;
-
-                await MeadowDeviceManager.CurrentDevice.DeleteFile(runtimeFilename);
-
-                if (!await Process(() => MeadowDeviceManager.MonoEnable(MeadowDeviceManager.CurrentDevice))) return;
-
-                await OutputMessageAsync($"Restart device");
-                if (!await Process(() => MeadowDeviceManager.ResetMeadow(MeadowDeviceManager.CurrentDevice, 0))) return;
 
                 EnableControls(true);
 
@@ -178,32 +192,23 @@
             if (selectCustom)
             {
                 OpenFileDialog dlg = new OpenFileDialog();
-                dlg.Filter = "Binary (*.BIN;)|*.BIN;";
+                dlg.Filter = "Meadow OS|Meadow.OS*.bin";
                 dlg.InitialDirectory = Globals.FirmwareDownloadsFilePath;
                 dlg.Multiselect = true;
 
                 var result = dlg.ShowDialog();
 
-                if (result.HasValue && result.Value)
+                if (result.HasValue && result.Value && dlg.FileNames.Any())
                 {
-                    if (dlg.FileNames.Select(x => Path.GetFileName(x).ToLower()).Contains(osFilename.ToLower())
-                        && dlg.FileNames.Select(x => Path.GetFileName(x).ToLower()).Contains(runtimeFilename.ToLower()))
-                    {
-                        var osFilePath = dlg.FileNames
-                            .Select(x => new { Path = x, Filename = Path.GetFileName(x) })
-                            .Single(x => string.Compare(x.Filename, osFilename, StringComparison.OrdinalIgnoreCase) == 0).Path;
+                    var osFilePath = dlg.FileNames
+                        .Select(x => new { Path = x, Filename = Path.GetFileName(x) })
+                        .SingleOrDefault(x => string.Compare(x.Filename, osFilename, StringComparison.OrdinalIgnoreCase) == 0)?.Path;
 
-                        var runtimeFilePath = dlg.FileNames
-                            .Select(x => new { Path = x, Filename = Path.GetFileName(x) })
-                            .Single(x => string.Compare(x.Filename, runtimeFilename, StringComparison.OrdinalIgnoreCase) == 0).Path;
+                    var runtimeFilePath = dlg.FileNames
+                        .Select(x => new { Path = x, Filename = Path.GetFileName(x) })
+                        .SingleOrDefault(x => string.Compare(x.Filename, runtimeFilename, StringComparison.OrdinalIgnoreCase) == 0)?.Path;
 
-                        return (osFilePath, runtimeFilePath);
-                    }
-                    else
-                    {
-                        await OutputMessageAsync($"Please select both '{osFilename}' and '{runtimeFilename}'");
-                        return (null, null);
-                    }
+                    return (osFilePath, runtimeFilePath);
                 }
                 else
                 {
