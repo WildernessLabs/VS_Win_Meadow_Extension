@@ -339,6 +339,13 @@
                 HttpClient httpClient = new HttpClient();
                 var payload = await httpClient.GetStringAsync(versionCheckUrl);
                 var version = ExtractJsonValue(payload, "version");
+                var minVsixVersion = ExtractJsonValue(payload, "minVsixVersion");
+
+                if (!CheckCompatibility(minVsixVersion, VsixManifest.GetManifest().Version))
+                {
+                    await OutputMessageAsync($"Meadow OS ({version}) is not compatible with VS Tools for Meadow ({VsixManifest.GetManifest().Version}). Please update the extension to continue.", true);
+                    return;
+                }
 
                 Uri download = new Uri(ExtractJsonValue(payload, "downloadUrl"));
                 var fileName = download.Segments.ToList().Last();
@@ -361,6 +368,15 @@
             {
                 await OutputMessageAsync($"Error occurred while downloading latest OS. Please try again later.");
             }
+        }
+
+        private bool CheckCompatibility(string minVsixVersion, string vsixVersion)
+        {
+            Version vsix, minVsix;
+            Version.TryParse(minVsixVersion, out minVsix);
+            Version.TryParse(vsixVersion, out vsix);
+
+            return (vsix ?? new Version(0, 0, 0)) >= (minVsix ?? new Version(0, 0, 0));
         }
 
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
@@ -405,7 +421,11 @@
         private string ExtractJsonValue(string json, string field)
         {
             var jo = JObject.Parse(json);
-            return jo[field].Value<string>();
+            if (jo.ContainsKey(field))
+            {
+                return jo[field].Value<string>();
+            }
+            return string.Empty;
         }
     }
 }

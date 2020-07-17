@@ -372,6 +372,7 @@
     <Compile Include="SerialDevice.cs" />
     <Compile Include="STDfuDevice.cs" />
     <Compile Include="Utility\OutputPaneWriter.cs" />
+    <Compile Include="VsixManifest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Resources\MeadowPackage.ico" />
