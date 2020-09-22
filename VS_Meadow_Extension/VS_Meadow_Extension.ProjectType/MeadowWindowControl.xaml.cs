@@ -31,7 +31,7 @@
     {
         readonly Guid DEVICE_INTERFACE_GUID_STDFU = new Guid(0x3fe809ab, 0xfb91, 0x4cb5, 0xa6, 0x43, 0x69, 0x67, 0x0d, 0x52, 0x36, 0x6e);
         static Guid windowGuid = new Guid("AD01DF73-6990-4361-8587-4FC3CB91A65F");
-        readonly string versionCheckUrl = "https://s3-us-west-2.amazonaws.com/downloads.wildernesslabs.co/Meadow_Beta/latest_dev.json";
+        readonly string versionCheckUrl = "https://s3-us-west-2.amazonaws.com/downloads.wildernesslabs.co/Meadow_Beta/latest.json";
         public string VersionCheckFile { get { return new Uri(versionCheckUrl).Segments.Last(); } }
 
         public readonly string osFilename = "Meadow.OS.bin";
@@ -97,126 +97,6 @@
             settings.DeviceTarget = Devices.SelectedValue.ToString();
             settings.Save();
         }
-
-        //private async void Flash_OS(object sender, RoutedEventArgs e)
-        //{
-        //    var osFilePath = Path.Combine(Globals.FirmwareDownloadsFilePath, osFilename);
-
-        //    if (!File.Exists(osFilePath))
-        //    {
-        //        await OutputMessageAsync($"Meadow OS files not found. 'Download Meadow OS' first.", true);
-        //        return;
-        //    }
-
-        //    await OutputMessageAsync($"Begin '{Flash_OS_Text}'", true);
-        //    EnableControls(false);
-
-        //    try
-        //    {
-        //        await DfuFlash(osFilePath, osAddress);
-        //        await OutputMessageAsync($"'{Flash_OS_Text}' completed");
-        //    }
-        //    catch(Exception ex)
-        //    {
-        //        await OutputMessageAsync($"Error flashing OS, try again.");
-        //    }
-
-        //    EnableControls(true);
-            
-        //}
-
-        //private async void Flash_Runtime(object sender, RoutedEventArgs e)
-        //{
-
-        //    try
-        //    {
-        //        if (IsDfuMode())
-        //        {
-        //            await OutputMessageAsync($"Device is in bootloader mode. Connect device in normal mode to flash runtime.", true);
-        //            return;
-        //        }
-
-        //        var runtimeFilePath = Path.Combine(Globals.FirmwareDownloadsFilePath, runtimeFilename);
-
-        //        if (!File.Exists(runtimeFilePath)
-        //            || !File.Exists(Path.Combine(Globals.FirmwareDownloadsFilePath, networkBootloaderFilename))
-        //            || !File.Exists(Path.Combine(Globals.FirmwareDownloadsFilePath, networkPartitionTableFilename))
-        //            || !File.Exists(Path.Combine(Globals.FirmwareDownloadsFilePath, networkMeadowCommsFilename)))
-        //        {
-        //            await OutputMessageAsync($"Meadow OS files not found. 'Download Meadow OS' first.", true);
-        //            return;
-        //        }
-
-        //        await OutputMessageAsync($"Begin '{Flash_Runtime_Text}'", true);
-
-        //        EnableControls(false);
-
-        //        await OutputMessageAsync($"Initialize device");
-
-        //        MeadowDeviceManager.CurrentDevice = null;
-
-        //        MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath);
-
-        //        if (string.IsNullOrEmpty(settings.DeviceTarget))
-        //        {
-        //            await OutputMessageAsync($"Select Target Device Port and try again.");
-        //            _skipFlashToSelectDevice = true;
-        //            EnableControls(true);
-        //            return;
-        //        }
-        //        else
-        //        {
-        //            await MeadowDeviceManager.GetMeadowForSerialPort(settings.DeviceTarget);
-        //        }
-
-        //        if (MeadowDeviceManager.CurrentDevice == null)
-        //        {
-        //            await OutputMessageAsync($"Initialization failed. Try again.");
-        //            return;
-        //        }
-
-        //        if (!await Process(() => MeadowDeviceManager.MonoDisable(MeadowDeviceManager.CurrentDevice))) return;
-
-        //        MeadowDeviceManager.CurrentDevice.Initialize();
-
-        //        await OutputMessageAsync($"Erase flash (~3 mins)");
-        //        if (!await Process(() => MeadowFileManager.EraseFlash(MeadowDeviceManager.CurrentDevice))) return;
-
-        //        await OutputMessageAsync($"Restart device");
-        //        if (!await Process(() => MeadowDeviceManager.ResetMeadow(MeadowDeviceManager.CurrentDevice, 0))) return;
-
-        //        MeadowDeviceManager.CurrentDevice.Initialize();
-
-        //        await OutputMessageAsync($"Upload {runtimeFilename} (~1 min)");
-        //        if (!await Process(() => MeadowFileManager.WriteFileToFlash(MeadowDeviceManager.CurrentDevice, runtimeFilePath))) return;
-
-        //        await OutputMessageAsync($"Process {runtimeFilename} (~30 secs)");
-        //        if (!await Process(() => MeadowDeviceManager.MonoFlash(MeadowDeviceManager.CurrentDevice))) return;
-
-        //        await OutputMessageAsync($"Flash coprocessor (~25 secs)");
-        //        await Task.Run(() =>
-        //        {
-        //            MeadowFileManager.WriteFileToEspFlash(MeadowDeviceManager.CurrentDevice, Path.Combine(Globals.FirmwareDownloadsFilePath, networkBootloaderFilename), mcuDestAddr: "0x1000");
-        //            MeadowFileManager.WriteFileToEspFlash(MeadowDeviceManager.CurrentDevice, Path.Combine(Globals.FirmwareDownloadsFilePath, networkPartitionTableFilename), mcuDestAddr: "0x8000");
-        //            MeadowFileManager.WriteFileToEspFlash(MeadowDeviceManager.CurrentDevice, Path.Combine(Globals.FirmwareDownloadsFilePath, networkMeadowCommsFilename), mcuDestAddr: "0x10000");
-        //        });
-
-        //        await OutputMessageAsync($"Clean up temporary files");
-        //        await MeadowDeviceManager.CurrentDevice.DeleteFile(runtimeFilename);
-
-        //        await OutputMessageAsync($"Restart device");
-        //        if (!await Process(() => MeadowDeviceManager.MonoEnable(MeadowDeviceManager.CurrentDevice))) return;
-        //        if (!await Process(() => MeadowDeviceManager.ResetMeadow(MeadowDeviceManager.CurrentDevice, 0))) return;
-
-        //        await OutputMessageAsync($"'{Flash_Runtime_Text}' completed");
-        //    }
-        //    catch(Exception ex)
-        //    {
-        //        await OutputMessageAsync($"Error flashing runtime, try again.");
-        //    }
-
-        //    EnableControls(true);
-        //}
 
         private async void Check_Version(object sender, RoutedEventArgs e)
         {
