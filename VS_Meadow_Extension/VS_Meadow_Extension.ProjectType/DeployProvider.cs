@@ -60,6 +60,7 @@ namespace Meadow
             try
             {
                 var meadow = MeadowDeviceManager.CurrentDevice;
+
                 if (meadow == null)
                 {
                     meadow = await MeadowDeviceManager.GetMeadowForSerialPort(target);
@@ -101,23 +102,22 @@ namespace Meadow
                 await outputPaneWriter.WriteAsync("Can't read Meadow device");
                 return false;
             }
+            else if (meadow.SerialPort == null || !meadow.SerialPort.IsOpen)
+            {
+                if (!meadow.Initialize())
+                {
+                    await outputPaneWriter.WriteAsync("Couldn't initialize serial port");
+                    return false;
+                }
+            }
 
-            meadow.Initialize(false);
-            MeadowDeviceManager.MonoDisable(meadow);
+            await MeadowDeviceManager.MonoDisable(meadow);
             await Task.Delay(5000); //hack for testing
 
-            if (meadow.Initialize() == false)
-            {
-                await outputPaneWriter.WriteAsync("Couldn't initialize serial port");
-                return false;
-            }
-            else
-            {
-                MeadowDeviceManager.GetDeviceInfo(meadow);
-                await Task.Delay(1000); // wait for device info to populate
-                await outputPaneWriter.WriteAsync($"Device {meadow.DeviceInfo.MeadowOSVersion}");
-            }
-            
+            MeadowDeviceManager.GetDeviceInfo(meadow);
+            await Task.Delay(1500); // wait for device info to populate
+            await outputPaneWriter.WriteAsync($"Device {meadow.DeviceInfo.MeadowOSVersion}");
+
             return true;
         }
 
@@ -127,7 +127,7 @@ namespace Meadow
 
             await outputPaneWriter.WriteAsync("Checking files on device (may take several seconds)");
 
-            var meadowFiles = await meadow.GetFilesAndCrcs(30000);
+            var meadowFiles = await meadow.GetFilesAndCrcs();
 
             foreach (var f in meadowFiles.files)
             {
@@ -249,24 +249,11 @@ namespace Meadow
 
             await outputPaneWriter.WriteAsync("Resetting Meadow and starting app (30-60s)");
 
-            MeadowDeviceManager.MonoEnable(meadow);
-
-            try
-            {
-                MeadowDeviceManager.ResetMeadow(meadow, 0);
-            }
-            catch
-            {
-                //gulp
-            }
+            await MeadowDeviceManager.MonoEnable(meadow);
 
             await Task.Delay(2500);//wait for reboot
 
-            //reconnect serial port
-            if (meadow.Initialize() == false)
-            {
-                //find device with matching serial
-            }
+            meadow.Initialize();
         }
 
         public bool IsDeploySupported

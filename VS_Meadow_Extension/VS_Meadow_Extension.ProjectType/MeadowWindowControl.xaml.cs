@@ -22,6 +22,7 @@
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using System.Windows.Input;
+    using Microsoft.Build.Tasks;
 
     /// <summary>
     /// Interaction logic for MeadowWindowControl.
@@ -35,10 +36,17 @@
 
         public readonly string osFilename = "Meadow.OS.bin";
         public readonly string runtimeFilename = "Meadow.OS.Runtime.bin";
+        public readonly string networkBootloaderFilename = "bootloader.bin";
+        public readonly string networkMeadowCommsFilename = "MeadowComms.bin";
+        public readonly string networkPartitionTableFilename = "partition-table.bin";
 
         public readonly uint osAddress = 0x08000000;
 
+        public readonly string Flash_OS_Text = "Flash OS";
+        public readonly string Flash_Runtime_Text = "Flash Runtime";
         public readonly string Flash_Device_Text = "Flash Device";
+        public readonly string Check_Version_Text = "Check Version";
+        public readonly string Erase_Flash_Text = "Erase Flash";
 
         public bool _skipFlashToSelectDevice = false;
 
@@ -90,6 +98,93 @@
             settings.Save();
         }
 
+        private async void Check_Version(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (IsDfuMode())
+                {
+                    await OutputMessageAsync($"Device is in bootloader mode. Connect device in normal mode to check version.", true);
+                    return;
+                }
+
+                EnableControls(false);
+
+                MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath);
+                if (string.IsNullOrEmpty(settings.DeviceTarget))
+                {
+                    await OutputMessageAsync($"Select Target Device Port and try again.", true);
+                    EnableControls(true);
+                    return;
+                }
+                else if (MeadowDeviceManager.CurrentDevice == null)
+                {
+                    await MeadowDeviceManager.GetMeadowForSerialPort(settings.DeviceTarget);
+                }
+                else
+                {
+                    MeadowDeviceManager.CurrentDevice.Initialize();
+                }
+
+                MeadowDeviceManager.GetDeviceInfo(MeadowDeviceManager.CurrentDevice);
+                await Task.Delay(1500); // wait for device info to populate
+                await OutputMessageAsync($"Device {MeadowDeviceManager.CurrentDevice.DeviceInfo.MeadowOSVersion}", true);
+            }
+            catch (Exception ex)
+            {
+                await OutputMessageAsync($"Could not read device version.");
+            }
+
+            EnableControls(true);
+
+        }
+
+        private async void Erase_Flash(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (IsDfuMode())
+                {
+                    await OutputMessageAsync($"Device is in bootloader mode. Connect device in normal mode to erase flash.", true);
+                    return;
+                }
+
+                EnableControls(false);
+                await OutputMessageAsync($"Erase flash (~3 mins)", true);
+
+                MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath);
+                if (string.IsNullOrEmpty(settings.DeviceTarget))
+                {
+                    await OutputMessageAsync($"Select Target Device Port and try again.", true);
+                    EnableControls(true);
+                    return;
+                }
+                else if (MeadowDeviceManager.CurrentDevice == null)
+                {
+                    await MeadowDeviceManager.GetMeadowForSerialPort(settings.DeviceTarget);
+                }
+                else
+                {
+                    MeadowDeviceManager.CurrentDevice.Initialize();
+                }
+
+                if (!await Process(() => MeadowDeviceManager.MonoDisable(MeadowDeviceManager.CurrentDevice))) return;
+
+                MeadowDeviceManager.CurrentDevice.Initialize(true);
+
+                if (!await Process(() => MeadowFileManager.EraseFlash(MeadowDeviceManager.CurrentDevice))) return;
+
+                await OutputMessageAsync($"'{Erase_Flash_Text}' completed");
+            }
+            catch (Exception ex)
+            {
+                await OutputMessageAsync($"Could not read erase flash.");
+            }
+
+            EnableControls(true);
+
+        }
+
         private async void Flash_Device(object sender, RoutedEventArgs e)
         {
             try
@@ -127,7 +222,7 @@
                 {
                     await OutputMessageAsync($"Initialize device");
 
-                    MeadowDeviceManager.CurrentDevice = null;
+                    //MeadowDeviceManager.CurrentDevice = null;
 
                     if (string.IsNullOrEmpty(settings.DeviceTarget))
                     {
@@ -136,9 +231,13 @@
                         EnableControls(true);
                         return;
                     }
-                    else
+                    else if(MeadowDeviceManager.CurrentDevice == null)
                     {
                         await MeadowDeviceManager.GetMeadowForSerialPort(settings.DeviceTarget);
+                    }
+                    else
+                    {
+                        MeadowDeviceManager.CurrentDevice.Initialize();
                     }
 
                     if (MeadowDeviceManager.CurrentDevice == null)
@@ -147,9 +246,9 @@
                         return;
                     }
 
-                    if (!await Process(() => MeadowDeviceManager.ResetMeadow(MeadowDeviceManager.CurrentDevice, 0))) return;
-
                     if (!await Process(() => MeadowDeviceManager.MonoDisable(MeadowDeviceManager.CurrentDevice))) return;
+
+                    MeadowDeviceManager.CurrentDevice.Initialize(true);
 
                     await OutputMessageAsync($"Erase flash (~3 mins)");
                     if (!await Process(() => MeadowFileManager.EraseFlash(MeadowDeviceManager.CurrentDevice))) return;
@@ -157,17 +256,27 @@
                     await OutputMessageAsync($"Restart device");
                     if (!await Process(() => MeadowDeviceManager.ResetMeadow(MeadowDeviceManager.CurrentDevice, 0))) return;
 
+                    MeadowDeviceManager.CurrentDevice.Initialize(true);
+
                     await OutputMessageAsync($"Upload {runtimeFilename} (~1 min)");
                     if (!await Process(() => MeadowFileManager.WriteFileToFlash(MeadowDeviceManager.CurrentDevice, runtimeFilePath))) return;
 
                     await OutputMessageAsync($"Process {runtimeFilename} (~30 secs)");
                     if (!await Process(() => MeadowDeviceManager.MonoFlash(MeadowDeviceManager.CurrentDevice))) return;
 
+                    await OutputMessageAsync($"Flash coprocessor (~25 secs)");
+                    await Task.Run(() =>
+                    {
+                        MeadowFileManager.WriteFileToEspFlash(MeadowDeviceManager.CurrentDevice, Path.Combine(Globals.FirmwareDownloadsFilePath, networkBootloaderFilename), mcuDestAddr: "0x1000");
+                        MeadowFileManager.WriteFileToEspFlash(MeadowDeviceManager.CurrentDevice, Path.Combine(Globals.FirmwareDownloadsFilePath, networkPartitionTableFilename), mcuDestAddr: "0x8000");
+                        MeadowFileManager.WriteFileToEspFlash(MeadowDeviceManager.CurrentDevice, Path.Combine(Globals.FirmwareDownloadsFilePath, networkMeadowCommsFilename), mcuDestAddr: "0x10000");
+                    });
+
+                    await OutputMessageAsync($"Clean up temporary files");
                     await MeadowDeviceManager.CurrentDevice.DeleteFile(runtimeFilename);
 
-                    if (!await Process(() => MeadowDeviceManager.MonoEnable(MeadowDeviceManager.CurrentDevice))) return;
-
                     await OutputMessageAsync($"Restart device");
+                    if (!await Process(() => MeadowDeviceManager.MonoEnable(MeadowDeviceManager.CurrentDevice))) return;
                     if (!await Process(() => MeadowDeviceManager.ResetMeadow(MeadowDeviceManager.CurrentDevice, 0))) return;
                 }
                 else
@@ -307,6 +416,21 @@
             return false;
         }
 
+        private bool IsDfuMode()
+        {
+            var query = "SELECT * FROM Win32_USBHub";
+            ManagementObjectSearcher device_searcher = new ManagementObjectSearcher(query);
+            string deviceId = string.Empty;
+            foreach (ManagementObject usb_device in device_searcher.Get())
+            {
+                if (usb_device.Properties["Name"].Value.ToString() == "STM Device in DFU Mode")
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private void UploadFile(STDfuDevice device, string filepath, uint address)
         {
             ushort blockSize = device.BlockTransferSize;
@@ -347,9 +471,6 @@
                     return;
                 }
 
-                Uri download = new Uri(ExtractJsonValue(payload, "downloadUrl"));
-                var fileName = download.Segments.ToList().Last();
-
                 if (Directory.Exists(Globals.FirmwareDownloadsFilePath))
                 {
                     Directory.Delete(Globals.FirmwareDownloadsFilePath, true);
@@ -357,10 +478,8 @@
                 Directory.CreateDirectory(Globals.FirmwareDownloadsFilePath);
 
                 await OutputMessageAsync($"Downloading firmware version: {version}.", true);
-                WebClient webClient = new WebClient();
-                webClient.DownloadFile(download, Path.Combine(Globals.FirmwareDownloadsFilePath, fileName));
-                webClient.DownloadFile(versionCheckUrl, Path.Combine(Globals.FirmwareDownloadsFilePath, VersionCheckFile));
-                ZipFile.ExtractToDirectory(Path.Combine(Globals.FirmwareDownloadsFilePath, fileName), Globals.FirmwareDownloadsFilePath);
+                await DownloadFile(new Uri(ExtractJsonValue(payload, "downloadUrl")));
+                await DownloadFile(new Uri(ExtractJsonValue(payload, "networkDownloadUrl")));
 
                 await OutputMessageAsync($"Download complete.");
             }
@@ -368,6 +487,16 @@
             {
                 await OutputMessageAsync($"Error occurred while downloading latest OS. Please try again later.");
             }
+        }
+
+        private async Task DownloadFile(Uri uri)
+        {
+            var fileName = uri.Segments.ToList().Last();
+
+            WebClient webClient = new WebClient();
+            webClient.DownloadFile(uri, Path.Combine(Globals.FirmwareDownloadsFilePath, fileName));
+            webClient.DownloadFile(versionCheckUrl, Path.Combine(Globals.FirmwareDownloadsFilePath, VersionCheckFile));
+            ZipFile.ExtractToDirectory(Path.Combine(Globals.FirmwareDownloadsFilePath, fileName), Globals.FirmwareDownloadsFilePath);
         }
 
         private bool CheckCompatibility(string minVsixVersion, string vsixVersion)
@@ -412,6 +541,8 @@
         private void EnableControls(bool enabled)
         {
             Flash.IsEnabled = enabled;
+            EraseFlash.IsEnabled = enabled;
+            CheckVersion.IsEnabled = enabled;
             Download.IsEnabled = enabled;
             Devices.IsEnabled = enabled;
             Refresh.IsEnabled = enabled;
