@@ -342,7 +342,7 @@
                 {
                     await OutputMessageAsync($"Initialize device");
 
-                    MeadowDeviceManager.CurrentDevice = null;
+                    //MeadowDeviceManager.CurrentDevice = null;
 
                     if (string.IsNullOrEmpty(settings.DeviceTarget))
                     {
@@ -351,9 +351,13 @@
                         EnableControls(true);
                         return;
                     }
-                    else
+                    else if(MeadowDeviceManager.CurrentDevice == null)
                     {
                         await MeadowDeviceManager.GetMeadowForSerialPort(settings.DeviceTarget);
+                    }
+                    else
+                    {
+                        MeadowDeviceManager.CurrentDevice.Initialize();
                     }
 
                     if (MeadowDeviceManager.CurrentDevice == null)
