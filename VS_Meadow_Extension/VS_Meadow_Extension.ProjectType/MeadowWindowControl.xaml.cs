@@ -23,6 +23,7 @@
     using System.Threading.Tasks;
     using System.Windows.Input;
     using Microsoft.Build.Tasks;
+    using MeadowCLI.Hcom;
 
     /// <summary>
     /// Interaction logic for MeadowWindowControl.
@@ -45,10 +46,12 @@
         public readonly string Flash_OS_Text = "Flash OS";
         public readonly string Flash_Runtime_Text = "Flash Runtime";
         public readonly string Flash_Device_Text = "Flash Device";
+        public readonly string Flash_Coprocessor_Text = "Flash Coprocessor";
         public readonly string Check_Version_Text = "Check Version";
         public readonly string Erase_Flash_Text = "Erase Flash";
 
         public bool _skipFlashToSelectDevice = false;
+        public bool _verbose = true;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MeadowWindowControl"/> class.
@@ -111,16 +114,26 @@
                 EnableControls(false);
 
                 MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath);
+
+                await OutputMessageAsync($"Initialize device (~30s)", true);
+
                 if (string.IsNullOrEmpty(settings.DeviceTarget))
                 {
-                    await OutputMessageAsync($"Select Target Device Port and try again.", true);
+                    await OutputMessageAsync($"Select Target Device Port and click '{Flash_Device_Text}' to resume.");
+                    _skipFlashToSelectDevice = true;
+                    EnableControls(true);
+                    return;
                 }
-                else
-                {
-                    await MeadowDeviceManager.GetMeadowForSerialPort(settings.DeviceTarget).ConfigureAwait(false);
-                    await MeadowDeviceManager.GetDeviceInfo(MeadowDeviceManager.CurrentDevice);
-                    await OutputMessageAsync($"Device {MeadowDeviceManager.CurrentDevice.DeviceInfo.MeadowOSVersion}", true);
-                }
+
+                MeadowSerialDevice meadow = null;
+                // initialize connection. need to jump through hoops after exiting dfu mode =(
+                meadow = await MeadowDeviceManager.GetMeadowForSerialPort(settings.DeviceTarget).ConfigureAwait(false);
+                await MeadowDeviceManager.ResetMeadow(meadow).ConfigureAwait(false);
+                await Task.Delay(1000);
+                meadow = await MeadowDeviceManager.GetMeadowForSerialPort(settings.DeviceTarget).ConfigureAwait(false);
+
+                await MeadowDeviceManager.GetDeviceInfo(meadow);
+                await OutputMessageAsync($"Device {meadow.DeviceInfo.MeadowOSVersion}", true);
             }
             catch (Exception ex)
             {
@@ -133,55 +146,11 @@
             }
         }
 
-        private async void Erase_Flash(object sender, RoutedEventArgs e)
-        {
-            //try
-            //{
-            //    if (IsDfuMode())
-            //    {
-            //        await OutputMessageAsync($"Device is in bootloader mode. Connect device in normal mode to erase flash.", true);
-            //        return;
-            //    }
-
-            //    EnableControls(false);
-            //    await OutputMessageAsync($"Erase flash (~3 mins)", true);
-
-            //    MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath);
-            //    if (string.IsNullOrEmpty(settings.DeviceTarget))
-            //    {
-            //        await OutputMessageAsync($"Select Target Device Port and try again.", true);
-            //        EnableControls(true);
-            //        return;
-            //    }
-
-            //    MeadowDeviceManager.CurrentDevice = null;
-            //    await MeadowDeviceManager.GetMeadowForSerialPort(settings.DeviceTarget);
-
-            //    if (MeadowDeviceManager.CurrentDevice == null)
-            //    {
-            //        await OutputMessageAsync($"Initialization failed. Try again.");
-            //        return;
-            //    }
-
-            //    if (!await Process(() => MeadowDeviceManager.MonoDisable(MeadowDeviceManager.CurrentDevice))) return;
-
-            //    MeadowDeviceManager.CurrentDevice.Initialize(true);
-
-            //    if (!await Process(() => MeadowFileManager.EraseFlash(MeadowDeviceManager.CurrentDevice))) return;
-
-            //    await OutputMessageAsync($"'{Erase_Flash_Text}' completed");
-            //}
-            //catch (Exception ex)
-            //{
-            //    await OutputMessageAsync($"Could not read erase flash.");
-            //}
-
-            //EnableControls(true);
-
-        }
-
         private async void Flash_Device(object sender, RoutedEventArgs e)
         {
+            _verbose = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
+
+            MeadowSerialDevice meadow = null;
             try
             {
                 MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath);
@@ -197,9 +166,11 @@
 
                 await OutputMessageAsync($"Begin '{Flash_Device_Text}'", true);
 
+                if (_verbose) { await OutputMessageAsync($"Trace output enabled."); }
+
                 if (!string.IsNullOrEmpty(osFilePath))
                 {
-                    if (!await DfuFlash(osFilePath, osAddress))
+                    if (!await DfuFlash(osFilePath, osAddress).ConfigureAwait(false))
                     {
                         EnableControls(true);
                         return;
@@ -225,24 +196,32 @@
                         return;
                     }
 
-                    await MeadowDeviceManager.GetMeadowForSerialPort(settings.DeviceTarget).ConfigureAwait(false);
-                    await MeadowDeviceManager.MonoDisable(MeadowDeviceManager.CurrentDevice);
+                    // initialize connection. need to jump through hoops after exiting dfu mode =(
+                    meadow = await MeadowDeviceManager.GetMeadowForSerialPort(settings.DeviceTarget).ConfigureAwait(false);
+                    await MeadowDeviceManager.ResetMeadow(meadow).ConfigureAwait(false);
+                    await Task.Delay(1000);
+                    meadow = await MeadowDeviceManager.GetMeadowForSerialPort(settings.DeviceTarget).ConfigureAwait(false);
+                    if (_verbose)
+                    {
+                        await MeadowDeviceManager.TraceEnable(meadow).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        await MeadowDeviceManager.TraceDisable(meadow).ConfigureAwait(false);
+                    }
+                    meadow.OnMeadowMessage += MeadowMesageHandler;
+                    await Task.Delay(1000);
 
-                    await OutputMessageAsync($"Upload {runtimeFilename} (~60s)");
-                    await MeadowFileManager.WriteFileToFlash(MeadowDeviceManager.CurrentDevice, runtimeFilePath);
+                    await MeadowDeviceManager.MonoDisable(meadow).ConfigureAwait(false);
+                    await Task.Delay(10000); // wait for reconnect, need an event for this
 
-                    await OutputMessageAsync($"Flash {runtimeFilename} (~30s)");
-                    await MeadowDeviceManager.MonoFlash(MeadowDeviceManager.CurrentDevice);
-
-                    await OutputMessageAsync($"Flash coprocessor (~90s)");
-                    await MeadowFileManager.WriteFileToEspFlash(MeadowDeviceManager.CurrentDevice, Path.Combine(Globals.FirmwareDownloadsFilePath, networkBootloaderFilename), mcuDestAddr: "0x1000");
-                    await MeadowFileManager.WriteFileToEspFlash(MeadowDeviceManager.CurrentDevice, Path.Combine(Globals.FirmwareDownloadsFilePath, networkPartitionTableFilename), mcuDestAddr: "0x8000");
-                    await MeadowFileManager.WriteFileToEspFlash(MeadowDeviceManager.CurrentDevice, Path.Combine(Globals.FirmwareDownloadsFilePath, networkMeadowCommsFilename), mcuDestAddr: "0x10000");
-
-                    await OutputMessageAsync($"Clean up");
-                    await MeadowDeviceManager.CurrentDevice.DeleteFile(runtimeFilename);
-
-                    await MeadowDeviceManager.MonoEnable(MeadowDeviceManager.CurrentDevice);
+                    await MeadowFileManager.WriteFileToFlash(meadow, runtimeFilePath).ConfigureAwait(false);
+                    await MeadowDeviceManager.MonoFlash(meadow).ConfigureAwait(false);
+                    
+                    await meadow.DeleteFile(runtimeFilename).ConfigureAwait(false);
+                    
+                    await MeadowDeviceManager.MonoEnable(meadow).ConfigureAwait(false);
+                    await Task.Delay(10000); // wait for reconnect, need an event for this
                 }
                 else
                 {
@@ -257,14 +236,96 @@
             }
             finally
             {
+                if(meadow != null)
+                {
+                    meadow.OnMeadowMessage -= MeadowMesageHandler;
+                }
+                _verbose = false;
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 EnableControls(true);
             }
         }
 
+        private async void Flash_ESP_Click(object sender, RoutedEventArgs e)
+        {
+            _verbose = Keyboard.IsKeyDown(Key.LeftCtrl) || Keyboard.IsKeyDown(Key.RightCtrl);
+
+            MeadowSerialDevice meadow = null;
+            try
+            {
+                MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath);
+
+                await OutputMessageAsync($"Begin '{Flash_Coprocessor_Text}'", true);
+
+                EnableControls(false);
+
+                await OutputMessageAsync($"Initialize device (~30s)");
+
+                if (string.IsNullOrEmpty(settings.DeviceTarget))
+                {
+                    await OutputMessageAsync($"Select Target Device Port and click '{Flash_Device_Text}' to resume.");
+                    _skipFlashToSelectDevice = true;
+                    EnableControls(true);
+                    return;
+                }
+
+                // initialize connection. need to jump through hoops after exiting dfu mode =(
+                meadow = await MeadowDeviceManager.GetMeadowForSerialPort(settings.DeviceTarget).ConfigureAwait(false);
+                await MeadowDeviceManager.ResetMeadow(meadow).ConfigureAwait(false);
+                await Task.Delay(1000);
+                meadow = await MeadowDeviceManager.GetMeadowForSerialPort(settings.DeviceTarget).ConfigureAwait(false);
+                if (_verbose)
+                {
+                    await MeadowDeviceManager.TraceEnable(meadow).ConfigureAwait(false);
+                }
+                else
+                {
+                    await MeadowDeviceManager.TraceDisable(meadow).ConfigureAwait(false);
+                }
+                meadow.OnMeadowMessage += MeadowMesageHandler;
+                await Task.Delay(1000);
+
+                await MeadowDeviceManager.MonoDisable(meadow).ConfigureAwait(false);
+                await Task.Delay(10000); // wait for reconnect, need an event for this
+
+                await MeadowFileManager.WriteFileToEspFlash(meadow, Path.Combine(Globals.FirmwareDownloadsFilePath, networkMeadowCommsFilename), mcuDestAddr: "0x10000").ConfigureAwait(false);
+                await Task.Delay(1000);
+                await MeadowFileManager.WriteFileToEspFlash(meadow, Path.Combine(Globals.FirmwareDownloadsFilePath, networkBootloaderFilename), mcuDestAddr: "0x1000").ConfigureAwait(false);
+                await Task.Delay(1000);
+                await MeadowFileManager.WriteFileToEspFlash(meadow, Path.Combine(Globals.FirmwareDownloadsFilePath, networkPartitionTableFilename), mcuDestAddr: "0x8000").ConfigureAwait(false);
+                await Task.Delay(1000);
+
+                await OutputMessageAsync($"{Flash_Coprocessor_Text} completed.");
+
+                await MeadowDeviceManager.MonoEnable(meadow).ConfigureAwait(false);
+                await Task.Delay(10000); // wait for reconnect, need an event for this
+            }
+            catch (Exception ex)
+            {
+                await OutputMessageAsync($"An unexpected error occurred. Please try again.");
+            }
+            finally
+            {
+                if (meadow != null)
+                {
+                    meadow.OnMeadowMessage -= MeadowMesageHandler;
+                }
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                EnableControls(true);
+            }
+        }
+
+        public void MeadowMesageHandler(object sender, MeadowMessageEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(e.Message))
+            {
+                OutputMessageAsync(e.Message);
+            }
+        }
+
         private async Task<(string osFilePath, string runtimeFilePath)> GetWorkingFiles()
         {
-            var selectCustom = Keyboard.IsKeyDown(Key.LeftShift);
+            var selectCustom = Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift);
             if (selectCustom)
             {
                 OpenFileDialog dlg = new OpenFileDialog();
@@ -363,6 +424,10 @@
                     catch (Exception ex)
                     {
                         await OutputMessageAsync($"An error occurred while flashing the device: {ex.Message}");
+                    }
+                    finally
+                    {
+                        device.Dispose();
                     }
                     return false;
                 }
@@ -508,7 +573,7 @@
         private void EnableControls(bool enabled)
         {
             Flash.IsEnabled = enabled;
-            EraseFlash.IsEnabled = enabled;
+            Flash_ESP.IsEnabled = enabled;
             CheckVersion.IsEnabled = enabled;
             Download.IsEnabled = enabled;
             Devices.IsEnabled = enabled;
