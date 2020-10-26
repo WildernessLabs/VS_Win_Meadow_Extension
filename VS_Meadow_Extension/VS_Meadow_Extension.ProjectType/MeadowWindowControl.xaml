@@ -23,8 +23,8 @@
             </StackPanel.RenderTransform>
             <Button Name="Download" Width="200" Click="Download_Firmware" Content="Download Meadow.OS" Margin="0 0 0 10" />
             <Button Name="CheckVersion" Width="200" Click="Check_Version" Content="Check Version" Margin="0 0 0 10" />
-            <Button Name="EraseFlash" Width="200" Click="Erase_Flash" Content="Erase Flash" Margin="0 0 0 10" />
             <Button Name="Flash" Width="200" Click="Flash_Device" Content="Flash Device" Margin="0 0 0 10" />
+            <Button Name="Flash_ESP" Width="200" Click="Flash_ESP_Click" Content="Flash Coprocessor" Margin="0 0 0 10" />
 
             <Separator Width="200"/>
 

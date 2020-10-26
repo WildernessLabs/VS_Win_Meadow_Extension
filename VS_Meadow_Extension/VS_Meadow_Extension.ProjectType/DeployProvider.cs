@@ -49,7 +49,7 @@ namespace Meadow
                 throw new Exception($"Device on '{settings.DeviceTarget}' is not connected or busy.");
             }
 
-            await DeployAppAsync(settings.DeviceTarget, Path.Combine(projectDir, outputPath), new OutputPaneWriter(outputPaneWriter), cts);
+            await DeployAppAsync(settings.DeviceTarget, Path.Combine(projectDir, outputPath), new OutputPaneWriter(outputPaneWriter), cts).ConfigureAwait(false);
         }
 
         async Task DeployAppAsync(string target, string folder, IOutputPaneWriter outputPaneWriter, CancellationToken cts)
@@ -59,28 +59,26 @@ namespace Meadow
 
             try
             {
-                var meadow = MeadowDeviceManager.CurrentDevice;
+                var meadow = await MeadowDeviceManager.GetMeadowForSerialPort(target).ConfigureAwait(false);
 
                 if (meadow == null)
                 {
-                    meadow = await MeadowDeviceManager.GetMeadowForSerialPort(target);
+                    await outputPaneWriter.WriteAsync($"Device connection error, please disconnect device and try again.");
+                    return;
                 }
 
-                if (await InitializeMeadowDeviceAsync(meadow, outputPaneWriter, cts) == false)
-                {
-                    throw new Exception("Failed to initialize Meadow. Try resetting or reconnecting the device.");
-                }
+                await MeadowDeviceManager.ResetMeadow(meadow).ConfigureAwait(false);
+                await Task.Delay(1000);
+                meadow = await MeadowDeviceManager.GetMeadowForSerialPort(target).ConfigureAwait(false);
+                await Task.Delay(1000);
 
-                var meadowFiles = await GetFilesOnDevice(meadow, outputPaneWriter, cts);
-
-                var localFiles = await GetLocalFiles(outputPaneWriter, cts, folder);
-
-                await DeleteUnusedFiles(meadow, outputPaneWriter, cts, meadowFiles, localFiles);
-
-                await DeployApp(meadow, outputPaneWriter, cts, folder, meadowFiles, localFiles);
-
-                await ResetMeadowAndStartMonoAsync(meadow, outputPaneWriter, cts);
-
+                await MeadowDeviceManager.MonoDisable(meadow).ConfigureAwait(false);
+                
+                var meadowFiles = await GetFilesOnDevice(meadow, outputPaneWriter, cts).ConfigureAwait(false);
+                var localFiles = await GetLocalFiles(outputPaneWriter, cts, folder).ConfigureAwait(false);
+                await DeleteUnusedFiles(meadow, outputPaneWriter, cts, meadowFiles, localFiles).ConfigureAwait(false);
+                await DeployApp(meadow, outputPaneWriter, cts, folder, meadowFiles, localFiles).ConfigureAwait(false);
+                await MeadowDeviceManager.MonoEnable(meadow).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -91,53 +89,23 @@ namespace Meadow
             await outputPaneWriter.WriteAsync($"Deployment Duration: {sw.Elapsed}");
         }
 
-        async Task<bool> InitializeMeadowDeviceAsync(MeadowSerialDevice meadow, IOutputPaneWriter outputPaneWriter, CancellationToken cts)
-        {
-            if (cts.IsCancellationRequested) return true;
-
-            await outputPaneWriter.WriteAsync("Initializing Meadow");
-
-            if (meadow == null)
-            {
-                await outputPaneWriter.WriteAsync("Can't read Meadow device");
-                return false;
-            }
-            else if (meadow.SerialPort == null || !meadow.SerialPort.IsOpen)
-            {
-                if (!meadow.Initialize())
-                {
-                    await outputPaneWriter.WriteAsync("Couldn't initialize serial port");
-                    return false;
-                }
-            }
-
-            await MeadowDeviceManager.MonoDisable(meadow);
-            await Task.Delay(5000); //hack for testing
-
-            MeadowDeviceManager.GetDeviceInfo(meadow);
-            await Task.Delay(1500); // wait for device info to populate
-            await outputPaneWriter.WriteAsync($"Device {meadow.DeviceInfo.MeadowOSVersion}");
-
-            return true;
-        }
-
         async Task<(List<string> files, List<UInt32> crcs)> GetFilesOnDevice(MeadowSerialDevice meadow, IOutputPaneWriter outputPaneWriter, CancellationToken cts)
         {
             if (cts.IsCancellationRequested) { return (new List<string>(), new List<UInt32>()); }
 
             await outputPaneWriter.WriteAsync("Checking files on device (may take several seconds)");
 
-            var meadowFiles = await meadow.GetFilesAndCrcs();
+            var meadowFiles = await meadow.GetFilesAndCrcs().ConfigureAwait(false);
 
             foreach (var f in meadowFiles.files)
             {
                 if (cts.IsCancellationRequested) break;
-                await outputPaneWriter.WriteAsync($"Found {f}").ConfigureAwait(false);
+                await outputPaneWriter.WriteAsync($"Found {f}");
             }
 
             if (meadowFiles.files.Count == 0)
             {
-                await outputPaneWriter.WriteAsync($"Deploying for the first time may take several minutes.").ConfigureAwait(false);
+                await outputPaneWriter.WriteAsync($"Deploying for the first time may take several minutes.");
             }
 
             return meadowFiles;
@@ -148,13 +116,10 @@ namespace Meadow
             // get list of files in folder
             // var files = Directory.GetFiles(folder, "*.dll");
 
+            var extensions = new List<string> { ".exe", ".bmp", ".jpg", ".jpeg", ".json", ".xml", ".yml", ".txt" };
+
             var paths = Directory.EnumerateFiles(folder, "*.*", SearchOption.TopDirectoryOnly)
-            .Where(s => s.EndsWith(".exe") ||
-                        s.EndsWith(".dll") ||
-                        s.EndsWith(".bmp") ||
-                        s.EndsWith(".jpg") ||
-                        s.EndsWith(".jpeg") ||
-                        s.EndsWith(".txt"));
+            .Where(s => extensions.Contains(new FileInfo(s).Extension));
 
             var files = new List<string>();
             var crcs = new List<UInt32>();
@@ -164,6 +129,29 @@ namespace Meadow
                 if (cts.IsCancellationRequested) break;
 
                 using (FileStream fs = File.Open(file, FileMode.Open))
+                {
+                    var len = (int)fs.Length;
+                    var bytes = new byte[len];
+
+                    fs.Read(bytes, 0, len);
+
+                    //0x
+                    var crc = CrcTools.Crc32part(bytes, len, 0);// 0x04C11DB7);
+
+                    Console.WriteLine($"{file} crc is {crc}");
+                    files.Add(Path.GetFileName(file));
+                    crcs.Add(crc);
+                }
+            }
+
+            var dependences = AssemblyManager.GetDependencies("App.exe", folder);
+
+            //crawl dependences
+            foreach (var file in dependences)
+            {
+                if (cts.IsCancellationRequested) { break; }
+
+                using (FileStream fs = File.Open(Path.Combine(folder, file), FileMode.Open))
                 {
                     var len = (int)fs.Length;
                     var bytes = new byte[len];
@@ -194,7 +182,7 @@ namespace Meadow
 
                 if (localFiles.files.Contains(file) == false)
                 {
-                    await meadow.DeleteFile(file);
+                    await meadow.DeleteFile(file).ConfigureAwait(false);
                     await outputPaneWriter.WriteAsync($"Removing {file}").ConfigureAwait(false);
                 }
             }
@@ -210,24 +198,8 @@ namespace Meadow
             {
                 if (meadowFiles.crcs.Contains(localFiles.crcs[i])) continue;
 
-                await WriteFileToMeadowAsync(meadow, outputPaneWriter, cts, folder, localFiles.files[i], true);
+                await WriteFileToMeadowAsync(meadow, outputPaneWriter, cts, folder, localFiles.files[i], true).ConfigureAwait(false);
             }
-        }
-
-        async Task<List<string>> GetFilesOnDeviceAsync(MeadowSerialDevice meadow, IOutputPaneWriter outputPaneWriter, CancellationToken cts)
-        {
-            if (cts.IsCancellationRequested) { return new List<string>(); }
-
-            var files = await meadow.GetFilesOnDevice();
-
-            await outputPaneWriter.WriteAsync("Checking files on device");
-
-            foreach (var f in files)
-            {
-                await outputPaneWriter.WriteAsync($"Found {f}").ConfigureAwait(false);
-            }
-
-            return files;
         }
 
         async Task WriteFileToMeadowAsync(MeadowSerialDevice meadow, IOutputPaneWriter outputPaneWriter, CancellationToken cts, string folder, string file, bool overwrite = false)
@@ -239,21 +211,6 @@ namespace Meadow
                 await outputPaneWriter.WriteAsync($"Writing {file}").ConfigureAwait(false);
                 await meadow.WriteFile(file, folder).ConfigureAwait(false);
             }
-        }
-
-        async Task ResetMeadowAndStartMonoAsync(MeadowSerialDevice meadow, IOutputPaneWriter outputPaneWriter, CancellationToken cts)
-        {
-            if (cts.IsCancellationRequested) { return; }
-
-            string serial = meadow.DeviceInfo.SerialNumber;
-
-            await outputPaneWriter.WriteAsync("Resetting Meadow and starting app (30-60s)");
-
-            await MeadowDeviceManager.MonoEnable(meadow);
-
-            await Task.Delay(2500);//wait for reboot
-
-            meadow.Initialize();
         }
 
         public bool IsDeploySupported
