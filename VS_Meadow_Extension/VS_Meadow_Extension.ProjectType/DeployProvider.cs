@@ -30,11 +30,14 @@ namespace Meadow
         [Import]
         private ProjectProperties Properties { get; set; }
 
+        private string _outputPath { get; set; }
+        private readonly string _systemHttpNetDllName = "System.Net.Http.dll";
+
         public async Task DeployAsync(CancellationToken cts, TextWriter outputPaneWriter)
         {
             var generalProperties = await this.Properties.GetConfigurationGeneralPropertiesAsync();
             var projectDir = await generalProperties.Rule.GetPropertyValueAsync("ProjectDir");
-            var outputPath = Path.Combine(projectDir, await generalProperties.Rule.GetPropertyValueAsync("OutputPath"));
+            _outputPath = Path.Combine(projectDir, await generalProperties.Rule.GetPropertyValueAsync("OutputPath"));
 
             MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath);
 
@@ -49,7 +52,7 @@ namespace Meadow
                 throw new Exception($"Device on '{settings.DeviceTarget}' is not connected or busy.");
             }
 
-            await DeployAppAsync(settings.DeviceTarget, Path.Combine(projectDir, outputPath), new OutputPaneWriter(outputPaneWriter), cts).ConfigureAwait(false);
+            await DeployAppAsync(settings.DeviceTarget, Path.Combine(projectDir, _outputPath), new OutputPaneWriter(outputPaneWriter), cts).ConfigureAwait(false);
         }
 
         async Task DeployAppAsync(string target, string folder, IOutputPaneWriter outputPaneWriter, CancellationToken cts)
@@ -115,6 +118,8 @@ namespace Meadow
         {
             // get list of files in folder
             // var files = Directory.GetFiles(folder, "*.dll");
+
+            CopySystemNetHttpDll();
 
             var extensions = new List<string> { ".exe", ".bmp", ".jpg", ".jpeg", ".json", ".xml", ".yml", ".txt" };
 
@@ -210,6 +215,48 @@ namespace Meadow
             {
                 await outputPaneWriter.WriteAsync($"Writing {file}").ConfigureAwait(false);
                 await meadow.WriteFile(file, folder).ConfigureAwait(false);
+            }
+        }
+
+        private void CopySystemNetHttpDll()
+        {
+            try
+            {
+                var bclNugetPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages", "wildernesslabs.meadow.assemblies");
+
+                if (Directory.Exists(bclNugetPath))
+                {
+                    List<Version> versions = new List<Version>();
+
+                    var versionFolders = Directory.EnumerateDirectories(bclNugetPath);
+                    foreach (var versionFolder in versionFolders)
+                    {
+                        var di = new DirectoryInfo(versionFolder);
+                        Version outVersion;
+                        if (Version.TryParse(di.Name, out outVersion))
+                        {
+                            versions.Add(outVersion);
+                        }
+                    }
+
+                    if (versions.Any())
+                    {
+                        versions.Sort();
+
+                        var sourcePath = Path.Combine(bclNugetPath, versions.Last().ToString(), "lib", "net472");
+                        if (Directory.Exists(sourcePath))
+                        {
+                            if (File.Exists(Path.Combine(sourcePath, _systemHttpNetDllName)))
+                            {
+                                File.Copy(Path.Combine(sourcePath, _systemHttpNetDllName), Path.Combine(_outputPath, _systemHttpNetDllName));
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // eat this for now
             }
         }
 
