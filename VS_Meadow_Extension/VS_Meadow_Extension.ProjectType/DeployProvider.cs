@@ -5,8 +5,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
-using EnvDTE;
 using Meadow.Helpers;
 using Meadow.Utility;
 using MeadowCLI.DeviceManagement;
@@ -32,6 +30,7 @@ namespace Meadow
 
         private string _outputPath { get; set; }
         private readonly string _systemHttpNetDllName = "System.Net.Http.dll";
+        private MeadowSerialDevice _currentDevice;
 
         public async Task DeployAsync(CancellationToken cts, TextWriter outputPaneWriter)
         {
@@ -62,25 +61,22 @@ namespace Meadow
 
             try
             {
-                var meadow = await MeadowDeviceManager.GetMeadowForSerialPort(target).ConfigureAwait(false);
+                var meadow = _currentDevice = await MeadowDeviceManager.GetMeadowForSerialPort(target);
 
-                if (meadow == null)
+                CopySystemNetHttpDll();
+
+                EventHandler<MeadowMessageEventArgs> handler = (s, e) =>
                 {
-                    await outputPaneWriter.WriteAsync($"Device connection error, please disconnect device and try again.");
-                    return;
-                }
-
-                await MeadowDeviceManager.ResetMeadow(meadow).ConfigureAwait(false);
-                await Task.Delay(1000);
-                meadow = await MeadowDeviceManager.GetMeadowForSerialPort(target).ConfigureAwait(false);
-                await Task.Delay(1000);
+                    if (!string.IsNullOrEmpty(e.Message))
+                    {
+                        outputPaneWriter.WriteAsync(e.Message).Wait();
+                    }
+                };
 
                 await MeadowDeviceManager.MonoDisable(meadow).ConfigureAwait(false);
-                
-                var meadowFiles = await GetFilesOnDevice(meadow, outputPaneWriter, cts).ConfigureAwait(false);
-                var localFiles = await GetLocalFiles(outputPaneWriter, cts, folder).ConfigureAwait(false);
-                await DeleteUnusedFiles(meadow, outputPaneWriter, cts, meadowFiles, localFiles).ConfigureAwait(false);
-                await DeployApp(meadow, outputPaneWriter, cts, folder, meadowFiles, localFiles).ConfigureAwait(false);
+                meadow.OnMeadowMessage += handler;
+                await MeadowDeviceManager.DeployApp(meadow, Path.Combine(folder, "App.exe"));
+                meadow.OnMeadowMessage -= handler;
                 await MeadowDeviceManager.MonoEnable(meadow).ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -92,132 +88,7 @@ namespace Meadow
             await outputPaneWriter.WriteAsync($"Deployment Duration: {sw.Elapsed}");
         }
 
-        async Task<(List<string> files, List<UInt32> crcs)> GetFilesOnDevice(MeadowSerialDevice meadow, IOutputPaneWriter outputPaneWriter, CancellationToken cts)
-        {
-            if (cts.IsCancellationRequested) { return (new List<string>(), new List<UInt32>()); }
-
-            await outputPaneWriter.WriteAsync("Checking files on device (may take several seconds)");
-
-            var meadowFiles = await meadow.GetFilesAndCrcs().ConfigureAwait(false);
-
-            foreach (var f in meadowFiles.files)
-            {
-                if (cts.IsCancellationRequested) break;
-                await outputPaneWriter.WriteAsync($"Found {f}");
-            }
-
-            if (meadowFiles.files.Count == 0)
-            {
-                await outputPaneWriter.WriteAsync($"Deploying for the first time may take several minutes.");
-            }
-
-            return meadowFiles;
-        }
-
-        async Task<(List<string> files, List<UInt32> crcs)> GetLocalFiles(IOutputPaneWriter outputPaneWriter, CancellationToken cts, string folder)
-        {
-            // get list of files in folder
-            // var files = Directory.GetFiles(folder, "*.dll");
-
-            CopySystemNetHttpDll();
-
-            var extensions = new List<string> { ".exe", ".bmp", ".jpg", ".jpeg", ".json", ".xml", ".yml", ".txt" };
-
-            var paths = Directory.EnumerateFiles(folder, "*.*", SearchOption.TopDirectoryOnly)
-            .Where(s => extensions.Contains(new FileInfo(s).Extension));
-
-            var files = new List<string>();
-            var crcs = new List<UInt32>();
-
-            foreach (var file in paths)
-            {
-                if (cts.IsCancellationRequested) break;
-
-                using (FileStream fs = File.Open(file, FileMode.Open))
-                {
-                    var len = (int)fs.Length;
-                    var bytes = new byte[len];
-
-                    fs.Read(bytes, 0, len);
-
-                    //0x
-                    var crc = CrcTools.Crc32part(bytes, len, 0);// 0x04C11DB7);
-
-                    Console.WriteLine($"{file} crc is {crc}");
-                    files.Add(Path.GetFileName(file));
-                    crcs.Add(crc);
-                }
-            }
-
-            var dependences = AssemblyManager.GetDependencies("App.exe", folder);
-
-            //crawl dependences
-            foreach (var file in dependences)
-            {
-                if (cts.IsCancellationRequested) { break; }
-
-                using (FileStream fs = File.Open(Path.Combine(folder, file), FileMode.Open))
-                {
-                    var len = (int)fs.Length;
-                    var bytes = new byte[len];
-
-                    fs.Read(bytes, 0, len);
-
-                    //0x
-                    var crc = CrcTools.Crc32part(bytes, len, 0);// 0x04C11DB7);
-
-                    Console.WriteLine($"{file} crc is {crc}");
-                    files.Add(Path.GetFileName(file));
-                    crcs.Add(crc);
-                }
-            }
-
-            return (files, crcs);
-        }
-
-        async Task DeleteUnusedFiles(MeadowSerialDevice meadow, IOutputPaneWriter outputPaneWriter, CancellationToken cts,
-            (List<string> files, List<UInt32> crcs) meadowFiles, (List<string> files, List<UInt32> crcs) localFiles)
-        {
-            if (cts.IsCancellationRequested)
-                return;
-
-            foreach (var file in meadowFiles.files)
-            {
-                if (cts.IsCancellationRequested) { break; }
-
-                if (localFiles.files.Contains(file) == false)
-                {
-                    await meadow.DeleteFile(file).ConfigureAwait(false);
-                    await outputPaneWriter.WriteAsync($"Removing {file}").ConfigureAwait(false);
-                }
-            }
-        }
-
-        async Task DeployApp(MeadowSerialDevice meadow, IOutputPaneWriter outputPaneWriter, CancellationToken cts, string folder,
-            (List<string> files, List<UInt32> crcs) meadowFiles, (List<string> files, List<UInt32> crcs) localFiles)
-        {
-            if (cts.IsCancellationRequested)
-                return;
-
-            for (int i = 0; i < localFiles.files.Count; i++)
-            {
-                if (meadowFiles.crcs.Contains(localFiles.crcs[i])) continue;
-
-                await WriteFileToMeadowAsync(meadow, outputPaneWriter, cts, folder, localFiles.files[i], true).ConfigureAwait(false);
-            }
-        }
-
-        async Task WriteFileToMeadowAsync(MeadowSerialDevice meadow, IOutputPaneWriter outputPaneWriter, CancellationToken cts, string folder, string file, bool overwrite = false)
-        {
-            if (cts.IsCancellationRequested) { return; }
-
-            if (overwrite || await meadow.IsFileOnDevice(file).ConfigureAwait(false) == false)
-            {
-                await outputPaneWriter.WriteAsync($"Writing {file}").ConfigureAwait(false);
-                await meadow.WriteFile(file, folder).ConfigureAwait(false);
-            }
-        }
-
+       
         private void CopySystemNetHttpDll()
         {
             try
@@ -276,10 +147,9 @@ namespace Meadow
 
             generalPane.OutputString(" Launching application..." + Environment.NewLine);
 
-            var meadow = MeadowDeviceManager.CurrentDevice;
-            if (meadow?.OnMeadowMessage == null)
+            if (_currentDevice?.OnMeadowMessage == null)
             {
-                meadow.OnMeadowMessage += (s, e) =>
+                _currentDevice.OnMeadowMessage += (s, e) =>
                 {
                     generalPane.OutputString(" " + e.Message);
                 };
