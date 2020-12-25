@@ -29,7 +29,7 @@ namespace Meadow
         private ProjectProperties Properties { get; set; }
 
         private string _outputPath { get; set; }
-        private readonly string _systemHttpNetDllName = "System.Net.Http.dll";
+        
         private MeadowSerialDevice _currentDevice;
 
         public async Task DeployAsync(CancellationToken cts, TextWriter outputPaneWriter)
@@ -63,8 +63,6 @@ namespace Meadow
             {
                 var meadow = _currentDevice = await MeadowDeviceManager.GetMeadowForSerialPort(target);
 
-                CopySystemNetHttpDll();
-
                 EventHandler<MeadowMessageEventArgs> handler = (s, e) =>
                 {
                     if (!string.IsNullOrEmpty(e.Message))
@@ -86,49 +84,6 @@ namespace Meadow
 
             sw.Stop();
             await outputPaneWriter.WriteAsync($"Deployment Duration: {sw.Elapsed}");
-        }
-
-       
-        private void CopySystemNetHttpDll()
-        {
-            try
-            {
-                var bclNugetPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages", "wildernesslabs.meadow.assemblies");
-
-                if (Directory.Exists(bclNugetPath))
-                {
-                    List<Version> versions = new List<Version>();
-
-                    var versionFolders = Directory.EnumerateDirectories(bclNugetPath);
-                    foreach (var versionFolder in versionFolders)
-                    {
-                        var di = new DirectoryInfo(versionFolder);
-                        Version outVersion;
-                        if (Version.TryParse(di.Name, out outVersion))
-                        {
-                            versions.Add(outVersion);
-                        }
-                    }
-
-                    if (versions.Any())
-                    {
-                        versions.Sort();
-
-                        var sourcePath = Path.Combine(bclNugetPath, versions.Last().ToString(), "lib", "net472");
-                        if (Directory.Exists(sourcePath))
-                        {
-                            if (File.Exists(Path.Combine(sourcePath, _systemHttpNetDllName)))
-                            {
-                                File.Copy(Path.Combine(sourcePath, _systemHttpNetDllName), Path.Combine(_outputPath, _systemHttpNetDllName));
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                // eat this for now
-            }
         }
 
         public bool IsDeploySupported
