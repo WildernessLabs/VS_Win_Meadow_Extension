@@ -1,39 +1,48 @@
 # Reference: https://aka.ms/yaml
 
+resources:
+  repositories:
+    - repository: MeadowCLI
+      type: github
+      endpoint: WildernessLabs
+      name: WildernessLabs/Meadow.CLI
+
 trigger:
-- master
-- develop
+  - main
+  - develop
 
 variables:
-  solution: '**/VS_Meadow_Extension.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
+  solution: "**/VS_Meadow_Extension.sln"
+  buildPlatform: "Any CPU"
+  buildConfiguration: "Release"
 
 pool:
   vmImage: windows-2019
 
 stages:
-- stage: Build
-  jobs:
-    - job: Build_Solution
-      steps:
-        - task: NuGetToolInstaller@1
-        - task: NuGetCommand@2
-          inputs:
-            feedsToUse: 'select' 
-            restoreSolution: '$(solution)'
-        - task: VSBuild@1
-          inputs:
-            solution: '$(solution)'
-            platform: '$(buildPlatform)'
-            configuration: '$(buildConfiguration)'
-        - task: CopyFiles@2
-          inputs:
-            Contents: '**\*.nupkg;**\Meadow.vsix;**\overview.md'
-            TargetFolder: '$(Build.ArtifactStagingDirectory)'
-            cleanTargetFolder: false
-            flattenFolders: true
-        - task: PublishBuildArtifacts@1
-          inputs:
-            pathtoPublish: '$(Build.ArtifactStagingDirectory)'
-            artifactName: artifacts
+  - stage: Build
+    jobs:
+      - job: Build_Solution
+        steps:
+          - checkout: self
+          - checkout: MeadowCLI
+          - task: NuGetToolInstaller@1
+          - task: NuGetCommand@2
+            inputs:
+              feedsToUse: "select"
+              restoreSolution: "$(solution)"
+          - task: VSBuild@1
+            inputs:
+              solution: "$(solution)"
+              platform: "$(buildPlatform)"
+              configuration: "$(buildConfiguration)"
+          - task: CopyFiles@2
+            inputs:
+              Contents: '**\*.nupkg;**\Meadow.vsix;**\overview.md'
+              TargetFolder: "$(Build.ArtifactStagingDirectory)"
+              cleanTargetFolder: false
+              flattenFolders: true
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathtoPublish: "$(Build.ArtifactStagingDirectory)"
+              artifactName: artifacts
