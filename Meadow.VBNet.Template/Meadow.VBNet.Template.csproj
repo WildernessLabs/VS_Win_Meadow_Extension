@@ -57,14 +57,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <VSTemplate Include="Meadow.VBNet.Template.vstemplate" />
+    <VSTemplate Include="Meadow.VBNet.Application.vstemplate" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="meadow_icon.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Meadow.VBNet.Template.vbproj" />
-    <None Include="packages.config" />
+    <None Include="Meadow.VBNet.Application.vbproj" />
     <None Include="Program.vb" />
     <None Include="MeadowApp.vb" />
   </ItemGroup>

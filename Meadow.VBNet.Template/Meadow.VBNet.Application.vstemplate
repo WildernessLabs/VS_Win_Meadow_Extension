@@ -1,0 +1,26 @@
+﻿<VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Project">
+  <TemplateData>
+    <Name>Meadow Application</Name>
+    <Description>Create a basic Meadow application</Description>
+    <ProjectType>visualbasic</ProjectType>
+    <LanguageTag>visualbasic</LanguageTag>
+    <PlatformTag>Meadow</PlatformTag>
+    <ProjectTypeTag>IoT</ProjectTypeTag>
+    <ProjectSubType>
+    </ProjectSubType>
+    <SortOrder>1000</SortOrder>
+    <CreateNewFolder>true</CreateNewFolder>
+    <DefaultName>MeadowApplication</DefaultName>
+    <ProvideDefaultName>true</ProvideDefaultName>
+    <LocationField>Enabled</LocationField>
+    <EnableLocationBrowseButton>true</EnableLocationBrowseButton>
+    <CreateInPlace>true</CreateInPlace>
+    <Icon>meadow_icon.png</Icon>
+  </TemplateData>
+  <TemplateContent>
+    <Project TargetFileName="Meadow.VBNet.Application.vbproj" File="Meadow.VBNet.Application.vbproj" ReplaceParameters="true">
+      <ProjectItem ReplaceParameters="true" TargetFileName="Program.vb">Program.vb</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="MeadowApp.vb">MeadowApp.vb</ProjectItem>
+    </Project>
+  </TemplateContent>
+</VSTemplate>
