@@ -11,7 +11,7 @@ type MeadowApp() =
     let led = new RgbPwmLed(MeadowApp.Device, MeadowApp.Device.Pins.OnboardLedRed,MeadowApp.Device.Pins.OnboardLedGreen, MeadowApp.Device.Pins.OnboardLedBlue,3.3f,3.3f,3.3f,Meadow.Peripherals.Leds.IRgbLed.CommonType.CommonAnode)
     
     let ShowcolorPulses color duration = 
-        led.StartPulse(color, (duration / 2u)) |> ignore
+        led.StartPulse(color, (duration / 2)) |> ignore
         Threading.Thread.Sleep (int duration) |> ignore
         led.Stop |> ignore
     
@@ -30,7 +30,7 @@ type MeadowApp() =
             ShowcolorPulses Color.Magenta duration
             ShowcolorPulses Color.Pink duration
             
-    do cyclecolors 1000u
+    do cyclecolors 1000
 
 [<EntryPoint>]
 let main argv =
