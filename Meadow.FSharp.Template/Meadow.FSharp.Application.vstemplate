@@ -2,8 +2,8 @@
   <TemplateData>
     <Name>Meadow Application</Name>
     <Description>Create a basic Meadow application</Description>
-    <ProjectType>CSharp</ProjectType>
-    <LanguageTag>C#</LanguageTag>
+    <ProjectType>FSharp</ProjectType>
+    <LanguageTag>F#</LanguageTag>
     <PlatformTag>Meadow</PlatformTag>
     <ProjectTypeTag>IoT</ProjectTypeTag>
     <ProjectSubType>
@@ -18,10 +18,9 @@
     <Icon>meadow_icon.png</Icon>
   </TemplateData>
   <TemplateContent>
-    <Project TargetFileName="MeadowTemplate.csproj" File="MeadowTemplate.csproj" ReplaceParameters="true">
+    <Project TargetFileName="Meadow.FSharp.Application.fsproj" File="Meadow.FSharp.Application.fsproj" ReplaceParameters="true">
       <Folder Name="Properties" TargetFolderName="Properties" />
-      <ProjectItem ReplaceParameters="true" TargetFileName="MeadowApp.cs">MeadowApp.cs</ProjectItem>
-      <ProjectItem ReplaceParameters="true" TargetFileName="Program.cs">Program.cs</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="Program.fs">Program.fs</ProjectItem>
     </Project>
   </TemplateContent>
 </VSTemplate>

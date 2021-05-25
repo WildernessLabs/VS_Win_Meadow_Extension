@@ -57,14 +57,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <VSTemplate Include="Meadow.FSharp.Template.vstemplate" />
+    <VSTemplate Include="Meadow.FSharp.Application.vstemplate" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="meadow_icon.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Meadow.FSharp.Template.fsproj" />
-    <None Include="packages.config" />
+    <None Include="Meadow.FSharp.Application.fsproj" />
     <None Include="Program.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

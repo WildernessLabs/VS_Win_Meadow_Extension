@@ -2,8 +2,8 @@
   <TemplateData>
     <Name>Meadow Library</Name>
     <Description>Create a Meadow class library</Description>
-    <ProjectType>FSharp</ProjectType>
-    <LanguageTag>F#</LanguageTag>
+    <ProjectType>visualbasic</ProjectType>
+    <LanguageTag>visualbasic</LanguageTag>
     <PlatformTag>Meadow</PlatformTag>
     <ProjectTypeTag>IoT</ProjectTypeTag>
     <ProjectSubType>
@@ -18,9 +18,9 @@
     <Icon>meadow_icon.png</Icon>
   </TemplateData>
   <TemplateContent>
-    <Project TargetFileName="MeadowLibraryTemplate.fsproj" File="MeadowLibraryTemplate.fsproj" ReplaceParameters="true">
+    <Project TargetFileName="Meadow.VBNet.Library.vbproj" File="Meadow.VBNet.Library.vbproj" ReplaceParameters="true">
       <Folder Name="Properties" TargetFolderName="Properties" />
-      <ProjectItem ReplaceParameters="true" TargetFileName="Class1.fs">Class1.fs</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="Class1.vb">Class1.vb</ProjectItem>
     </Project>
   </TemplateContent>
 </VSTemplate>

@@ -59,13 +59,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <VSTemplate Include="Meadow.CSharp.Library.vstemplate" />
   </ItemGroup>
   <ItemGroup>
-    <VSTemplate Include="Meadow.Library.Template.vstemplate" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="MeadowLibraryTemplate.csproj" />
+    <Content Include="Meadow.CSharp.Library.csproj" />
     <Content Include="meadow_icon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

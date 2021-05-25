@@ -1,16 +1,16 @@
 ﻿<VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Project">
   <TemplateData>
-    <Name>Meadow Application</Name>
-    <Description>Create a basic Meadow application</Description>
-    <ProjectType>VBNet</ProjectType>
-    <LanguageTag>VBNet</LanguageTag>
+    <Name>Meadow Library</Name>
+    <Description>Create a Meadow class library</Description>
+    <ProjectType>FSharp</ProjectType>
+    <LanguageTag>F#</LanguageTag>
     <PlatformTag>Meadow</PlatformTag>
     <ProjectTypeTag>IoT</ProjectTypeTag>
     <ProjectSubType>
     </ProjectSubType>
     <SortOrder>1000</SortOrder>
     <CreateNewFolder>true</CreateNewFolder>
-    <DefaultName>MeadowApplication</DefaultName>
+    <DefaultName>MeadowLibrary</DefaultName>
     <ProvideDefaultName>true</ProvideDefaultName>
     <LocationField>Enabled</LocationField>
     <EnableLocationBrowseButton>true</EnableLocationBrowseButton>
@@ -18,9 +18,9 @@
     <Icon>meadow_icon.png</Icon>
   </TemplateData>
   <TemplateContent>
-    <Project TargetFileName="MeadowTemplate.vbproj" File="Meadow.VBNet.Template.vbproj" ReplaceParameters="true">
-      <ProjectItem ReplaceParameters="true" TargetFileName="Program.vb">Program.vb</ProjectItem>
-      <ProjectItem ReplaceParameters="true" TargetFileName="MeadowApp.vb">MeadowApp.vb</ProjectItem>
+    <Project TargetFileName="Meadow.FSharp.Library.fsproj" File="Meadow.FSharp.Library.fsproj" ReplaceParameters="true">
+      <Folder Name="Properties" TargetFolderName="Properties" />
+      <ProjectItem ReplaceParameters="true" TargetFileName="Class1.fs">Class1.fs</ProjectItem>
     </Project>
   </TemplateContent>
 </VSTemplate>
