@@ -5,6 +5,9 @@
     <AssemblyName>App</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Meadow.Foundation" Version="0.*" />
   </ItemGroup>
 </Project>
