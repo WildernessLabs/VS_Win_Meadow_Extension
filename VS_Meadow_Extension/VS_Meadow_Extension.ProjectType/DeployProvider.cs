@@ -73,7 +73,22 @@ namespace Meadow
 
                 await MeadowDeviceManager.MonoDisable(meadow).ConfigureAwait(false);
                 meadow.OnMeadowMessage += handler;
-                await MeadowDeviceManager.DeployApp(meadow, Path.Combine(folder, "App.exe"));
+                //rename App.exe to App.dll
+                //check for App.dll ... if exists, rename 
+                var appPathDll = Path.Combine(folder, "App.dll");
+                var appPathExe = Path.Combine(folder, "App.exe");
+
+                if (File.Exists(appPathDll))
+                {
+                    if (File.Exists(appPathExe))
+                    {
+                        File.Delete(appPathExe);
+                    }
+                    File.Copy(appPathDll, appPathExe);
+                    File.Delete(appPathDll);
+                }
+
+                await MeadowDeviceManager.DeployApp(meadow, appPathExe);
                 meadow.OnMeadowMessage -= handler;
                 await MeadowDeviceManager.MonoEnable(meadow).ConfigureAwait(false);
             }
