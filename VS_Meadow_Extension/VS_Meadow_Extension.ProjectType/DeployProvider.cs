@@ -19,7 +19,7 @@ using Task = System.Threading.Tasks.Task;
 namespace Meadow
 {
     [Export(typeof(IDeployProvider))]
-    [AppliesTo("Meadow")]
+    [AppliesTo(Globals.MeadowCapability)]
     internal class DeployProvider : IDeployProvider
     {
         /// <summary>
@@ -38,31 +38,17 @@ namespace Meadow
             var projectDir = await generalProperties.Rule.GetPropertyValueAsync("ProjectDir");
             _outputPath = Path.Combine(projectDir, await generalProperties.Rule.GetPropertyValueAsync("OutputPath"));
 
-            MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath);
-
-            if (string.IsNullOrEmpty(settings.DeviceTarget))
-            {
-                throw new Exception("Device has not been selected. Hit Ctrl+Shift+M to access the Device list.");
-            }
-
-            var attachedDevices = MeadowDeviceManager.FindSerialDevices();
-            if (!attachedDevices.Contains(settings.DeviceTarget))
-            {
-                throw new Exception($"Device on '{settings.DeviceTarget}' is not connected or busy.");
-            }
-
-            await DeployAppAsync(settings.DeviceTarget, Path.Combine(projectDir, _outputPath), new OutputPaneWriter(outputPaneWriter), cts).ConfigureAwait(false);
+            var meadow = await MeadowProvider.GetMeadowSerialDeviceAsync();
+            await DeployAppAsync(meadow, Path.Combine(projectDir, _outputPath), new OutputPaneWriter(outputPaneWriter), cts).ConfigureAwait(false);
         }
 
-        async Task DeployAppAsync(string target, string folder, IOutputPaneWriter outputPaneWriter, CancellationToken cts)
+        async Task DeployAppAsync(MeadowSerialDevice meadow, string folder, IOutputPaneWriter outputPaneWriter, CancellationToken cts)
         {
+            _currentDevice = meadow;
             Stopwatch sw = Stopwatch.StartNew();
-            await outputPaneWriter.WriteAsync($"Deploying to Meadow on {target}...");
-
+            await outputPaneWriter.WriteAsync($"Deploying to Meadow on {meadow.PortName}...");
             try
             {
-                var meadow = _currentDevice = await MeadowDeviceManager.GetMeadowForSerialPort(target);
-
                 EventHandler<MeadowMessageEventArgs> handler = (s, e) =>
                 {
                     if (!string.IsNullOrEmpty(e.Message))

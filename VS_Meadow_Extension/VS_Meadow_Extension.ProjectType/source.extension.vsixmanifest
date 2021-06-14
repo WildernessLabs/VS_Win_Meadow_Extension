@@ -32,5 +32,8 @@
     </Assets>
     <Prerequisites>
         <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[16.0,)" DisplayName="Visual Studio core editor" />
+        <Prerequisite Id="Microsoft.VisualStudio.Component.MonoDebugger" 
+                      Version="[16.0,17.0)" 
+                      DisplayName="Mono Debugging for Visual Studio" />
     </Prerequisites>
 </PackageManifest>
