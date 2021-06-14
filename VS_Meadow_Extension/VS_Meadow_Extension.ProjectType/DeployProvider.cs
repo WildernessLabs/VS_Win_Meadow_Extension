@@ -18,9 +18,14 @@ using Task = System.Threading.Tasks.Task;
 namespace Meadow
 {
     [Export(typeof(IDeployProvider))]
-    [AppliesTo("Meadow")]
+    [AppliesTo(Globals.MeadowCapability)]
     internal class DeployProvider : IDeployProvider
     {
+        //let's keep it around
+        static MeadowDeviceHelper meadow;
+        static OutputLogger logger = new OutputLogger();
+        bool isAppDeploy = false;
+
         /// <summary>
         /// Provides access to the project's properties.
         /// </summary>
@@ -46,52 +51,30 @@ namespace Meadow
             var projectDir = await generalProperties.Rule.GetPropertyValueAsync("ProjectDir");
             var outputPath = Path.Combine(projectDir, await generalProperties.Rule.GetPropertyValueAsync("OutputPath"));
 
-            var settings = new MeadowSettings(Globals.SettingsFilePath);
+            var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger);
 
-            if (string.IsNullOrEmpty(settings.DeviceTarget))
+            if (device == null)
             {
-                throw new Exception("Device has not been selected. Hit Ctrl+Shift+M to access the Device list.");
+                return;
             }
 
-            var attachedDevices = MeadowDeviceManager.GetSerialPorts();
-
-            if(attachedDevices.Where(p => p.Port == settings.DeviceTarget).Any() == false)
-            // if (!attachedDevices.Contains(settings.DeviceTarget))
-            {
-                throw new Exception($"Device on '{settings.DeviceTarget}' is not connected or busy.");
-            }
-
-            await DeployAppAsync(settings.DeviceTarget, Path.Combine(projectDir, outputPath), cts).ConfigureAwait(false);
+            await DeployAppAsync(meadow, Path.Combine(projectDir, outputPath), new OutputPaneWriter(outputPaneWriter), cts).ConfigureAwait(false);
         }
 
-        //let's keep it around
-        static MeadowDeviceHelper meadow;
-        static OutputLogger logger = new OutputLogger();
-        bool isAppDeploy = false;
-
-        async Task DeployAppAsync(string target, string folder, CancellationToken token)
+        async Task DeployAppAsync(MeadowSerialDevice device, string folder, IOutputPaneWriter outputPaneWriter, CancellationToken cts)
         {
+            if (device == null)
+            {
+                throw new ArgumentNullException(nameof(meadow));
+            }
+
             meadow?.Dispose();
 
-            try
-            {
-                var device = await MeadowDeviceManager.GetMeadowForSerialPort(target, logger: logger);
+            meadow = new MeadowDeviceHelper(device, logger);
 
-                if(device == null)
-                {
-                    return;
-                }
+            var appPathDll = Path.Combine(folder, "App.dll");
 
-                meadow = new MeadowDeviceHelper(device, logger);
-
-                var appPathDll = Path.Combine(folder, "App.dll");
-
-                await meadow.DeployAppAsync(appPathDll, true, token);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            await meadow.DeployAppAsync(appPathDll, true, token);
         }
 
         public bool IsDeploySupported

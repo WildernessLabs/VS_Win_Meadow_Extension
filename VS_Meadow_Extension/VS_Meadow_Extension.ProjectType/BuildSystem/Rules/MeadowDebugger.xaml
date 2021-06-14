@@ -1,10 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!--Copyright, Microsoft Corporation, All rights reserved.-->
 <Rule
-	Name="ScriptDebugger"
-	DisplayName="Script Debugger"
-	PageTemplate="debugger"
-	Description="Script Debugger options"
+	Name="MeadowDebugger"
+	DisplayName="Meadow Debugger"
+	Description="Meadow Debugger options"
 	xmlns="http://schemas.microsoft.com/build/2009/properties">
     <Rule.DataSource>
         <DataSource Persistence="UserFileWithXamlDefaults" HasConfigurationCondition="True"/>
@@ -37,4 +36,5 @@
                 Default="$(MSBuildProjectDirectory)"
                 Description="The application's working directory. By default, the directory containing the project file."
                 Subtype="folder"/>
+
 </Rule>
