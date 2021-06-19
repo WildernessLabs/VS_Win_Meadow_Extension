@@ -1,16 +1,17 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
 namespace Meadow.Utility
 {
-    interface IOutputPaneWriter
+    public interface IOutputPaneWriter : ILogger
     {
         Task WriteAsync(string text);
     }
 
-    class OutputPaneWriter : IOutputPaneWriter
+    class OutputPaneWriter : IOutputPaneWriter, ILogger
     {
         private readonly TextWriter textWriter;
         private readonly Stopwatch stopwatch;
@@ -32,16 +33,40 @@ namespace Meadow.Utility
 
         public async Task WriteAsync(string text)
         {
-            if (this.stopwatch.IsRunning)
+            if (stopwatch.IsRunning)
             {
-                await this.textWriter.WriteAsync($"{CurrentTimeStamp,-25} {text,-120} {ElapsedTime}").ConfigureAwait(false);
-                this.stopwatch.Restart();
+                await textWriter.WriteAsync($"{CurrentTimeStamp,-25} {text,-120} {ElapsedTime}").ConfigureAwait(false);
+                stopwatch.Restart();
             }
             else
             {
-                await this.textWriter.WriteAsync($"{CurrentTimeStamp,-25} {text,-120}").ConfigureAwait(false);
-                this.stopwatch.Start();
+                await textWriter.WriteAsync($"{CurrentTimeStamp,-25} {text,-120}").ConfigureAwait(false);
+                stopwatch.Start();
             }
+        }
+
+        public IDisposable BeginScope<TState>(TState state) => default;
+
+        public bool IsEnabled(LogLevel logLevel) => logLevel >= LogLevel.Information;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        {
+            if (!IsEnabled(logLevel)) { return; }
+
+            var msg = formatter(state, exception);
+
+            _ = WriteAsync(msg);
+
+            /*
+            if(msg.Contains("StdOut"))
+            {
+
+            }
+            else
+            {
+
+            }
+            */
         }
     }
 }

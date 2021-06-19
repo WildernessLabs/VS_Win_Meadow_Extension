@@ -1,13 +1,13 @@
 ﻿namespace Meadow
 {
     using Meadow.Helpers;
-    using MeadowCLI.DeviceManagement;
     using System;
     using System.Diagnostics;
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
     using System.Text.RegularExpressions;
+    using Meadow.CLI.Core.DeviceManagement;
 
     /// <summary>
     /// Interaction logic for MeadowWindowControl.
@@ -40,7 +40,7 @@
             Devices.SelectedIndex = 0;
 
             var index = 1;
-            var captions = MeadowDeviceManager.GetSerialDeviceCaptions();
+            var captions = MeadowDeviceManager.GetSerialPorts(); //  .GetSerialDeviceCaptions();
             foreach (var c in captions.Distinct())
             {
                 var port = Regex.Match(c, @"(?<=\().+?(?=\))").Value;
