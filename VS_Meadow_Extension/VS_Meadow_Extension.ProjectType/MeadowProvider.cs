@@ -2,7 +2,8 @@
 using System.Threading.Tasks;
 
 using Meadow.Helpers;
-using MeadowCLI.DeviceManagement;
+using Meadow.CLI.Core.DeviceManagement;
+using Meadow.CLI.Core.Devices;
 
 namespace Meadow
 {

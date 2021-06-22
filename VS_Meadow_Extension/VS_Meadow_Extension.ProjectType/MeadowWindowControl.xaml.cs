@@ -1,7 +1,7 @@
 ﻿namespace Meadow
 {
     using Meadow.Helpers;
-    using MeadowCLI.DeviceManagement;
+    using Meadow.CLI.Core.DeviceManagement;
     using System;
     using System.Diagnostics;
     using System.Linq;

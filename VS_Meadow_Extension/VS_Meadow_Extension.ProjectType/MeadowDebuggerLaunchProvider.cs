@@ -13,7 +13,6 @@ using Microsoft.VisualStudio.ProjectSystem.VS.Debug;
 using Mono.Debugging.Soft;
 using Mono.Debugging.Client;
 using Mono.Debugging.VisualStudio;
-using Meadow.CLI.Internals.MeadowComms.RecvClasses;
 
 namespace Meadow
 {

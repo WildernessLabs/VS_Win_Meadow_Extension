@@ -5,8 +5,8 @@ using System.Diagnostics;
 using Mono.Debugging.Client;
 using Mono.Debugging.Soft;
 
-using Meadow.CLI.Internals.MeadowComms.RecvClasses;
-using MeadowCLI.DeviceManagement;
+using Meadow.CLI.Core.DeviceManagement;
+using Meadow.CLI.Core.Devices;
 
 namespace Meadow
 {
