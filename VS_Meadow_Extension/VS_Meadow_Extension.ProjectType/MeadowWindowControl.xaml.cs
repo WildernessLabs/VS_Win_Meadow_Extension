@@ -60,7 +60,10 @@
             if (Devices.SelectedIndex <= 0) return;
 
             MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath, false);
-            settings.DeviceTarget = Devices.SelectedValue.ToString();
+
+            var selectedItem = (Devices.SelectedItem as SerialDevice).Caption;
+
+            settings.DeviceTarget = selectedItem;
             settings.Save();
         }
 
