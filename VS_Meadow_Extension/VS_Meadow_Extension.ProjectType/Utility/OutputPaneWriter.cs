@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Meadow.Utility
 {
-    interface IOutputPaneWriter
+    public interface IOutputPaneWriter 
     {
         Task WriteAsync(string text);
     }
@@ -32,15 +32,15 @@ namespace Meadow.Utility
 
         public async Task WriteAsync(string text)
         {
-            if (this.stopwatch.IsRunning)
+            if (stopwatch.IsRunning)
             {
-                await this.textWriter.WriteAsync($"{CurrentTimeStamp,-25} {text,-120} {ElapsedTime}").ConfigureAwait(false);
-                this.stopwatch.Restart();
+                await textWriter.WriteAsync($"{CurrentTimeStamp,-25} {text,-120} {ElapsedTime}").ConfigureAwait(false);
+                stopwatch.Restart();
             }
             else
             {
-                await this.textWriter.WriteAsync($"{CurrentTimeStamp,-25} {text,-120}").ConfigureAwait(false);
-                this.stopwatch.Start();
+                await textWriter.WriteAsync($"{CurrentTimeStamp,-25} {text,-120}").ConfigureAwait(false);
+                stopwatch.Start();
             }
         }
     }

@@ -382,6 +382,7 @@
     <Compile Include="MeadowWindowControl.xaml.cs">
       <DependentUpon>MeadowWindowControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Utility\OutputLogger.cs" />
     <Compile Include="ProjectProperties.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SerialDevice.cs" />
@@ -411,7 +412,6 @@
     <VSCTCompile Include="VsPackage.vsct">
       <ResourceName>Menus1.ctmenu</ResourceName>
     </VSCTCompile>
-    <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>

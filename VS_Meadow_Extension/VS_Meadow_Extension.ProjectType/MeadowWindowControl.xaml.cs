@@ -1,13 +1,13 @@
 ﻿namespace Meadow
 {
     using Meadow.Helpers;
-    using MeadowCLI.DeviceManagement;
     using System;
     using System.Diagnostics;
     using System.Linq;
     using System.Windows;
     using System.Windows.Controls;
     using System.Text.RegularExpressions;
+    using Meadow.CLI.Core.DeviceManagement;
 
     /// <summary>
     /// Interaction logic for MeadowWindowControl.
@@ -40,13 +40,13 @@
             Devices.SelectedIndex = 0;
 
             var index = 1;
-            var captions = MeadowDeviceManager.GetSerialDeviceCaptions();
+            var captions = MeadowDeviceManager.GetSerialPorts(); //  .GetSerialDeviceCaptions();
             foreach (var c in captions.Distinct())
             {
-                var port = Regex.Match(c, @"(?<=\().+?(?=\))").Value;
+                var port = Regex.Match(c.Port, @"(?<=\().+?(?=\))").Value;
                 Devices.Items.Add(new SerialDevice()
                 {
-                    Caption = c,
+                    Caption = c.Port,
                     Port = port
                 });
 
@@ -60,13 +60,16 @@
             if (Devices.SelectedIndex <= 0) return;
 
             MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath, false);
-            settings.DeviceTarget = Devices.SelectedValue.ToString();
+
+            var selectedItem = (Devices.SelectedItem as SerialDevice).Caption;
+
+            settings.DeviceTarget = selectedItem;
             settings.Save();
         }
 
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {
-            System.Diagnostics.Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
             e.Handled = true;
         }
     }
