@@ -7,7 +7,7 @@ using System.IO;
 
 namespace Meadow
 {
-    public class OutputLogger : IMeadowLogger
+    public class OutputLogger : ILogger
     {
         private TextWriter textWriter;
         private IVsOutputWindowPane outputPane;

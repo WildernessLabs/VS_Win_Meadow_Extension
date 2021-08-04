@@ -43,10 +43,10 @@
             var captions = MeadowDeviceManager.GetSerialPorts(); //  .GetSerialDeviceCaptions();
             foreach (var c in captions.Distinct())
             {
-                var port = Regex.Match(c, @"(?<=\().+?(?=\))").Value;
+                var port = Regex.Match(c.Port, @"(?<=\().+?(?=\))").Value;
                 Devices.Items.Add(new SerialDevice()
                 {
-                    Caption = c,
+                    Caption = c.Port,
                     Port = port
                 });
 
@@ -69,7 +69,7 @@
 
         private void Hyperlink_RequestNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
         {
-            System.Diagnostics.Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
+            Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri));
             e.Handled = true;
         }
     }
