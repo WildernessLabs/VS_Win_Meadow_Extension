@@ -13,6 +13,7 @@ using Microsoft.VisualStudio.ProjectSystem.VS.Debug;
 using Mono.Debugging.Soft;
 using Mono.Debugging.Client;
 using Mono.Debugging.VisualStudio;
+using Meadow.CLI.Core.Devices;
 
 namespace Meadow
 {
@@ -31,7 +32,7 @@ namespace Meadow
             SocketTimeout = 0
         };
 
-        VsOutputPaneProgress outputPane;
+        VsOutputPaneLogger outputPane;
 
         // FIXME: Find a nicer way than storing this
         DebuggerSession vsSession;
@@ -49,7 +50,7 @@ namespace Meadow
         {
             vsHierarchies = new OrderPrecedenceImportCollection<IVsHierarchy>(
                 projectCapabilityCheckProvider: configuredProj);
-            outputPane = new VsOutputPaneProgress(configuredProj.UnconfiguredProject.ProjectService.Services.ThreadingPolicy);
+            outputPane = new VsOutputPaneLogger(configuredProj.UnconfiguredProject.ProjectService.Services.ThreadingPolicy);
         }
 
         public async Task<IReadOnlyList<IDebugLaunchSettings>> QueryDebugTargetsAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
@@ -60,8 +61,9 @@ namespace Meadow
                 return Array.Empty<IDebugLaunchSettings>();
             }
 
-            var meadow = await MeadowProvider.GetMeadowSerialDeviceAsync();
-            var meadowSession = new MeadowSoftDebuggerSession(meadow);
+            var meadow = await MeadowProvider.GetMeadowSerialDeviceAsync(logger: outputPane);
+            var helper = new MeadowDeviceHelper(meadow, outputPane);
+            var meadowSession = new MeadowSoftDebuggerSession(helper);
 
             var startArgs = new SoftDebuggerListenArgs(profile.Name, IPAddress.Loopback, 0);
             var startInfo = new StartInfo(startArgs, debuggingOptions, VsHierarchy.GetProject());

@@ -454,7 +454,7 @@
     <Compile Include="SerialDevice.cs" />
     <Compile Include="STDfuDevice.cs" />
     <Compile Include="Utility\OutputPaneWriter.cs" />
-    <Compile Include="VsOutputPaneProgress.cs" />
+    <Compile Include="Utility\VsOutputPaneLogger.cs" />
     <Compile Include="VsixManifest.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -58,10 +58,10 @@ namespace Meadow
                 return;
             }
 
-            await DeployAppAsync(meadow, Path.Combine(projectDir, outputPath), new OutputPaneWriter(outputPaneWriter), cts).ConfigureAwait(false);
+            await DeployAppAsync(device, Path.Combine(projectDir, outputPath), new OutputPaneWriter(outputPaneWriter), cts).ConfigureAwait(false);
         }
 
-        async Task DeployAppAsync(MeadowSerialDevice device, string folder, IOutputPaneWriter outputPaneWriter, CancellationToken cts)
+        async Task DeployAppAsync(IMeadowDevice device, string folder, IOutputPaneWriter outputPaneWriter, CancellationToken token)
         {
             if (device == null)
             {

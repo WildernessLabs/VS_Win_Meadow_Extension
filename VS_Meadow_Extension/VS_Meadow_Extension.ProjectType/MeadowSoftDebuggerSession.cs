@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Diagnostics;
+using System.Threading;
 
 using Mono.Debugging.Client;
 using Mono.Debugging.Soft;
@@ -12,9 +13,9 @@ namespace Meadow
 {
     class MeadowSoftDebuggerSession : SoftDebuggerSession
     {
-        MeadowSerialDevice meadow;
+        MeadowDeviceHelper meadow;
 
-        public MeadowSoftDebuggerSession(MeadowSerialDevice meadow)
+        public MeadowSoftDebuggerSession(MeadowDeviceHelper meadow)
         {
             this.meadow = meadow;
         }
@@ -25,14 +26,15 @@ namespace Meadow
             switch (softStartInfo.StartArgs)
             {
                 case SoftDebuggerConnectArgs args:
-                    (await MeadowDeviceManager.CreateDebuggingServer(meadow, new IPEndPoint(IPAddress.Loopback, args.DebugPort))).StartListening(meadow);
+                    await meadow.StartDebuggingSessionAsync(args.DebugPort, CancellationToken.None);
                     StartConnecting(softStartInfo);
                     break;
 
                 case SoftDebuggerListenArgs args:
-                    StartListening(softStartInfo, out var debugPort);
-                    (await MeadowDeviceManager.CreateDebuggingServer(meadow, new IPEndPoint(IPAddress.Loopback, debugPort))).Connect(meadow);
-                    break;
+                    throw new NotImplementedException("FIXME");
+                    //StartListening(softStartInfo, out var debugPort);
+                    //(await MeadowDeviceManager.CreateDebuggingServer(meadow, new IPEndPoint(IPAddress.Loopback, debugPort))).Connect(meadow);
+                    //break;
 
                 default:
                     base.OnRun(startInfo);

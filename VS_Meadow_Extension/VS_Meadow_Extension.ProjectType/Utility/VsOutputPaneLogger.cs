@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio;
+﻿using Meadow.CLI.Core.Logging;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
@@ -10,14 +11,23 @@ using System.Threading.Tasks;
 
 namespace Meadow
 {
-    class VsOutputPaneProgress : IProgress<string>
+    class VsOutputPaneLogger : IProgress<string>, ILogger
     {
         IProjectThreadingService ThreadingService;
         IVsOutputWindowPane OutputPane;
 
-        public VsOutputPaneProgress(IProjectThreadingService threadingService)
+        public IDisposable BeginScope<TState>(TState state) => default;
+
+        public bool IsEnabled(LogLevel logLevel) => logLevel >= LogLevel.Information;
+
+        public VsOutputPaneLogger(IProjectThreadingService threadingService)
         {
             ThreadingService = threadingService;
+        }
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        {
+            Report(formatter(state, exception));
         }
 
         public async void Report(string value)
