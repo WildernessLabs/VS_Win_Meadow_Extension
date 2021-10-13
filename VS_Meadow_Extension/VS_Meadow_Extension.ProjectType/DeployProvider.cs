@@ -55,8 +55,8 @@ namespace Meadow
 
             var attachedDevices = MeadowDeviceManager.GetSerialPorts();
 
-            if(attachedDevices.Where(p => p.Port == settings.DeviceTarget).Any() == false)
-            // if (!attachedDevices.Contains(settings.DeviceTarget))
+            //if(attachedDevices.Where(p => p.Port == settings.DeviceTarget).Any() == false)
+            if (!attachedDevices.Contains(settings.DeviceTarget))
             {
                 throw new Exception($"Device on '{settings.DeviceTarget}' is not connected or busy.");
             }
