@@ -43,14 +43,14 @@
             var captions = MeadowDeviceManager.GetSerialPorts(); //  .GetSerialDeviceCaptions();
             foreach (var c in captions.Distinct())
             {
-                var port = Regex.Match(c.Port, @"(?<=\().+?(?=\))").Value;
+              //  var port = Regex.Match(c, @"(?<=\().+?(?=\))").Value;
                 Devices.Items.Add(new SerialDevice()
                 {
-                    Caption = c.Port,
-                    Port = port
+                    Caption = c, //port, //c.Port,
+                    Port = c //port
                 });
 
-                if (port == settings.DeviceTarget) { Devices.SelectedIndex = index; }
+                if (c /* port */ == settings.DeviceTarget) { Devices.SelectedIndex = index; }
                 index++;
             }
         }
