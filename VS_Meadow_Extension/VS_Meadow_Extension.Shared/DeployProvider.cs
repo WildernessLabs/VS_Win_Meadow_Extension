@@ -40,7 +40,7 @@ namespace Meadow
             {
                 return;
             }
-
+             
             isAppDeploy = true;
 
             var projectDir = await generalProperties.Rule.GetPropertyValueAsync("ProjectDir");
