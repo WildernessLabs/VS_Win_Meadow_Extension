@@ -539,9 +539,9 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Meadow.CLI\Meadow.CLI.Core\Meadow.CLI.Core.csproj">
-      <Project>{d7f7dc5f-0223-4bb6-81c0-13d961ddfe5a}</Project>
-      <Name>Meadow.CLI.Core</Name>
+    <ProjectReference Include="..\..\..\Meadow.CLI\Meadow.CLI.Core\Meadow.CLI.Core.VS2019.csproj">
+      <Project>{a48fc00c-9ba3-43e3-ba1d-55fd6128d425}</Project>
+      <Name>Meadow.CLI.Core.VS2019</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Meadow.FSharp.Library.Template\Meadow.FSharp.Library.Template.csproj">
       <Project>{CE404DDC-B2DF-4E4D-B0CF-BCA50AE34041}</Project>
