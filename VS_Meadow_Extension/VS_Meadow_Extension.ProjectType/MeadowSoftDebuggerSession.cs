@@ -8,12 +8,14 @@ using Mono.Debugging.Soft;
 
 using Meadow.CLI.Core.DeviceManagement;
 using Meadow.CLI.Core.Devices;
+using Meadow.CLI.Core.Internals.MeadowCommunication.ReceiveClasses;
 
 namespace Meadow
 {
     class MeadowSoftDebuggerSession : SoftDebuggerSession
     {
         MeadowDeviceHelper meadow;
+        DebuggingServer meadowDebugServer;
 
         public MeadowSoftDebuggerSession(MeadowDeviceHelper meadow)
         {
@@ -26,7 +28,7 @@ namespace Meadow
             switch (softStartInfo.StartArgs)
             {
                 case SoftDebuggerConnectArgs args:
-                    await meadow.StartDebuggingSessionAsync(args.DebugPort, CancellationToken.None);
+                    meadowDebugServer = await meadow.StartDebuggingSessionAsync(args.DebugPort, CancellationToken.None);
                     StartConnecting(softStartInfo);
                     break;
 
@@ -40,6 +42,16 @@ namespace Meadow
                     base.OnRun(startInfo);
                     break;
             }
+        }
+
+        protected override async void OnExit()
+        {
+            await meadowDebugServer?.StopListeningAsync();
+            meadowDebugServer?.Dispose();
+            meadowDebugServer = null;
+            meadow?.Dispose();
+
+            base.OnExit();
         }
     }
 }
