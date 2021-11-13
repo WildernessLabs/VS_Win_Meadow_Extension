@@ -45,12 +45,8 @@ namespace Meadow
 
         public bool IsEnabled(LogLevel logLevel) => logLevel >= LogLevel.Information;
 
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        public void Log(string msg)
         {
-            if (!IsEnabled(logLevel)) { return; }
-
-            var msg = formatter(state, exception);
-
             if (stopwatch.IsRunning)
                 stopwatch.Restart();
             else
@@ -60,6 +56,16 @@ namespace Meadow
 
             textWriter?.WriteLine(msg);
             outputPane?.OutputString(msg);
+        }
+
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        {
+            if (!IsEnabled(logLevel)) { return; }
+
+            var msg = formatter(state, exception);
+
+            Log(msg);
         }
     }
 }

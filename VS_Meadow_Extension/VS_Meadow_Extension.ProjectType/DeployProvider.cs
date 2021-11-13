@@ -42,6 +42,7 @@ namespace Meadow
             var generalProperties = await Properties.GetConfigurationGeneralPropertiesAsync();
             var name = await generalProperties.Rule.GetPropertyValueAsync("AssemblyName");
             
+            //This is to avoid repeat deploys for multiple projects in the solution
             if(name != "App")
             {
                 return;
@@ -52,24 +53,25 @@ namespace Meadow
             var projectDir = await generalProperties.Rule.GetPropertyValueAsync("ProjectDir");
             var outputPath = Path.Combine(projectDir, await generalProperties.Rule.GetPropertyValueAsync("OutputPath"));
 
-            var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger);
-
-            if (device == null)
+            try
             {
-                throw new Exception("Device has not been selected. Hit Ctrl+Shift+M to access the Device list.");
-            }
+                var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger);
 
-            await DeployAppAsync(device, Path.Combine(projectDir, outputPath), new OutputPaneWriter(outputPaneWriter), cts).ConfigureAwait(false);
+                if (device == null)
+                {
+                    logger?.Log("Device has not been selected. Hit Ctrl+Shift+M to access the Device list.");
+                }
+
+                await DeployAppAsync(device, Path.Combine(projectDir, outputPath), new OutputPaneWriter(outputPaneWriter), cts).ConfigureAwait(false);
+            }
+            catch
+            {
+                logger?.Log("Deploy failed - reset Meadow and try again.");
+            }
         }
 
         async Task DeployAppAsync(IMeadowDevice device, string folder, IOutputPaneWriter outputPaneWriter, CancellationToken token)
         {
-            if (device == null)
-            {
-                //DoTo
-                throw new ArgumentNullException(nameof(Meadow));
-            }
-
             try
             {
                 Meadow?.Dispose();
