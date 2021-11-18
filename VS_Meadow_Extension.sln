@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29215.179
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS_Meadow_Extension.ProjectType", "VS_Meadow_Extension\VS_Meadow_Extension.ProjectType\VS_Meadow_Extension.ProjectType.csproj", "{0D8532C9-69AD-4EE2-80A9-0C4ECE47674E}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.CSharp.Template", "Meadow.CSharp.Template\Meadow.CSharp.Template.csproj", "{2CA2AE75-18E0-4EF2-80A7-63E51446BBFE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.FSharp.Template", "Meadow.FSharp.Template\Meadow.FSharp.Template.csproj", "{D51C9F60-DF98-4DC6-BE6A-1EC2EC16381D}"
@@ -21,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.CLI.Core.VS2019", ".
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "MeadowLogger", "..\Meadow.CLI\MeadowLogger\MeadowLogger.shproj", "{A04F6A20-2B23-4B29-9905-1B79A39BBF25}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS_Meadow_Extension.2019", "VS_Meadow_Extension\VS_Meadow_Extension.2019\VS_Meadow_Extension.2019.csproj", "{0D8532C9-69AD-4EE2-80A9-0C4ECE47674E}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\Meadow.CLI\MeadowLogger\MeadowLogger.projitems*{a04f6a20-2b23-4b29-9905-1b79a39bbf25}*SharedItemsImports = 13
@@ -31,10 +31,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0D8532C9-69AD-4EE2-80A9-0C4ECE47674E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0D8532C9-69AD-4EE2-80A9-0C4ECE47674E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0D8532C9-69AD-4EE2-80A9-0C4ECE47674E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0D8532C9-69AD-4EE2-80A9-0C4ECE47674E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2CA2AE75-18E0-4EF2-80A7-63E51446BBFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2CA2AE75-18E0-4EF2-80A7-63E51446BBFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CA2AE75-18E0-4EF2-80A7-63E51446BBFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -63,6 +59,10 @@ Global
 		{A48FC00C-9BA3-43E3-BA1D-55FD6128D425}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A48FC00C-9BA3-43E3-BA1D-55FD6128D425}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A48FC00C-9BA3-43E3-BA1D-55FD6128D425}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D8532C9-69AD-4EE2-80A9-0C4ECE47674E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D8532C9-69AD-4EE2-80A9-0C4ECE47674E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D8532C9-69AD-4EE2-80A9-0C4ECE47674E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D8532C9-69AD-4EE2-80A9-0C4ECE47674E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
