@@ -167,62 +167,107 @@
   Resources for our new project system
   -->
   <ItemGroup>
-    <EmbeddedResource Include="Resources.resx">
+    <EmbeddedResource Include="..\VS_Meadow_Extension.Shared\Resources.resx">
       <SubType>Designer</SubType>
+      <Link>Resources.resx</Link>
     </EmbeddedResource>
-    <EmbeddedResource Include="VSPackage.resx">
+    <EmbeddedResource Include="..\VS_Meadow_Extension.Shared\VSPackage.resx">
       <MergeWithCTO>true</MergeWithCTO>
       <SubType>Designer</SubType>
+      <Link>VSPackage.resx</Link>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BuildSystem\Rules\MeadowDebugger.xaml.cs">
-      <DependentUpon>MeadowDebugger.xaml</DependentUpon>
+    <Compile Include="..\VS_Meadow_Extension.Shared\Extensions.cs">
+      <Link>Extensions.cs</Link>
     </Compile>
-    <Compile Include="Extensions.cs" />
-    <Compile Include="MeadowProvider.cs" />
-    <Compile Include="MeadowSoftDebuggerSession.cs" />
-    <Compile Include="MonoDebugLaunchSettings.cs" />
-    <Compile Include="MeadowDebuggerLaunchProvider.cs" />
-    <Compile Include="MeadowPackage.cs" />
-    <Compile Include="DeployProvider.cs" />
-    <Compile Include="Globals.cs" />
-    <Compile Include="MeadowSettings.cs" />
-    <Compile Include="MeadowWindow.cs" />
-    <Compile Include="MeadowWindowCommand.cs" />
-    <Compile Include="MeadowWindowControl.xaml.cs">
+    <Compile Include="..\VS_Meadow_Extension.Shared\MeadowProvider.cs">
+      <Link>MeadowProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\VS_Meadow_Extension.Shared\MeadowSoftDebuggerSession.cs">
+      <Link>MeadowSoftDebuggerSession.cs</Link>
+    </Compile>
+    <Compile Include="..\VS_Meadow_Extension.Shared\MonoDebugLaunchSettings.cs">
+      <Link>MonoDebugLaunchSettings.cs</Link>
+    </Compile>
+    <Compile Include="..\VS_Meadow_Extension.Shared\MeadowDebuggerLaunchProvider.cs">
+      <Link>MeadowDebuggerLaunchProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\VS_Meadow_Extension.Shared\MeadowPackage.cs">
+      <Link>MeadowPackage.cs</Link>
+    </Compile>
+    <Compile Include="..\VS_Meadow_Extension.Shared\DeployProvider.cs">
+      <Link>DeployProvider.cs</Link>
+    </Compile>
+    <Compile Include="..\VS_Meadow_Extension.Shared\Globals.cs">
+      <Link>Globals.cs</Link>
+    </Compile>
+    <Compile Include="..\VS_Meadow_Extension.Shared\MeadowSettings.cs">
+      <Link>MeadowSettings.cs</Link>
+    </Compile>
+    <Compile Include="..\VS_Meadow_Extension.Shared\MeadowWindow.cs">
+      <Link>MeadowWindow.cs</Link>
+    </Compile>
+    <Compile Include="..\VS_Meadow_Extension.Shared\MeadowWindowCommand.cs">
+      <Link>MeadowWindowCommand.cs</Link>
+    </Compile>
+    <Compile Include="..\VS_Meadow_Extension.Shared\MeadowWindowControl.xaml.cs">
       <DependentUpon>MeadowWindowControl.xaml</DependentUpon>
+      <Link>MeadowWindowControl.xaml.cs</Link>
     </Compile>
-    <Compile Include="Utility\OutputLogger.cs" />
-    <Compile Include="ProjectProperties.cs" />
+    <Compile Include="..\VS_Meadow_Extension.Shared\Utility\OutputLogger.cs">
+      <Link>"Utility\OutputLogger.cs</Link>
+    </Compile>
+    <Compile Include="..\VS_Meadow_Extension.Shared\ProjectProperties.cs">
+      <Link>ProjectProperties.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SerialDevice.cs" />
-    <Compile Include="STDfuDevice.cs" />
-    <Compile Include="Utility\OutputPaneWriter.cs" />
-    <Compile Include="Utility\VsOutputPaneLogger.cs" />
-    <Compile Include="VsixManifest.cs" />
+    <Compile Include="..\VS_Meadow_Extension.Shared\SerialDevice.cs">
+      <Link>SerialDevice.cs</Link>
+    </Compile>
+    <Compile Include="..\VS_Meadow_Extension.Shared\STDfuDevice.cs">
+      <Link>STDfuDevice.cs</Link>
+    </Compile>
+    <Compile Include="..\VS_Meadow_Extension.Shared\Utility\OutputPaneWriter.cs">
+      <Link>Utility\OutputPaneWriter.cs</Link>
+    </Compile>
+    <Compile Include="..\VS_Meadow_Extension.Shared\Utility\VsOutputPaneLogger.cs">
+      <Link>Utility\VsOutputPaneLogger.cs</Link>
+    </Compile>
+    <Compile Include="..\VS_Meadow_Extension.Shared\VsixManifest.cs">
+      <Link>VsixManifest.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\MeadowPackage.ico" />
-    <Content Include="Resources\MeadowWindowCommand.png" />
-    <Content Include="STDFU.dll">
+    <Content Include="..\VS_Meadow_Extension.Shared\Resources\MeadowPackage.ico">
+      <Link>Resources\MeadowPackage.ico</Link>
+    </Content>
+    <Content Include="..\VS_Meadow_Extension.Shared\Resources\MeadowWindowCommand.png">
+      <Link>Resources\MeadowWindowCommand.png</Link>
+    </Content>
+    <Content Include="..\VS_Meadow_Extension.Shared\STDFU.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
+      <Link>STDFU.dll</Link>
     </Content>
-    <Content Include="STTubeDevice30.dll">
+    <Content Include="..\VS_Meadow_Extension.Shared\STTubeDevice30.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
+      <Link>STTubeDevice30.dll</Link>
     </Content>
-    <Content Include="wildernesslabs_icon.png">
+    <Content Include="..\VS_Meadow_Extension.Shared\wildernesslabs_icon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
+      <Link>wildernesslabs_icon.png</Link>
     </Content>
-    <VSCTCompile Include="MeadowPackage.vsct">
+    <VSCTCompile Include="..\VS_Meadow_Extension.Shared\MeadowPackage.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
       <SubType>Designer</SubType>
+      <Link>MeadowPackage.vsct</Link>
     </VSCTCompile>
-    <VSCTCompile Include="VsPackage.vsct">
+    <VSCTCompile Include="..\VS_Meadow_Extension.Shared\VsPackage.vsct">
       <ResourceName>Menus1.ctmenu</ResourceName>
+      <Link>VsPackage.vsct</Link>
     </VSCTCompile>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
@@ -234,9 +279,12 @@
   final implementation, and provide the basic processing for handling rules in CPS.
   -->
   <ItemGroup>
-    <None Include="BuildSystem\DeployedBuildSystem\VS_Meadow_Extension.props" />
-    <None Include="BuildSystem\DeployedBuildSystem\VS_Meadow_Extension.targets">
+    <None Include="..\VS_Meadow_Extension.Shared\BuildSystem\DeployedBuildSystem\VS_Meadow_Extension.props">
+      <Link>BuildSystem\DeployedBuildSystem\VS_Meadow_Extension.props</Link>
+    </None>
+    <None Include="..\VS_Meadow_Extension.Shared\BuildSystem\DeployedBuildSystem\VS_Meadow_Extension.targets">
       <SubType>Designer</SubType>
+      <Link>BuildSystem\DeployedBuildSystem\VS_Meadow_Extension.targets</Link>
     </None>
   </ItemGroup>
   <!--
@@ -245,39 +293,52 @@
   final package.
   -->
   <ItemGroup>
-    <XamlPropertyRule Include="BuildSystem\Rules\general.xaml">
+    <XamlPropertyRule Include="..\VS_Meadow_Extension.Shared\BuildSystem\Rules\general.xaml">
       <SubType>Designer</SubType>
+      <Link>BuildSystem\Rules\general.xaml</Link>
     </XamlPropertyRule>
-    <XamlPropertyRule Include="BuildSystem\Rules\general_file.xaml">
+    <XamlPropertyRule Include="..\VS_Meadow_Extension.Shared\BuildSystem\Rules\general_file.xaml">
       <RuleInjection>None</RuleInjection>
       <SubType>Designer</SubType>
+      <Link>BuildSystem\Rules\general_file.xaml</Link>
     </XamlPropertyRule>
-    <XamlPropertyRule Include="BuildSystem\Rules\folder.xaml">
+    <XamlPropertyRule Include="..\VS_Meadow_Extension.Shared\BuildSystem\Rules\folder.xaml">
       <RuleInjection>None</RuleInjection>
       <SubType>Designer</SubType>
+      <Link>BuildSystem\Rules\folder.xaml</Link>
     </XamlPropertyRule>
-    <XamlPropertyRule Include="BuildSystem\Rules\none.xaml">
+    <XamlPropertyRule Include="..\VS_Meadow_Extension.Shared\BuildSystem\Rules\none.xaml">
       <RuleInjection>None</RuleInjection>
       <SubType>Designer</SubType>
+      <Link>BuildSystem\Rules\none.xaml</Link>
     </XamlPropertyRule>
-    <XamlPropertyRule Include="BuildSystem\Rules\scc.xaml">
+    <XamlPropertyRule Include="..\VS_Meadow_Extension.Shared\BuildSystem\Rules\scc.xaml">
       <SubType>Designer</SubType>
+      <Link>BuildSystem\Rules\scc.xaml</Link>
     </XamlPropertyRule>
-    <XamlPropertyRule Include="BuildSystem\Rules\debugger_general.xaml">
+    <XamlPropertyRule Include="..\VS_Meadow_Extension.Shared\BuildSystem\Rules\debugger_general.xaml">
       <SubType>Designer</SubType>
+      <Link>BuildSystem\Rules\debugger_general.xaml</Link>
     </XamlPropertyRule>
-    <XamlPropertyRule Include="BuildSystem\Rules\general.browseobject.xaml">
+    <XamlPropertyRule Include="..\VS_Meadow_Extension.Shared\BuildSystem\Rules\general.browseobject.xaml">
       <SubType>Designer</SubType>
+      <Link>BuildSystem\Rules\general.browseobject.xaml</Link>
     </XamlPropertyRule>
   </ItemGroup>
   <ItemGroup>
-    <XamlPropertyRule Include="BuildSystem\Rules\MeadowDebugger.xaml">
+    <Compile Include="..\VS_Meadow_Extension.Shared\BuildSystem\Rules\MeadowDebugger.xaml.cs">
+      <DependentUpon>MeadowDebugger.xaml</DependentUpon>
+      <Link>BuildSystem\Rules\MeadowDebugger.xaml.cs</Link>
+    </Compile>
+    <XamlPropertyRule Include="..\VS_Meadow_Extension.Shared\BuildSystem\Rules\MeadowDebugger.xaml">
       <Generator>MSBuild:GenerateRuleSourceFromXaml</Generator>
       <SubType>Designer</SubType>
+      <Link>BuildSystem\Rules\MeadowDebugger.xaml</Link>
     </XamlPropertyRule>
-    <Page Include="MeadowWindowControl.xaml">
+    <Page Include="..\VS_Meadow_Extension.Shared\MeadowWindowControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+      <Link>MeadowWindowControl.xaml</Link>
     </Page>
   </ItemGroup>
   <ItemGroup>
@@ -340,8 +401,8 @@
        customer machine and update the project template to point at that location.-->
   <Target Name="AfterBuild">
     <ItemGroup>
-      <BuildSystemToCopy Include="BuildSystem\DeployedBuildSystem\**\*" />
-      <RulesToCopy Include="BuildSystem\Rules\**\*" />
+      <BuildSystemToCopy Include="..\VS_Meadow_Extension.Shared\BuildSystem\DeployedBuildSystem\**\*" />
+      <RulesToCopy Include="..\VS_Meadow_Extension.Shared\BuildSystem\Rules\**\*" />
     </ItemGroup>
     <Copy SourceFiles="@(BuildSystemToCopy)" DestinationFiles="@(BuildSystemToCopy->'$(LocalAppData)\CustomProjectSystems\VS_Meadow_Extension\%(RecursiveDir)%(FileName)%(Extension)')" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(RulesToCopy)" DestinationFiles="@(RulesToCopy->'$(LocalAppData)\CustomProjectSystems\VS_Meadow_Extension\Rules\%(RecursiveDir)%(FileName)%(Extension)')" SkipUnchangedFiles="true" />
