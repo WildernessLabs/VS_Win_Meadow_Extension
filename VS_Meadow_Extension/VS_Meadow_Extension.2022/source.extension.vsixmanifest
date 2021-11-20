@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+    <Metadata>
+        <Identity Id="VS_Meadow_Extension.2022.d5eb772d-2173-4795-b60b-67929a9bf12d" Version="0.20.0" Language="en-US" Publisher="Wilderness Labs" />
+        <DisplayName>VS 2022 Tools for Meadow</DisplayName>
+        <Description xml:space="preserve">Tools for developing Meadow applications</Description>
+        <Icon>wildernesslabs_icon.png</Icon>
+        <Tags>Meadow, Wilderness Labs</Tags>
+        <Preview>true</Preview>
+    </Metadata>
+    <Installation>
+        <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 18.0)">
+        </InstallationTarget>
+        <InstallationTarget Version="[16.0,18.0)" Id="Microsoft.VisualStudio.Pro">
+        </InstallationTarget>
+        <InstallationTarget Version="[16.0,18.0)" Id="Microsoft.VisualStudio.Enterprise">
+        </InstallationTarget>
+    </Installation>
+    <Dependencies>
+        <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="[4.5,)" />
+    </Dependencies>
+    <Prerequisites>
+        <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,18.0)" DisplayName="Visual Studio core editor" />
+    </Prerequisites>
+    <Assets>
+        <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="VS_Meadow_Extension.2022" Path="|VS_Meadow_Extension.2022|" />
+        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="VS_Meadow_Extension.2022" Path="|VS_Meadow_Extension.2022;PkgdefProjectOutputGroup|" />
+        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
+        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="Meadow.CSharp.Library.Template" Path="ProjectTemplates" d:TargetPath="|Meadow.CSharp.Library.Template;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" />
+        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="Meadow.CSharp.Template" Path="ProjectTemplates" d:TargetPath="|Meadow.CSharp.Template;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" />
+        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="Meadow.FSharp.Library.Template" Path="ProjectTemplates" d:TargetPath="|Meadow.FSharp.Library.Template;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" />
+        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="Meadow.FSharp.Template" Path="ProjectTemplates" d:TargetPath="|Meadow.FSharp.Template;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" />
+        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="Meadow.VBNet.Library.Template" Path="ProjectTemplates" d:TargetPath="|Meadow.VBNet.Library.Template;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" />
+        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="Meadow.VBNet.Template" Path="ProjectTemplates" d:TargetPath="|Meadow.VBNet.Template;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" />
+    </Assets>
+</PackageManifest>
