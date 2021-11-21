@@ -1,0 +1,83 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29215.179
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.CSharp.Template", "Meadow.CSharp.Template\Meadow.CSharp.Template.csproj", "{2CA2AE75-18E0-4EF2-80A7-63E51446BBFE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.FSharp.Template", "Meadow.FSharp.Template\Meadow.FSharp.Template.csproj", "{D51C9F60-DF98-4DC6-BE6A-1EC2EC16381D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.CSharp.Library.Template", "Meadow.CSharp.Library.Template\Meadow.CSharp.Library.Template.csproj", "{D4B7449D-E200-4513-B32E-E6DB6BC4BC50}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.FSharp.Library.Template", "Meadow.FSharp.Library.Template\Meadow.FSharp.Library.Template.csproj", "{CE404DDC-B2DF-4E4D-B0CF-BCA50AE34041}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.VBNet.Library.Template", "Meadow.VBNet.Library.Template\Meadow.VBNet.Library.Template.csproj", "{48663609-C0AD-4B74-B2A2-C5117212212B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.VBNet.Template", "Meadow.VBNet.Template\Meadow.VBNet.Template.csproj", "{0A4773F5-B5EC-4928-AAE7-64253877CF4E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.CLI.Core.VS2019", "..\Meadow.CLI\Meadow.CLI.Core\Meadow.CLI.Core.VS2019.csproj", "{A48FC00C-9BA3-43E3-BA1D-55FD6128D425}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "MeadowLogger", "..\Meadow.CLI\MeadowLogger\MeadowLogger.shproj", "{A04F6A20-2B23-4B29-9905-1B79A39BBF25}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS_Meadow_Extension.2019", "VS_Meadow_Extension\VS_Meadow_Extension.2019\VS_Meadow_Extension.2019.csproj", "{0D8532C9-69AD-4EE2-80A9-0C4ECE47674E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{F27FC7D7-ADB6-4538-BF59-CBFE72C5AA71}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\Meadow.CLI\MeadowLogger\MeadowLogger.projitems*{a04f6a20-2b23-4b29-9905-1b79a39bbf25}*SharedItemsImports = 13
+		..\Meadow.CLI\MeadowLogger\MeadowLogger.projitems*{a48fc00c-9ba3-43e3-ba1d-55fd6128d425}*SharedItemsImports = 5
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2CA2AE75-18E0-4EF2-80A7-63E51446BBFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CA2AE75-18E0-4EF2-80A7-63E51446BBFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CA2AE75-18E0-4EF2-80A7-63E51446BBFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CA2AE75-18E0-4EF2-80A7-63E51446BBFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D51C9F60-DF98-4DC6-BE6A-1EC2EC16381D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D51C9F60-DF98-4DC6-BE6A-1EC2EC16381D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D51C9F60-DF98-4DC6-BE6A-1EC2EC16381D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D51C9F60-DF98-4DC6-BE6A-1EC2EC16381D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4B7449D-E200-4513-B32E-E6DB6BC4BC50}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4B7449D-E200-4513-B32E-E6DB6BC4BC50}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4B7449D-E200-4513-B32E-E6DB6BC4BC50}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4B7449D-E200-4513-B32E-E6DB6BC4BC50}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE404DDC-B2DF-4E4D-B0CF-BCA50AE34041}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE404DDC-B2DF-4E4D-B0CF-BCA50AE34041}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE404DDC-B2DF-4E4D-B0CF-BCA50AE34041}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE404DDC-B2DF-4E4D-B0CF-BCA50AE34041}.Release|Any CPU.Build.0 = Release|Any CPU
+		{48663609-C0AD-4B74-B2A2-C5117212212B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{48663609-C0AD-4B74-B2A2-C5117212212B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{48663609-C0AD-4B74-B2A2-C5117212212B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{48663609-C0AD-4B74-B2A2-C5117212212B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A4773F5-B5EC-4928-AAE7-64253877CF4E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A4773F5-B5EC-4928-AAE7-64253877CF4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A4773F5-B5EC-4928-AAE7-64253877CF4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A4773F5-B5EC-4928-AAE7-64253877CF4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A48FC00C-9BA3-43E3-BA1D-55FD6128D425}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A48FC00C-9BA3-43E3-BA1D-55FD6128D425}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A48FC00C-9BA3-43E3-BA1D-55FD6128D425}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A48FC00C-9BA3-43E3-BA1D-55FD6128D425}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D8532C9-69AD-4EE2-80A9-0C4ECE47674E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D8532C9-69AD-4EE2-80A9-0C4ECE47674E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D8532C9-69AD-4EE2-80A9-0C4ECE47674E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D8532C9-69AD-4EE2-80A9-0C4ECE47674E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2CA2AE75-18E0-4EF2-80A7-63E51446BBFE} = {F27FC7D7-ADB6-4538-BF59-CBFE72C5AA71}
+		{D51C9F60-DF98-4DC6-BE6A-1EC2EC16381D} = {F27FC7D7-ADB6-4538-BF59-CBFE72C5AA71}
+		{D4B7449D-E200-4513-B32E-E6DB6BC4BC50} = {F27FC7D7-ADB6-4538-BF59-CBFE72C5AA71}
+		{CE404DDC-B2DF-4E4D-B0CF-BCA50AE34041} = {F27FC7D7-ADB6-4538-BF59-CBFE72C5AA71}
+		{48663609-C0AD-4B74-B2A2-C5117212212B} = {F27FC7D7-ADB6-4538-BF59-CBFE72C5AA71}
+		{0A4773F5-B5EC-4928-AAE7-64253877CF4E} = {F27FC7D7-ADB6-4538-BF59-CBFE72C5AA71}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {52B44033-1294-4876-A2EC-2B745E38EE37}
+	EndGlobalSection
+EndGlobal
