@@ -1,0 +1,54 @@
+name: VS4Win Extension
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout current repo
+      uses: actions/checkout@v2
+      with:
+        path: main
+
+    - name: Checkout Meadow.CLI.Core side-by-side
+      uses: actions/checkout@v2
+      with:
+        repository: WildernessLabs/Meadow.CLI
+        path: Meadow.CLI
+
+    - name: Setup .NET Core SDK 5.0.x
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.0.5
+
+    - name: Restore VS2019 dependencies
+      run: dotnet restore main/VS_Meadow_Extension.2019.sln
+
+    - name: Add MSBuild to Path
+      uses: microsoft/setup-msbuild@1.1
+      with:
+        vs-version: '[16.0, 17.0)'
+
+    - name: Build VS2019 Extension
+      run: msbuild main/VS_Meadow_Extension.2019.sln -t:rebuild /p:Configuration=Release
+
+    - name: Restore VS2022 dependencies
+      run: dotnet restore main/VS_Meadow_Extension.2022.sln
+
+    - name: Add MSBuild to Path
+      uses: microsoft/setup-msbuild@1.1
+      with:
+        vs-version: '[17.0, 18.0)'
+
+    - name: Build VS2022 Extension
+      run: msbuild main/VS_Meadow_Extension.2022.sln -t:rebuild /p:Configuration=Release
