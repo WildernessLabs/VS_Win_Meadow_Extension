@@ -1,15 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="VS_Meadow_Extension.ProjectType..fe358059-9487-4fe7-a01a-4b67b8231321" Version="0.18.4" Language="en-US" Publisher="Wilderness Labs" />
-        <DisplayName>VS Tools for Meadow</DisplayName>
+        <Identity Id="VS_Meadow_Extension.2019.fe358059-9487-4fe7-a01a-4b67b8231321" Version="0.18.4" Language="en-US" Publisher="Wilderness Labs" />
+        <DisplayName>VS 2019 Tools for Meadow</DisplayName>
         <Description xml:space="preserve">Tools for developing Meadow applications</Description>
         <Icon>wildernesslabs_icon.png</Icon>
         <Tags>Meadow, Wilderness Labs</Tags>
         <Preview>true</Preview>
     </Metadata>
     <Installation>
-        <InstallationTarget Id="Microsoft.VisualStudio.Pro" Version="[16.0,17.0)" />
+        <InstallationTarget Version="[16.0,17.0)" Id="Microsoft.VisualStudio.Pro"  />
         <InstallationTarget Version="[16.0,17.0)" Id="Microsoft.VisualStudio.Community" />
         <InstallationTarget Version="[16.0,17.0)" Id="Microsoft.VisualStudio.Enterprise" />
     </Installation>
@@ -20,8 +20,8 @@
         <!--<Dependency Id="Microsoft.VisualStudio.MPF.15.0" DisplayName="Visual Studio MPF 15.0" d:Source="Installed" Version="[15.0]" />-->
     </Dependencies>
     <Assets>
-        <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="VS_Meadow_Extension.ProjectType" Path="|VS_Meadow_Extension.ProjectType|" />
-        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="VS_Meadow_Extension.ProjectType" Path="|VS_Meadow_Extension.ProjectType;PkgdefProjectOutputGroup|" />
+        <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="VS_Meadow_Extension.2019" Path="|VS_Meadow_Extension.2019|" />
+        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="VS_Meadow_Extension.2019" Path="|VS_Meadow_Extension.2019;PkgdefProjectOutputGroup|" />
         <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
         <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="Meadow.CSharp.Library.Template" Path="ProjectTemplates" d:TargetPath="|Meadow.CSharp.Library.Template;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" />
         <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="Meadow.CSharp.Template" Path="ProjectTemplates" d:TargetPath="|Meadow.CSharp.Template;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" />
