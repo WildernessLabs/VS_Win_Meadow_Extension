@@ -41,7 +41,19 @@ jobs:
         vs-version: '[16.0, 17.0)'
 
     - name: Build VS2019 Extension
+      id: VS2019-Extension
       run: msbuild main/VS_Meadow_Extension.2019.sln -t:rebuild /p:Configuration=Release
+      
+    - uses: actions/create-release@v1
+      id: create_vs2019_release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: ${{ github.ref }}
+      
+    - name: Publish VS2019 Extension
+      run: ${VSInstallDir}\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe publish -payload ${{ steps.create_vs2019_release.outputs.upload_url }}/Meadow.2019.vsix -publishManifest ${{ steps.create_vs2019_release.outputs.upload_url }}/vs-publish.json -ignoreWarnings "VSIXValidatorWarning01,VSIXValidatorWarning02"
 
     - name: Restore VS2022 dependencies
       run: dotnet restore main/VS_Meadow_Extension.2022.sln
@@ -52,4 +64,16 @@ jobs:
         vs-version: '[17.0, 18.0)'
 
     - name: Build VS2022 Extension
+      id: VS2022-Extension
       run: msbuild main/VS_Meadow_Extension.2022.sln -t:rebuild /p:Configuration=Release
+    
+    - uses: actions/create-release@v1
+      id: create_vs2022_release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: ${{ github.ref }}
+      
+    - name: Publish VS2022 Extension
+      run: ${VSInstallDir}\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe publish -payload ${{ steps.create_vs2022_release.outputs.upload_url }}/Meadow.2022.vsix -publishManifest ${{ steps.create_vs2022_release.outputs.upload_url }}/vs-publish.json -ignoreWarnings "VSIXValidatorWarning01,VSIXValidatorWarning02"
