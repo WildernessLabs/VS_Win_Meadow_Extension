@@ -36,7 +36,7 @@ jobs:
       run: dotnet restore main/VS_Meadow_Extension.2019.sln
 
     - name: Add MSBuild to Path
-      uses: microsoft/setup-msbuild@v1.0.3
+      uses: microsoft/setup-msbuild@v1.1
       with:
         vs-version: '[16.0, 17.0)'
 
@@ -59,7 +59,7 @@ jobs:
       run: dotnet restore main/VS_Meadow_Extension.2022.sln
 
     - name: Add MSBuild to Path
-      uses: microsoft/setup-msbuild@v1.0.3
+      uses: microsoft/setup-msbuild@v1.1
       with:
         vs-version: '[17.0, 18.0)'
 
