@@ -27,7 +27,10 @@ namespace Meadow
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-            Report(formatter(state, exception));
+            if (IsEnabled(logLevel))
+            {
+                Report(formatter(state, exception));
+            }
         }
 
         public async void Report(string value)
