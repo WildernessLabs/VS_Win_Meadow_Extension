@@ -59,6 +59,7 @@ namespace Meadow
 
                 if (device == null)
                 {
+                    isAppDeploy = false;
                     logger?.Log("Device has not been selected. Hit Ctrl+Shift+M to access the Device list.");
                 }
 
@@ -66,6 +67,7 @@ namespace Meadow
             }
             catch
             {
+                isAppDeploy = false;
                 logger?.Log("Deploy failed - reset Meadow and try again.");
             }
         }
@@ -84,6 +86,7 @@ namespace Meadow
             }
             catch (Exception ex)
             {
+                isAppDeploy = false;
                 await outputPaneWriter.WriteAsync($"Deploy failed: {ex.Message}");
                 await outputPaneWriter.WriteAsync($"Reset Meadow and try again");
             }
