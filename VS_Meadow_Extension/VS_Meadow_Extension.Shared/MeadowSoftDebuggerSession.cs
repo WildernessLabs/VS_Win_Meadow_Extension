@@ -24,23 +24,30 @@ namespace Meadow
 
         protected override async void OnRun(DebuggerStartInfo startInfo)
         {
-            var softStartInfo = (SoftDebuggerStartInfo)startInfo;
-            switch (softStartInfo.StartArgs)
+            try
             {
-                case SoftDebuggerConnectArgs args:
-                    meadowDebugServer = await meadow.StartDebuggingSessionAsync(args.DebugPort, CancellationToken.None);
-                    StartConnecting(softStartInfo);
-                    break;
+                var softStartInfo = (SoftDebuggerStartInfo)startInfo;
+                switch (softStartInfo.StartArgs)
+                {
+                    case SoftDebuggerConnectArgs args:
+                        meadowDebugServer = await meadow.StartDebuggingSessionAsync(args.DebugPort, CancellationToken.None);
+                        StartConnecting(softStartInfo);
+                        break;
 
-                case SoftDebuggerListenArgs args:
-                    throw new NotImplementedException("FIXME");
+                    case SoftDebuggerListenArgs args:
+                        throw new NotImplementedException("FIXME");
                     //StartListening(softStartInfo, out var debugPort);
                     //(await MeadowDeviceManager.CreateDebuggingServer(meadow, new IPEndPoint(IPAddress.Loopback, debugPort))).Connect(meadow);
                     //break;
 
-                default:
-                    base.OnRun(startInfo);
-                    break;
+                    default:
+                        base.OnRun(startInfo);
+                        break;
+                }
+            }
+            catch (Meadow.CLI.Core.Exceptions.DeviceDisconnectedException e)
+            {
+
             }
         }
 
