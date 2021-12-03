@@ -110,7 +110,7 @@ namespace Meadow
             generalPane.Activate();
             generalPane.Clear();
 
-            generalPane.OutputString(" Launching application..." + Environment.NewLine);
+            generalPane.OutputStringThreadSafe(" Launching application..." + Environment.NewLine);
 
             logger.DisconnectTextWriter();
             logger.ConnectPane(generalPane);

@@ -44,7 +44,7 @@ namespace Meadow
                     Guid generalPaneGuid = VSConstants.GUID_OutWindowDebugPane; // P.S. There's also the GUID_OutWindowDebugPane available.
                     outWindow.GetPane(ref generalPaneGuid, out OutputPane);
                 }
-                OutputPane.OutputString(value + Environment.NewLine);
+                OutputPane.OutputStringThreadSafe(value + Environment.NewLine);
             } catch (Exception ex)
             {
                 Console.WriteLine(ex);
