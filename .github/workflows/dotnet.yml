@@ -7,7 +7,7 @@ on:
     branches: [ main, develop ]
 
 jobs:
-  2019-build:
+  build-2019:
     runs-on: windows-latest
     name: Build VS2019 Extension
 
@@ -57,7 +57,7 @@ jobs:
 #    - name: Publish VS2019 Extension
 #      run: ${VSInstallDir}\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe publish -payload ${{ steps.create_vs2019_release.outputs.upload_url }}/Meadow.2019.vsix -publishManifest ${{ steps.create_vs2019_release.outputs.upload_url }}/vs-publish.json -ignoreWarnings "VSIXValidatorWarning01,VSIXValidatorWarning02"
 
-  2022_build:
+  build-2022:
     runs-on: windows-2022
     name: Build VS2022 Extension
 
