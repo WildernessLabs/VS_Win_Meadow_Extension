@@ -176,11 +176,6 @@
       <SubType>Designer</SubType>
       <Link>Resources.resx</Link>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\VS_Meadow_Extension.Shared\VSPackage.resx">
-      <MergeWithCTO>true</MergeWithCTO>
-      <SubType>Designer</SubType>
-      <Link>VSPackage.resx</Link>
-    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\VS_Meadow_Extension.Shared\Extensions.cs">
@@ -269,10 +264,6 @@
       <ResourceName>Menus.ctmenu</ResourceName>
       <SubType>Designer</SubType>
       <Link>MeadowPackage.vsct</Link>
-    </VSCTCompile>
-    <VSCTCompile Include="..\VS_Meadow_Extension.Shared\VsPackage.vsct">
-      <ResourceName>Menus1.ctmenu</ResourceName>
-      <Link>VsPackage.vsct</Link>
     </VSCTCompile>
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
