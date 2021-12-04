@@ -49,8 +49,8 @@ jobs:
     - name: Upload VSIX Artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: VSIX
-        path: '*.vsix'
+        name: Meadow.2019.vsix
+        path: 'main\VS_Meadow_Extension\VS_Meadow_Extension.2019\bin\Release\*.vsix'
 
 #    - uses: actions/create-release@v1
 #      id: create_vs2019_release
@@ -105,8 +105,8 @@ jobs:
     - name: Upload VSIX Artifacts
       uses: actions/upload-artifact@v2
       with:
-        name: VSIX
-        path: '*.vsix'
+        name: Meadow.2022.vsix
+        path: 'main\VS_Meadow_Extension\VS_Meadow_Extension.2022\bin\Release\*.vsix'
     
 #    - uses: actions/create-release@v1
 #      id: create_vs2022_release
