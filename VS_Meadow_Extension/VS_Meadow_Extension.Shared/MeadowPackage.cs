@@ -1,4 +1,9 @@
-﻿using System;
+﻿using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.OLE.Interop;
+using Microsoft.VisualStudio.ProjectSystem;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
+using System;
 using System.ComponentModel.Composition;
 using System.ComponentModel.Design;
 using System.Diagnostics;
@@ -9,11 +14,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using EnvDTE;
 using EnvDTE80;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.OLE.Interop;
-using Microsoft.VisualStudio.ProjectSystem;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.Win32;
 using Task = System.Threading.Tasks.Task;
 
@@ -39,16 +39,11 @@ namespace Meadow
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [InstalledProductRegistration("#1110", "#1112", "1.0", IconResourceID = 1400)] // Info on this package for Help/About
     [ProvideMenuResource("Menus.ctmenu", 1)]
-    [Guid(MeadowPackage.PackageGuidString)]
+    [Guid(GuidList.guidMeadowPackageString)]
     [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
     [ProvideToolWindow(typeof(MeadowWindow))]
     public sealed class MeadowPackage : AsyncPackage
     {
-         /// <summary>
-        /// MeadowPackage GUID string.
-        /// </summary>
-        public const string PackageGuidString = "9e640b9d-2a9e-4da3-ba5e-351adc854fd2";
-
         /// <summary>
         /// Initializes a new instance of the <see cref="MeadowPackage"/> class.
         /// </summary>
@@ -76,8 +71,113 @@ namespace Meadow
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
+            // Add our command handlers for menu (commands must be declared in the .vsct file)
+            OleMenuCommandService mcs = GetService(typeof(IMenuCommandService)) as OleMenuCommandService;
+            if (null != mcs)
+            {
+                CommandID menuMeadowDeviceListComboCommandID = new CommandID(GuidList.guidMeadowPackageCmdSet, (int)PkgCmdIDList.cmdidMeadowDeviceListCombo);
+                OleMenuCommand menuMeadowDeviceListComboCommand = new OleMenuCommand(new EventHandler(OnMeadowDeviceListCombo), menuMeadowDeviceListComboCommandID);
+                mcs.AddCommand(menuMeadowDeviceListComboCommand);
+
+                CommandID menuMeadowDeviceListComboGetListCommandID = new CommandID(GuidList.guidMeadowPackageCmdSet, (int)PkgCmdIDList.cmdidMeadowDeviceListComboGetList);
+                MenuCommand menuMeadowDeviceListComboGetListCommand = new OleMenuCommand(new EventHandler(OnMeadowDeviceListComboGetList), menuMeadowDeviceListComboGetListCommandID);
+                mcs.AddCommand(menuMeadowDeviceListComboGetListCommand);
+            }
+
             await MeadowWindowCommand.InitializeAsync(this);
         }
         #endregion
+
+        private void OnMeadowDeviceListCombo(object sender, EventArgs e)
+        {
+            OleMenuCmdEventArgs eventArgs = e as OleMenuCmdEventArgs;
+
+            if (eventArgs != null)
+            {
+                /* string newChoice = eventArgs.InValue as string;
+                IntPtr vOut = eventArgs.OutValue;
+
+                if (vOut != IntPtr.Zero)
+                {
+                    // when vOut is non-NULL, the IDE is requesting the current value for the combo
+                    Marshal.GetNativeVariantForObject(currentDropDownComboChoice, vOut);
+                }
+
+                else if (newChoice != null)
+                {
+                    // new value was selected or typed in
+                    // see if it is one of our items
+                    bool validInput = false;
+                    int indexInput = -1;
+                    for (indexInput = 0; indexInput < dropDownComboChoices.Length; indexInput++)
+                    {
+                        if (string.Compare(dropDownComboChoices[indexInput], newChoice, StringComparison.CurrentCultureIgnoreCase) == 0)
+                        {
+                            validInput = true;
+                            break;
+                        }
+                    }
+
+                    if (validInput)
+                    {
+                        currentDropDownComboChoice = dropDownComboChoices[indexInput];
+                        ShowMessage(Resources.MyDropDownCombo, currentDropDownComboChoice);
+                    }
+                    else
+                    {
+                        throw (new ArgumentException(Resources.ParamNotValidStringInList)); // force an exception to be thrown
+                    }
+                }*/
+            }
+            else
+            {
+                // We should never get here; EventArgs are required.
+                throw (new ArgumentException("EventArgsRequired")); // force an exception to be thrown
+            }
+        }
+
+        private void OnMeadowDeviceListComboGetList(object sender, EventArgs e)
+        {
+            OleMenuCmdEventArgs eventArgs = e as OleMenuCmdEventArgs;
+
+            if (eventArgs != null)
+            {
+                object inParam = eventArgs.InValue;
+                IntPtr vOut = eventArgs.OutValue;
+
+                /*if (inParam != null)
+                {
+                    throw (new ArgumentException(Resources.InParamIllegal)); // force an exception to be thrown
+                }
+                else if (vOut != IntPtr.Zero)
+                {
+                    Marshal.GetNativeVariantForObject(dropDownComboChoices, vOut);
+                }
+                else
+                {
+                    throw (new ArgumentException(Resources.OutParamRequired)); // force an exception to be thrown
+                }*/
+            }
+
+        }
+    }
+
+    static class GuidList
+    {
+        /// <summary>
+        /// MeadowPackage GUID string.
+        /// </summary>
+        public const string guidMeadowPackageString = "9e640b9d-2a9e-4da3-ba5e-351adc854fd2";
+        public const string guidMeadowPackageCmdSetString = "0af06414-3c09-44ff-88a1-c4e1a35b0bdf";
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
+        public static readonly Guid guidMeadowPackage = new Guid(guidMeadowPackageString);
+        public static readonly Guid guidMeadowPackageCmdSet = new Guid(guidMeadowPackageCmdSetString);
+    }
+
+    static class PkgCmdIDList
+    {
+        public const uint cmdidMeadowDeviceListCombo = 0x101;
+        public const uint cmdidMeadowDeviceListComboGetList = 0x102;
     }
 }
