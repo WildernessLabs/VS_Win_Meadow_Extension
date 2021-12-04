@@ -45,6 +45,12 @@ jobs:
       run: msbuild main/VS_Meadow_Extension.2019.sln -t:rebuild /p:Configuration=Release
       env:
         DevEnvDir: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE'
+        
+    - name: Upload VSIX Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: VSIX
+        path: '*.vsix'
 
 #    - uses: actions/create-release@v1
 #      id: create_vs2019_release
@@ -95,6 +101,12 @@ jobs:
       run: msbuild main/VS_Meadow_Extension.2022.sln -t:rebuild /p:Configuration=Release
       env:
         DevEnvDir: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE'
+
+    - name: Upload VSIX Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: VSIX
+        path: '*.vsix'
     
 #    - uses: actions/create-release@v1
 #      id: create_vs2022_release
