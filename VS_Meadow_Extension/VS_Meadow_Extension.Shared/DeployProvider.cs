@@ -102,6 +102,8 @@ namespace Meadow
             if (isAppDeploy == false)
                 return;
 
+            ThreadHelper.ThrowIfNotOnUIThread();
+
             IVsOutputWindow outWindow = Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
             Guid generalPaneGuid = VSConstants.GUID_OutWindowDebugPane; // P.S. There's also the GUID_OutWindowDebugPane available.
             

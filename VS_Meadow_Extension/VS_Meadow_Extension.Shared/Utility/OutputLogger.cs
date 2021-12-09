@@ -1,9 +1,10 @@
-﻿using Meadow.CLI.Core.Logging;
-using Meadow.Utility;
+﻿using Meadow.Utility;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
 using System.IO;
+using Microsoft.VisualStudio.Shell;
 
 namespace Meadow
 {
@@ -53,6 +54,8 @@ namespace Meadow
                 stopwatch.Start();
 
             msg = $"{CurrentTimeStamp} {msg,-25}";
+
+            ThreadHelper.ThrowIfNotOnUIThread();
 
             textWriter?.WriteLine(msg);
             outputPane?.OutputString(msg);
