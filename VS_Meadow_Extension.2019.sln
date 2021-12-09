@@ -15,19 +15,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.VBNet.Library.Templa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.VBNet.Template", "Meadow.VBNet.Template\Meadow.VBNet.Template.csproj", "{0A4773F5-B5EC-4928-AAE7-64253877CF4E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.CLI.Core.VS2019", "..\Meadow.CLI\Meadow.CLI.Core\Meadow.CLI.Core.VS2019.csproj", "{A48FC00C-9BA3-43E3-BA1D-55FD6128D425}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "MeadowLogger", "..\Meadow.CLI\MeadowLogger\MeadowLogger.shproj", "{A04F6A20-2B23-4B29-9905-1B79A39BBF25}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS_Meadow_Extension.2019", "VS_Meadow_Extension\VS_Meadow_Extension.2019\VS_Meadow_Extension.2019.csproj", "{0D8532C9-69AD-4EE2-80A9-0C4ECE47674E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{F27FC7D7-ADB6-4538-BF59-CBFE72C5AA71}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.CLI.Core", "..\Meadow.CLI\Meadow.CLI.Core\Meadow.CLI.Core.csproj", "{2021DC29-5F18-4B36-A72D-8557087872BC}"
+EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		..\Meadow.CLI\MeadowLogger\MeadowLogger.projitems*{a04f6a20-2b23-4b29-9905-1b79a39bbf25}*SharedItemsImports = 13
-		..\Meadow.CLI\MeadowLogger\MeadowLogger.projitems*{a48fc00c-9ba3-43e3-ba1d-55fd6128d425}*SharedItemsImports = 5
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -57,14 +51,14 @@ Global
 		{0A4773F5-B5EC-4928-AAE7-64253877CF4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A4773F5-B5EC-4928-AAE7-64253877CF4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0A4773F5-B5EC-4928-AAE7-64253877CF4E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A48FC00C-9BA3-43E3-BA1D-55FD6128D425}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A48FC00C-9BA3-43E3-BA1D-55FD6128D425}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A48FC00C-9BA3-43E3-BA1D-55FD6128D425}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A48FC00C-9BA3-43E3-BA1D-55FD6128D425}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0D8532C9-69AD-4EE2-80A9-0C4ECE47674E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0D8532C9-69AD-4EE2-80A9-0C4ECE47674E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D8532C9-69AD-4EE2-80A9-0C4ECE47674E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0D8532C9-69AD-4EE2-80A9-0C4ECE47674E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2021DC29-5F18-4B36-A72D-8557087872BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2021DC29-5F18-4B36-A72D-8557087872BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2021DC29-5F18-4B36-A72D-8557087872BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2021DC29-5F18-4B36-A72D-8557087872BC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
