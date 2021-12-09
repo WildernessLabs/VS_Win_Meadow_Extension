@@ -1,0 +1,120 @@
+name: VS4Win Extension
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-2019:
+    runs-on: windows-latest
+    name: Build VS2019 Extension
+
+    steps:
+    - name: Checkout current repo
+      uses: actions/checkout@v2
+      with:
+        path: main
+
+    - name: Checkout Meadow.CLI.Core side-by-side
+      uses: actions/checkout@v2
+      with:
+        repository: WildernessLabs/Meadow.CLI
+        path: Meadow.CLI
+        ref: VS2019
+
+    - name: Setup .NET Core SDK 5.0.x
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.0.5
+
+    - name: Restore VS2019 dependencies
+      run: dotnet restore main/VS_Meadow_Extension.2019.sln
+
+    - name: Add MSBuild to Path
+      uses: microsoft/setup-msbuild@v1.1
+      with:
+        vs-version: '[16.0, 17.0)'
+
+    - name: Build VS2019 Extension
+      id: VS2019-Extension
+      run: msbuild main/VS_Meadow_Extension.2019.sln -t:rebuild /p:Configuration=Release
+      env:
+        DevEnvDir: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE'
+        
+    - name: Upload VSIX Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: Meadow.2019.vsix
+        path: 'main\VS_Meadow_Extension\VS_Meadow_Extension.2019\bin\Release\*.vsix'
+
+#    - uses: actions/create-release@v1
+#      id: create_vs2019_release
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      with:
+#        tag_name: ${{ github.ref }}
+#        release_name: ${{ github.ref }}
+      
+#    - name: Publish VS2019 Extension
+#      run: ${VSInstallDir}\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe publish -payload ${{ steps.create_vs2019_release.outputs.upload_url }}/Meadow.2019.vsix -publishManifest ${{ steps.create_vs2019_release.outputs.upload_url }}/vs-publish.json -ignoreWarnings "VSIXValidatorWarning01,VSIXValidatorWarning02"
+
+  build-2022:
+    runs-on: windows-2022
+    name: Build VS2022 Extension
+
+    steps:
+    - name: Checkout current repo
+      uses: actions/checkout@v2
+      with:
+        path: main
+
+    - name: Checkout Meadow.CLI.Core side-by-side
+      uses: actions/checkout@v2
+      with:
+        repository: WildernessLabs/Meadow.CLI
+        path: Meadow.CLI
+        ref: VS2019
+
+    - name: Setup .NET Core SDK 5.0.x
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.0.5
+
+    - name: Restore VS2022 dependencies
+      run: dotnet restore main/VS_Meadow_Extension.2022.sln
+
+    - name: Add MSBuild to Path
+      uses: microsoft/setup-msbuild@v1.1
+      with:
+        vs-version: '[17.0, 18.0)'
+
+    - name: Build VS2022 Extension
+      id: VS2022-Extension
+      run: msbuild main/VS_Meadow_Extension.2022.sln -t:rebuild /p:Configuration=Release
+      env:
+        DevEnvDir: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE'
+
+    - name: Upload VSIX Artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: Meadow.2022.vsix
+        path: 'main\VS_Meadow_Extension\VS_Meadow_Extension.2022\bin\Release\*.vsix'
+    
+#    - uses: actions/create-release@v1
+#      id: create_vs2022_release
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      with:
+#        tag_name: ${{ github.ref }}
+#        release_name: ${{ github.ref }}
+      
+#    - name: Publish VS2022 Extension
+#      run: ${VSInstallDir}\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe publish -payload ${{ steps.create_vs2022_release.outputs.upload_url }}/Meadow.2022.vsix -publishManifest ${{ steps.create_vs2022_release.outputs.upload_url }}/vs-publish.json -ignoreWarnings "VSIXValidatorWarning01,VSIXValidatorWarning02"
