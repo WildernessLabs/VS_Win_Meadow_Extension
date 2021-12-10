@@ -220,11 +220,11 @@
       <DependentUpon>MeadowWindowControl.xaml</DependentUpon>
       <Link>MeadowWindowControl.xaml.cs</Link>
     </Compile>
-    <Compile Include="..\VS_Meadow_Extension.Shared\Utility\OutputLogger.cs">
-      <Link>"Utility\OutputLogger.cs</Link>
-    </Compile>
     <Compile Include="..\VS_Meadow_Extension.Shared\ProjectProperties.cs">
       <Link>ProjectProperties.cs</Link>
+    </Compile>
+    <Compile Include="..\VS_Meadow_Extension.Shared\Utility\OutputLogger.cs">
+      <Link>Utility\OutputLogger.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="..\VS_Meadow_Extension.Shared\SerialDevice.cs">
