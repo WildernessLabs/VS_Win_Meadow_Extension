@@ -14,45 +14,32 @@ namespace Meadow
 {
     class MeadowSoftDebuggerSession : SoftDebuggerSession
     {
+		CancellationTokenSource meadowDebugCancelTokenSource;
+		DebuggingServer meadowDebugServer;
         MeadowDeviceHelper meadow;
-        DebuggingServer meadowDebugServer;
 
         public MeadowSoftDebuggerSession(MeadowDeviceHelper meadow)
         {
             this.meadow = meadow;
+            meadowDebugCancelTokenSource = new CancellationTokenSource();
         }
 
         protected override async void OnRun(DebuggerStartInfo startInfo)
         {
-            try
-            {
-                var softStartInfo = (SoftDebuggerStartInfo)startInfo;
-                switch (softStartInfo.StartArgs)
-                {
-                    case SoftDebuggerConnectArgs args:
-                        meadowDebugServer = await meadow.StartDebuggingSessionAsync(args.DebugPort, CancellationToken.None);
-                        StartConnecting(softStartInfo);
-                        break;
+            var meadowStartInfo = startInfo as SoftDebuggerStartInfo;
+            var connectArgs = meadowStartInfo.StartArgs as SoftDebuggerConnectArgs;
+            var port = connectArgs?.DebugPort ?? 0;
 
-                    case SoftDebuggerListenArgs args:
-                        throw new NotImplementedException("FIXME");
-                    //StartListening(softStartInfo, out var debugPort);
-                    //(await MeadowDeviceManager.CreateDebuggingServer(meadow, new IPEndPoint(IPAddress.Loopback, debugPort))).Connect(meadow);
-                    //break;
+            meadowDebugServer = await meadow.StartDebuggingSessionAsync(port, meadowDebugCancelTokenSource.Token);
 
-                    default:
-                        base.OnRun(startInfo);
-                        break;
-                }
-            }
-            catch (Meadow.CLI.Core.Exceptions.DeviceDisconnectedException e)
-            {
-
-            }
+            base.OnRun(startInfo);
         }
 
         protected override async void OnExit()
         {
+            if (!meadowDebugCancelTokenSource.IsCancellationRequested)
+                meadowDebugCancelTokenSource?.Cancel();
+
             await meadowDebugServer?.StopListeningAsync();
             meadowDebugServer?.Dispose();
             meadowDebugServer = null;
