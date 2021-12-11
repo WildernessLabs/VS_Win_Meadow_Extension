@@ -97,10 +97,12 @@ namespace Meadow
             get { return true; }
         }
 
-        public void Commit()
+        public async void Commit()
         {
             if (isAppDeploy == false)
                 return;
+
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
             IVsOutputWindow outWindow = Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
             Guid generalPaneGuid = VSConstants.GUID_OutWindowDebugPane; // P.S. There's also the GUID_OutWindowDebugPane available.
