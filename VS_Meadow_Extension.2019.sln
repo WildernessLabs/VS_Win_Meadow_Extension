@@ -23,8 +23,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS_Meadow_Extension.2019", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{F27FC7D7-ADB6-4538-BF59-CBFE72C5AA71}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "VS_Win_Meadow_Extension.Shared", "VS_Meadow_Extension\VS_Meadow_Extension.Shared\VS_Win_Meadow_Extension.Shared.shproj", "{6BD8A462-77A3-442D-97C8-36CBDA794DC9}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		VS_Meadow_Extension\VS_Meadow_Extension.Shared\VS_Win_Meadow_Extension.Shared.projitems*{0d8532c9-69ad-4ee2-80a9-0c4ece47674e}*SharedItemsImports = 4
+		VS_Meadow_Extension\VS_Meadow_Extension.Shared\VS_Win_Meadow_Extension.Shared.projitems*{6bd8a462-77a3-442d-97c8-36cbda794dc9}*SharedItemsImports = 13
 		..\Meadow.CLI\MeadowLogger\MeadowLogger.projitems*{a04f6a20-2b23-4b29-9905-1b79a39bbf25}*SharedItemsImports = 13
 		..\Meadow.CLI\MeadowLogger\MeadowLogger.projitems*{a48fc00c-9ba3-43e3-ba1d-55fd6128d425}*SharedItemsImports = 5
 	EndGlobalSection
