@@ -75,39 +75,41 @@ namespace Meadow
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-            // Add our command handlers for menu (commands must be declared in the .vsct file)
-            OleMenuCommandService mcs = await GetServiceAsync(typeof(IMenuCommandService)) as OleMenuCommandService;
-            if (mcs != null)
-            {
-                CommandID menuMeadowDeviceListComboCommandID = new CommandID(GuidList.guidMeadowPackageCmdSet, (int)PkgCmdIDList.cmdidMeadowDeviceListCombo);
-                OleMenuCommand menuMeadowDeviceListComboCommand = new OleMenuCommand(new EventHandler(OnMeadowDeviceListCombo), menuMeadowDeviceListComboCommandID);
-                mcs.AddCommand(menuMeadowDeviceListComboCommand);
+			// Add our command handlers for menu (commands must be declared in the .vsct file)
+			if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService mcs)
+			{
+				CommandID menuMeadowDeviceListComboCommandID = new CommandID(GuidList.guidMeadowPackageCmdSet, (int)PkgCmdIDList.cmdidMeadowDeviceListCombo);
+				OleMenuCommand menuMeadowDeviceListComboCommand = new OleMenuCommand(new EventHandler(OnMeadowDeviceListCombo), menuMeadowDeviceListComboCommandID);
+				mcs.AddCommand(menuMeadowDeviceListComboCommand);
 
-                CommandID menuMeadowDeviceListComboGetListCommandID = new CommandID(GuidList.guidMeadowPackageCmdSet, (int)PkgCmdIDList.cmdidMeadowDeviceListComboGetList);
-                MenuCommand menuMeadowDeviceListComboGetListCommand = new OleMenuCommand(new EventHandler(OnMeadowDeviceListComboGetList), menuMeadowDeviceListComboGetListCommandID);
-                mcs.AddCommand(menuMeadowDeviceListComboGetListCommand);
-            }
+				CommandID menuMeadowDeviceListComboGetListCommandID = new CommandID(GuidList.guidMeadowPackageCmdSet, (int)PkgCmdIDList.cmdidMeadowDeviceListComboGetList);
+				MenuCommand menuMeadowDeviceListComboGetListCommand = new OleMenuCommand(new EventHandler(OnMeadowDeviceListComboGetList), menuMeadowDeviceListComboGetListCommandID);
+				mcs.AddCommand(menuMeadowDeviceListComboGetListCommand);
+			}
 
-            await MeadowWindowCommand.InitializeAsync(this);
+			await MeadowWindowCommand.InitializeAsync(this);
         }
         #endregion
 
-        private async void OnMeadowDeviceListCombo(object sender, EventArgs e)
+        private void OnMeadowDeviceListCombo(object sender, EventArgs e)
         {
-            OleMenuCmdEventArgs eventArgs = e as OleMenuCmdEventArgs;
-
-            if (eventArgs != null)
+            if (e is OleMenuCmdEventArgs eventArgs)
             {
-                string newChoice = eventArgs.InValue as string;
-                IntPtr vOut = eventArgs.OutValue;
+				IntPtr vOut = eventArgs.OutValue;
 
-                if (vOut != IntPtr.Zero)
+				if (vOut != IntPtr.Zero)
                 {
-                    // when vOut is non-NULL, the IDE is requesting the current value for the combo
-                    MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath);
-                    Marshal.GetNativeVariantForObject(settings.DeviceTarget, vOut);
+                    string deviceTarget = string.Empty;
+                    var portList = MeadowDeviceManager.GetSerialPorts();
+                    if (portList.Count > 0)
+                    {
+                        // when vOut is non-NULL, the IDE is requesting the current value for the combo
+                        MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath);
+                        deviceTarget = settings.DeviceTarget;
+                    }
+                    Marshal.GetNativeVariantForObject(deviceTarget, vOut);
                 }
-                else if (newChoice != null)
+                else if (eventArgs.InValue is string newChoice)
                 {
                     // new value was selected check if it is our list
                     bool validInput = false;
@@ -123,10 +125,11 @@ namespace Meadow
 
                     if (validInput)
                     {
-                        MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath, false);
-
-                        settings.DeviceTarget = newChoice;
-                        settings.Save();
+						MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath, false)
+						{
+							DeviceTarget = newChoice
+						};
+						settings.Save();
                     }
                     else
                     {
@@ -143,9 +146,7 @@ namespace Meadow
 
         private void OnMeadowDeviceListComboGetList(object sender, EventArgs e)
         {
-            OleMenuCmdEventArgs eventArgs = e as OleMenuCmdEventArgs;
-
-            if (eventArgs != null)
+            if (e is OleMenuCmdEventArgs eventArgs)
             {
                 object inParam = eventArgs.InValue;
                 IntPtr vOut = eventArgs.OutValue;
@@ -157,7 +158,14 @@ namespace Meadow
                 else if (vOut != IntPtr.Zero)
                 {
                     var captions = MeadowDeviceManager.GetSerialPorts();
-                    Marshal.GetNativeVariantForObject(captions, vOut);
+                    if (captions.Count > 0)
+                    {
+                        Marshal.GetNativeVariantForObject(captions, vOut);
+                    }
+                    else
+                    {
+                        Marshal.GetNativeVariantForObject(new string [] { "No Devices Found" }, vOut);
+                    }
                 }
                 else
                 {
