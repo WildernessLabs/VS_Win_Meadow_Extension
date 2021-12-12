@@ -121,10 +121,9 @@ namespace Meadow
 
             IVsOutputWindow outWindow = Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
             Guid generalPaneGuid = VSConstants.GUID_OutWindowDebugPane; // P.S. There's also the GUID_OutWindowDebugPane available.
-            
-            IVsOutputWindowPane generalPane;
-            outWindow.GetPane(ref generalPaneGuid, out generalPane);
-            generalPane.Activate();
+
+			outWindow.GetPane(ref generalPaneGuid, out IVsOutputWindowPane generalPane);
+			generalPane.Activate();
             generalPane.Clear();
 
             generalPane.OutputString(" Launching application..." + Environment.NewLine);
