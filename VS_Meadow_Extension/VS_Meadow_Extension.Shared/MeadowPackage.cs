@@ -44,8 +44,6 @@ namespace Meadow
     [InstalledProductRegistration("#1110", "#1112", "1.0", IconResourceID = 1400)] // Info on this package for Help/About
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [Guid(GuidList.guidMeadowPackageString)]
-    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
-    [ProvideToolWindow(typeof(MeadowWindow))]
     public sealed class MeadowPackage : AsyncPackage
     {
         /// <summary>
@@ -86,8 +84,6 @@ namespace Meadow
 				MenuCommand menuMeadowDeviceListComboGetListCommand = new OleMenuCommand(new EventHandler(OnMeadowDeviceListComboGetList), menuMeadowDeviceListComboGetListCommandID);
 				mcs.AddCommand(menuMeadowDeviceListComboGetListCommand);
 			}
-
-			await MeadowWindowCommand.InitializeAsync(this);
         }
         #endregion
 

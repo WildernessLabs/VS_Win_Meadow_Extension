@@ -111,10 +111,6 @@
       <Parent guid="guidMeadowPackageCmdSet" id="MyToolbar"/>
     </CommandPlacement>
   </CommandPlacements>
-
-  <KeyBindings>
-    <KeyBinding guid="guidMeadowPackageCmdSet" id="cmdidMeadowWindowCommand" editor="guidVSStd97" key1="M" mod1="Control Shift" />
-  </KeyBindings>
   
   <Symbols>
     <!-- This is the package guid. -->
