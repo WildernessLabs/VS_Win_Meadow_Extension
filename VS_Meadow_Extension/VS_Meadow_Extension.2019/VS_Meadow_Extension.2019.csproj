@@ -339,11 +339,6 @@
       <SubType>Designer</SubType>
       <Link>BuildSystem\Rules\MeadowDebugger.xaml</Link>
     </XamlPropertyRule>
-    <Page Include="..\VS_Meadow_Extension.Shared\MeadowWindowControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Link>MeadowWindowControl.xaml</Link>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Meadow.CLI\Meadow.CLI.Core\Meadow.CLI.Core.VS2019.csproj">
