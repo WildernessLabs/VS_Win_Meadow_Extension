@@ -55,15 +55,7 @@ namespace Meadow
 
             try
             {
-                var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger);
-
-                if (device == null)
-                {
-                    isAppDeploy = false;
-                    logger?.Log("Device has not been selected. Hit Ctrl+Shift+M to access the Device list.");
-                }
-
-                await DeployAppAsync(device, Path.Combine(projectDir, outputPath), new OutputPaneWriter(outputPaneWriter), cts).ConfigureAwait(false);
+                await DeployAppAsync(Path.Combine(projectDir, outputPath), new OutputPaneWriter(outputPaneWriter), cts).ConfigureAwait(false);
             }
             catch
             {
@@ -72,11 +64,19 @@ namespace Meadow
             }
         }
 
-        async Task DeployAppAsync(IMeadowDevice device, string folder, IOutputPaneWriter outputPaneWriter, CancellationToken token)
+        async Task DeployAppAsync(string folder, IOutputPaneWriter outputPaneWriter, CancellationToken token)
         {
             try
             {
                 Meadow?.Dispose();
+
+                var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger);
+                if (device == null)
+                {
+                    isAppDeploy = false;
+                    logger?.Log("A device has not been selected. Please select a device from the Device list.");
+                    return;
+                }
 
                 Meadow = new MeadowDeviceHelper(device, logger);
 
