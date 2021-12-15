@@ -1,13 +1,15 @@
-﻿using Meadow.CLI.Core.Logging;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.ProjectSystem;
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.ProjectSystem;
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
+
+using Meadow.CLI.Core.Logging;
 
 namespace Meadow
 {
@@ -37,7 +39,7 @@ namespace Meadow
         {
             try
             {
-                await ThreadingService.SwitchToUIThread();
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 if (OutputPane == null)
                 {
                     IVsOutputWindow outWindow = Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
