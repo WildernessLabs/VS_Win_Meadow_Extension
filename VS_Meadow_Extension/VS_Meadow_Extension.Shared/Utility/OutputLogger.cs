@@ -1,9 +1,11 @@
-﻿using Meadow.CLI.Core.Logging;
-using Meadow.Utility;
-using Microsoft.VisualStudio.Shell.Interop;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
+
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
+
+using Meadow.CLI.Core.Logging;
 
 namespace Meadow
 {
@@ -45,7 +47,7 @@ namespace Meadow
 
         public bool IsEnabled(LogLevel logLevel) => logLevel >= LogLevel.Information;
 
-        public void Log(string msg)
+        public async void Log(string msg)
         {
             if (stopwatch.IsRunning)
                 stopwatch.Restart();
@@ -53,6 +55,8 @@ namespace Meadow
                 stopwatch.Start();
 
             msg = $"{CurrentTimeStamp} {msg,-25}";
+
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
             textWriter?.WriteLine(msg);
             outputPane?.OutputString(msg);

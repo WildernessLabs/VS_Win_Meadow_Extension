@@ -61,11 +61,10 @@ namespace Meadow
                 return Array.Empty<IDebugLaunchSettings>();
             }
 
-            if (DeployProvider.Meadow == null)
-            {
-                var meadow = await MeadowProvider.GetMeadowSerialDeviceAsync(logger: outputPane);
-                DeployProvider.Meadow = new MeadowDeviceHelper(meadow, outputPane);
-            }
+            DeployProvider.Meadow?.Dispose();
+
+            var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger: outputPane);
+            DeployProvider.Meadow = new MeadowDeviceHelper(device, outputPane);
 
             var meadowSession = new MeadowSoftDebuggerSession(DeployProvider.Meadow);
 
