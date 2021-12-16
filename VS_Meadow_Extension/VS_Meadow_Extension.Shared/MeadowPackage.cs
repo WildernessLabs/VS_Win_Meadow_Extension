@@ -46,6 +46,8 @@ namespace Meadow
     [Guid(GuidList.guidMeadowPackageString)]
     public sealed class MeadowPackage : AsyncPackage
     {
+        private const string NoDevicesFound = "No Devices Found";
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MeadowPackage"/> class.
         /// </summary>
@@ -73,17 +75,17 @@ namespace Meadow
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-			// Add our command handlers for menu (commands must be declared in the .vsct file)
-			if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService mcs)
-			{
-				CommandID menuMeadowDeviceListComboCommandID = new CommandID(GuidList.guidMeadowPackageCmdSet, (int)PkgCmdIDList.cmdidMeadowDeviceListCombo);
-				OleMenuCommand menuMeadowDeviceListComboCommand = new OleMenuCommand(new EventHandler(OnMeadowDeviceListCombo), menuMeadowDeviceListComboCommandID);
-				mcs.AddCommand(menuMeadowDeviceListComboCommand);
+            // Add our command handlers for menu (commands must be declared in the .vsct file)
+            if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService mcs)
+            {
+                CommandID menuMeadowDeviceListComboCommandID = new CommandID(GuidList.guidMeadowPackageCmdSet, (int)PkgCmdIDList.cmdidMeadowDeviceListCombo);
+                OleMenuCommand menuMeadowDeviceListComboCommand = new OleMenuCommand(new EventHandler(OnMeadowDeviceListCombo), menuMeadowDeviceListComboCommandID);
+                mcs.AddCommand(menuMeadowDeviceListComboCommand);
 
-				CommandID menuMeadowDeviceListComboGetListCommandID = new CommandID(GuidList.guidMeadowPackageCmdSet, (int)PkgCmdIDList.cmdidMeadowDeviceListComboGetList);
-				MenuCommand menuMeadowDeviceListComboGetListCommand = new OleMenuCommand(new EventHandler(OnMeadowDeviceListComboGetList), menuMeadowDeviceListComboGetListCommandID);
-				mcs.AddCommand(menuMeadowDeviceListComboGetListCommand);
-			}
+                CommandID menuMeadowDeviceListComboGetListCommandID = new CommandID(GuidList.guidMeadowPackageCmdSet, (int)PkgCmdIDList.cmdidMeadowDeviceListComboGetList);
+                MenuCommand menuMeadowDeviceListComboGetListCommand = new OleMenuCommand(new EventHandler(OnMeadowDeviceListComboGetList), menuMeadowDeviceListComboGetListCommandID);
+                mcs.AddCommand(menuMeadowDeviceListComboGetListCommand);
+            }
         }
         #endregion
 
@@ -91,9 +93,9 @@ namespace Meadow
         {
             if (e is OleMenuCmdEventArgs eventArgs)
             {
-				IntPtr vOut = eventArgs.OutValue;
+                IntPtr vOut = eventArgs.OutValue;
 
-				if (vOut != IntPtr.Zero)
+                if (vOut != IntPtr.Zero)
                 {
                     string deviceTarget = string.Empty;
                     var portList = MeadowDeviceManager.GetSerialPorts();
@@ -107,11 +109,11 @@ namespace Meadow
                 }
                 else if (eventArgs.InValue is string newChoice)
                 {
-                    // new value was selected check if it is our list
+                    // new value was selected check if it is in our list
                     bool validInput = false;
                     var portList = MeadowDeviceManager.GetSerialPorts();
-					for (int i = 0; i < portList.Count; i++)
-					{
+                    for (int i = 0; i < portList.Count; i++)
+                    {
                         if (string.Compare(portList[i], newChoice, StringComparison.CurrentCultureIgnoreCase) == 0)
                         {
                             validInput = true;
@@ -121,15 +123,11 @@ namespace Meadow
 
                     if (validInput)
                     {
-						MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath, false)
-						{
-							DeviceTarget = newChoice
-						};
-						settings.Save();
-                    }
-                    else
-                    {
-                        throw (new ArgumentException("Invalid Device Selected")); // force an exception to be thrown
+                        MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath, false)
+                        {
+                            DeviceTarget = newChoice
+                        };
+                        settings.Save();
                     }
                 }
             }
@@ -160,7 +158,7 @@ namespace Meadow
                     }
                     else
                     {
-                        Marshal.GetNativeVariantForObject(new string [] { "No Devices Found" }, vOut);
+                        Marshal.GetNativeVariantForObject(new string[] { NoDevicesFound }, vOut);
                     }
                 }
                 else
