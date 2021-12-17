@@ -22,7 +22,7 @@ jobs:
       with:
         repository: WildernessLabs/Meadow.CLI
         path: Meadow.CLI
-        ref: VS2019
+        ref: develop
 
     - name: Setup .NET Core SDK 5.0.x
       uses: actions/setup-dotnet@v1
@@ -67,7 +67,7 @@ jobs:
       with:
         repository: WildernessLabs/Meadow.CLI
         path: Meadow.CLI
-        ref: VS2019
+        ref: develop
 
     - name: Setup .NET Core SDK 5.0.x
       uses: actions/setup-dotnet@v1
