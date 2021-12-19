@@ -84,11 +84,11 @@ namespace Meadow
                 //wrap this is a try/catch so it doesn't crash if the developer is offline
                 try
                 {
-                    //check the device OS version, in order to download matching assemblies to it
-                    var deviceInfo = await Meadow.GetDeviceInfoAsync(TimeSpan.FromSeconds(30), token).ConfigureAwait(false);
-                    string osVersion = deviceInfo.MeadowOsVersion.Split(' ')[0]; // we want the first part of e.g. '0.5.3.0 (Oct 13 2021 13:39:12)'
+                    string osVersion = await Meadow.GetOSVersion(TimeSpan.FromSeconds(30), token)
+                        .ConfigureAwait(false);
 
-                    await new DownloadManager(logger).DownloadLatestAsync(osVersion).ConfigureAwait(false);
+                    await new DownloadManager(logger).DownloadLatestAsync(osVersion)
+                        .ConfigureAwait(false);
                 }
                 catch
                 {
