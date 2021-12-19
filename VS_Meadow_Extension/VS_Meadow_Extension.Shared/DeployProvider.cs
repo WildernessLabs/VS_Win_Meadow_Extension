@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using Meadow.CLI.Core;
 using Meadow.CLI.Core.DeviceManagement;
 using Meadow.CLI.Core.Devices;
 using Meadow.Helpers;
@@ -79,6 +80,20 @@ namespace Meadow
                 }
 
                 Meadow = new MeadowDeviceHelper(device, logger);
+
+                //wrap this is a try/catch so it doesn't crash if the developer is offline
+                try
+                {
+                    string osVersion = await Meadow.GetOSVersion(TimeSpan.FromSeconds(30), token)
+                        .ConfigureAwait(false);
+
+                    await new DownloadManager(logger).DownloadLatestAsync(osVersion)
+                        .ConfigureAwait(false);
+                }
+                catch
+                {
+                    logger.Log("OS download failed, make sure you have an active internet connection");
+                }
 
                 var appPathDll = Path.Combine(folder, "App.dll");
 
