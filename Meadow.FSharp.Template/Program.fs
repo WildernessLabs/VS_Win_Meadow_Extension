@@ -5,7 +5,7 @@ open Meadow.Foundation.Leds
 open Meadow.Foundation
 
 type MeadowApp() =
-    inherit App<F7Micro, MeadowApp>()
+    inherit App<F7MicroV2, MeadowApp>()
         
     do Console.WriteLine "Init with FSharp!"
     let led = new RgbPwmLed(MeadowApp.Device, MeadowApp.Device.Pins.OnboardLedRed,MeadowApp.Device.Pins.OnboardLedGreen, MeadowApp.Device.Pins.OnboardLedBlue,3.3f,3.3f,3.3f,Meadow.Peripherals.Leds.IRgbLed.CommonType.CommonAnode)
