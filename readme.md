@@ -8,7 +8,7 @@ This is the add-in for Visual Studio that enables Meadow projects to be built an
 
 ## Getting Started
 
-The [Meadow.CLI](https://github.com/WildernessLabs/Meadow.CLI) repo must be cloned adjacent to this checkout.
+The [Meadow.CLI](https://github.com/WildernessLabs/Meadow.CLI) repo must be cloned adjacent to this checkout using the `develop` branch.
 
 ## License
 
@@ -16,4 +16,4 @@ Released under the [Apache 2 license](license.md).
 
 ## Authors
 
-Brian Kim
+Brian Kim, Adrian Stevens, Jorge Ramirez, Dominique Louis
