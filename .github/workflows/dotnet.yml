@@ -24,10 +24,12 @@ jobs:
         path: Meadow.CLI
         ref: develop
 
-    - name: Setup .NET Core SDK 5.0.x
+    - name: Setup .NET Core SDK 5.0.x and 6.0.x
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.x
+        dotnet-version: |
+          5.0.x
+          6.0.x
 
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v1.0.5
@@ -69,10 +71,12 @@ jobs:
         path: Meadow.CLI
         ref: develop
 
-    - name: Setup .NET Core SDK 5.0.x
+    - name: Setup .NET Core SDK 5.0.x and 6.0.x
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 5.0.x
+        dotnet-version: |
+          5.0.x
+          6.0.x
 
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v1.0.5
