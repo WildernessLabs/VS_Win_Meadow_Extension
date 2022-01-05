@@ -64,19 +64,28 @@ namespace Meadow
             DeployProvider.Meadow?.Dispose();
 
             var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger: outputPane);
-            DeployProvider.Meadow = new MeadowDeviceHelper(device, outputPane);
 
-            var meadowSession = new MeadowSoftDebuggerSession(DeployProvider.Meadow);
+            if (device != null)
+            {
+                DeployProvider.Meadow = new MeadowDeviceHelper(device, outputPane);
 
-            var startArgs = new SoftDebuggerConnectArgs(profile.Name, IPAddress.Loopback, 55898);
-            var startInfo = new StartInfo(startArgs, debuggingOptions, VsHierarchy.GetProject());
+                var meadowSession = new MeadowSoftDebuggerSession(DeployProvider.Meadow);
 
-            var sessionInfo = new SessionMarshalling(meadowSession, startInfo);
-            vsSession = new DebuggerSession(startInfo, outputPane, meadowSession, this);
+                var startArgs = new SoftDebuggerConnectArgs(profile.Name, IPAddress.Loopback, 55898);
+                var startInfo = new StartInfo(startArgs, debuggingOptions, VsHierarchy.GetProject());
 
-            var settings = new MonoDebugLaunchSettings(launchOptions, sessionInfo);
+                var sessionInfo = new SessionMarshalling(meadowSession, startInfo);
+                vsSession = new DebuggerSession(startInfo, outputPane, meadowSession, this);
 
-            return new[] { settings };
+                var settings = new MonoDebugLaunchSettings(launchOptions, sessionInfo);
+
+                return new[] { settings };
+            }
+            else
+			{
+                vsSession = null;
+                return Array.Empty<IDebugLaunchSettings>();
+            }
         }
 
         public Task OnBeforeLaunchAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile) => Task.CompletedTask;
