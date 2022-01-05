@@ -128,7 +128,14 @@ namespace Meadow
                             DeviceTarget = newChoice
                         };
                         settings.Save();
-                    }
+					}
+					else
+					{
+                        if (!newChoice.Equals(NoDevicesFound))
+						{
+                            throw (new ArgumentException("Invalid Device Selected"));
+                        }
+					}
                 }
             }
             else
