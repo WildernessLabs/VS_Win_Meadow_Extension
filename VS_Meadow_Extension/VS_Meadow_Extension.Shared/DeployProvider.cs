@@ -26,7 +26,7 @@ namespace Meadow
         // in the debug launch provider ?
         internal static MeadowDeviceHelper Meadow;
         static OutputLogger logger = new OutputLogger();
-        bool isAppDeploy = false;
+        bool appDeployed = false;
 
         /// <summary>
         /// Provides access to the project's properties.
@@ -38,7 +38,7 @@ namespace Meadow
         {
             logger?.DisconnectPane();
             logger?.ConnectTextWriter(outputPaneWriter);
-            isAppDeploy = false;
+            appDeployed = false;
 
             var generalProperties = await Properties.GetConfigurationGeneralPropertiesAsync();
             var name = await generalProperties.Rule.GetPropertyValueAsync("AssemblyName");
@@ -49,7 +49,7 @@ namespace Meadow
                 return;
             }
 
-            isAppDeploy = true;
+            appDeployed = true;
 
             var projectDir = await generalProperties.Rule.GetPropertyValueAsync("ProjectDir");
             var outputPath = Path.Combine(projectDir, await generalProperties.Rule.GetPropertyValueAsync("OutputPath"));
@@ -58,10 +58,12 @@ namespace Meadow
             {
                 await DeployAppAsync(Path.Combine(projectDir, outputPath), new OutputPaneWriter(outputPaneWriter), cts).ConfigureAwait(false);
             }
-            catch
+            catch (Exception ex)
             {
-                isAppDeploy = false;
-                logger?.Log("Deploy failed - reset Meadow and try again.");
+                appDeployed = false;
+                logger?.Log($"Deploy failed: {ex.Message}");
+                logger?.Log("Reset Meadow and try again.");
+                throw ex;
             }
         }
 
@@ -74,9 +76,8 @@ namespace Meadow
                 var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger);
                 if (device == null)
                 {
-                    isAppDeploy = false;
-                    logger?.Log("A device has not been selected. Please select a device from the Device list.");
-                    return;
+                    appDeployed = false;
+                    throw new Exception("A device has not been selected. Please attach a device, then select it from the Device list.");
                 }
 
                 Meadow = new MeadowDeviceHelper(device, logger);
@@ -101,9 +102,10 @@ namespace Meadow
             }
             catch (Exception ex)
             {
-                isAppDeploy = false;
+                appDeployed = false;
                 await outputPaneWriter.WriteAsync($"Deploy failed: {ex.Message}");
-                await outputPaneWriter.WriteAsync($"Reset Meadow and try again");
+                await outputPaneWriter.WriteAsync($"Reset Meadow and try again.");
+                throw ex;
             }
         }
 
@@ -114,7 +116,7 @@ namespace Meadow
 
         public async void Commit()
         {
-            if (isAppDeploy == false)
+            if (!appDeployed)
                 return;
 
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
@@ -134,6 +136,7 @@ namespace Meadow
 
         public void Rollback()
         {
+            Console.Write("Rolling Back");
         }
     }
 }
