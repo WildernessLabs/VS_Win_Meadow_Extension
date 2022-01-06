@@ -172,11 +172,6 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="Key.snk" />
-    <Content Include="..\VS_Meadow_Extension.Shared\wildernesslabs_icon.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
-      <Link>wildernesslabs_icon.png</Link>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Meadow.CLI\Meadow.CLI.Core\Meadow.CLI.Core.VS2019.csproj">

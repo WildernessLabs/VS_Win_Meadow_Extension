@@ -11,99 +11,76 @@
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources.resx">
       <SubType>Designer</SubType>
-      <Link>Resources.resx</Link>
     </EmbeddedResource>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)VSPackage.resx">
       <MergeWithCTO>true</MergeWithCTO>
       <SubType>Designer</SubType>
-      <Link>VSPackage.resx</Link>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs">
-      <Link>Extensions.cs</Link>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MeadowProvider.cs">
-      <Link>MeadowProvider.cs</Link>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MeadowSoftDebuggerSession.cs">
-      <Link>MeadowSoftDebuggerSession.cs</Link>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MonoDebugLaunchSettings.cs">
-      <Link>MonoDebugLaunchSettings.cs</Link>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MeadowDebuggerLaunchProvider.cs">
-      <Link>MeadowDebuggerLaunchProvider.cs</Link>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MeadowPackage.cs">
-      <Link>MeadowPackage.cs</Link>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)DeployProvider.cs">
-      <Link>DeployProvider.cs</Link>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Globals.cs">
-      <Link>Globals.cs</Link>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MeadowSettings.cs">
-      <Link>MeadowSettings.cs</Link>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MeadowWindow.cs">
-      <Link>MeadowWindow.cs</Link>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MeadowWindowCommand.cs">
-      <Link>MeadowWindowCommand.cs</Link>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MeadowWindowControl.xaml.cs">
       <DependentUpon>MeadowWindowControl.xaml</DependentUpon>
-      <Link>MeadowWindowControl.xaml.cs</Link>
-    </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)Utility\OutputLogger.cs">
-      <Link>"Utility\OutputLogger.cs</Link>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)ProjectProperties.cs">
-      <Link>ProjectProperties.cs</Link>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Utility\OutputLogger.cs">
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)SerialDevice.cs">
-      <Link>SerialDevice.cs</Link>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)STDfuDevice.cs">
-      <Link>STDfuDevice.cs</Link>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Utility\OutputPaneWriter.cs">
-      <Link>Utility\OutputPaneWriter.cs</Link>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Utility\VsOutputPaneLogger.cs">
-      <Link>Utility\VsOutputPaneLogger.cs</Link>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)VsixManifest.cs">
-      <Link>VsixManifest.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)Resources\MeadowPackage.ico">
-      <Link>Resources\MeadowPackage.ico</Link>
     </Content>
     <Content Include="$(MSBuildThisFileDirectory)Resources\MeadowWindowCommand.png">
-      <Link>Resources\MeadowWindowCommand.png</Link>
     </Content>
     <Content Include="$(MSBuildThisFileDirectory)STDFU.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
-      <Link>STDFU.dll</Link>
     </Content>
     <Content Include="$(MSBuildThisFileDirectory)STTubeDevice30.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <IncludeInVSIX>true</IncludeInVSIX>
-      <Link>STTubeDevice30.dll</Link>
+    </Content>
+    <Content Include="$(MSBuildThisFileDirectory)wildernesslabs_icon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <VSCTCompile Include="$(MSBuildThisFileDirectory)MeadowPackage.vsct">
       <ResourceName>Menus.ctmenu</ResourceName>
       <SubType>Designer</SubType>
-      <Link>MeadowPackage.vsct</Link>
     </VSCTCompile>
     <VSCTCompile Include="$(MSBuildThisFileDirectory)VsPackage.vsct">
       <ResourceName>Menus1.ctmenu</ResourceName>
-      <Link>VsPackage.vsct</Link>
     </VSCTCompile>
   </ItemGroup>
   <!-- 
@@ -112,11 +89,9 @@
   -->
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)BuildSystem\DeployedBuildSystem\VS_Meadow_Extension.props">
-      <Link>BuildSystem\DeployedBuildSystem\VS_Meadow_Extension.props</Link>
     </None>
     <None Include="$(MSBuildThisFileDirectory)BuildSystem\DeployedBuildSystem\VS_Meadow_Extension.targets">
       <SubType>Designer</SubType>
-      <Link>BuildSystem\DeployedBuildSystem\VS_Meadow_Extension.targets</Link>
     </None>
   </ItemGroup>
   <!--
@@ -127,132 +102,40 @@
   <ItemGroup>
     <XamlPropertyRule Include="$(MSBuildThisFileDirectory)BuildSystem\Rules\general.xaml">
       <SubType>Designer</SubType>
-      <Link>BuildSystem\Rules\general.xaml</Link>
     </XamlPropertyRule>
     <XamlPropertyRule Include="$(MSBuildThisFileDirectory)BuildSystem\Rules\general_file.xaml">
       <RuleInjection>None</RuleInjection>
       <SubType>Designer</SubType>
-      <Link>BuildSystem\Rules\general_file.xaml</Link>
     </XamlPropertyRule>
     <XamlPropertyRule Include="$(MSBuildThisFileDirectory)BuildSystem\Rules\folder.xaml">
       <RuleInjection>None</RuleInjection>
       <SubType>Designer</SubType>
-      <Link>BuildSystem\Rules\folder.xaml</Link>
     </XamlPropertyRule>
     <XamlPropertyRule Include="$(MSBuildThisFileDirectory)BuildSystem\Rules\none.xaml">
       <RuleInjection>None</RuleInjection>
       <SubType>Designer</SubType>
-      <Link>BuildSystem\Rules\none.xaml</Link>
     </XamlPropertyRule>
     <XamlPropertyRule Include="$(MSBuildThisFileDirectory)BuildSystem\Rules\scc.xaml">
       <SubType>Designer</SubType>
-      <Link>BuildSystem\Rules\scc.xaml</Link>
     </XamlPropertyRule>
     <XamlPropertyRule Include="$(MSBuildThisFileDirectory)BuildSystem\Rules\debugger_general.xaml">
       <SubType>Designer</SubType>
-      <Link>BuildSystem\Rules\debugger_general.xaml</Link>
     </XamlPropertyRule>
     <XamlPropertyRule Include="$(MSBuildThisFileDirectory)BuildSystem\Rules\general.browseobject.xaml">
       <SubType>Designer</SubType>
-      <Link>BuildSystem\Rules\general.browseobject.xaml</Link>
     </XamlPropertyRule>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)BuildSystem\Rules\MeadowDebugger.xaml.cs">
       <DependentUpon>MeadowDebugger.xaml</DependentUpon>
-      <Link>BuildSystem\Rules\MeadowDebugger.xaml.cs</Link>
     </Compile>
     <XamlPropertyRule Include="$(MSBuildThisFileDirectory)BuildSystem\Rules\MeadowDebugger.xaml">
       <Generator>MSBuild:GenerateRuleSourceFromXaml</Generator>
       <SubType>Designer</SubType>
-      <Link>BuildSystem\Rules\MeadowDebugger.xaml</Link>
     </XamlPropertyRule>
     <Page Include="$(MSBuildThisFileDirectory)MeadowWindowControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-      <Link>MeadowWindowControl.xaml</Link>
     </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="$(MSBuildThisFileDirectory)BuildSystem\DeployedBuildSystem\VS_Meadow_Extension.props" />
-    <None Include="$(MSBuildThisFileDirectory)BuildSystem\DeployedBuildSystem\VS_Meadow_Extension.targets">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)BuildSystem\Rules\debugger_general.xaml">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)BuildSystem\Rules\folder.xaml">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)BuildSystem\Rules\general.browseobject.xaml">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)BuildSystem\Rules\general.xaml">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)BuildSystem\Rules\general_file.xaml">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)BuildSystem\Rules\MeadowDebugger.xaml">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)BuildSystem\Rules\none.xaml">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)BuildSystem\Rules\scc.xaml">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="$(MSBuildThisFileDirectory)MeadowPackage.vsct" />
-    <None Include="$(MSBuildThisFileDirectory)VsPackage.vsct" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)BuildSystem\Rules\MeadowDebugger.xaml.cs">
-      <DependentUpon>MeadowDebugger.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)DeployProvider.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Globals.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)MeadowDebuggerLaunchProvider.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)MeadowPackage.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)MeadowProvider.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)MeadowSettings.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)MeadowSoftDebuggerSession.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)MeadowWindow.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)MeadowWindowCommand.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)MeadowWindowControl.xaml.cs">
-      <DependentUpon>MeadowWindowControl.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)MonoDebugLaunchSettings.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)ProjectProperties.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)SerialDevice.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)STDfuDevice.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Utility\OutputLogger.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Utility\OutputPaneWriter.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Utility\VsOutputPaneLogger.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)VsixManifest.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="$(MSBuildThisFileDirectory)Resources\MeadowPackage.ico" />
-    <Content Include="$(MSBuildThisFileDirectory)Resources\MeadowWindowCommand.png" />
-    <Content Include="$(MSBuildThisFileDirectory)STDFU.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="$(MSBuildThisFileDirectory)STTubeDevice30.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Include="$(MSBuildThisFileDirectory)MeadowWindowControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="$(MSBuildThisFileDirectory)VSPackage.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
   </ItemGroup>
 </Project>
