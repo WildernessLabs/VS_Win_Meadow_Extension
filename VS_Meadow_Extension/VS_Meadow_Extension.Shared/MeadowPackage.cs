@@ -7,15 +7,19 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Task = System.Threading.Tasks.Task;
+
 using EnvDTE;
 using EnvDTE80;
+using Microsoft.Win32;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.Win32;
-using Task = System.Threading.Tasks.Task;
+
+using Meadow.CLI.Core.DeviceManagement;
+using Meadow.Helpers;
 
 namespace Meadow
 {
@@ -39,15 +43,10 @@ namespace Meadow
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [InstalledProductRegistration("#1110", "#1112", "1.0", IconResourceID = 1400)] // Info on this package for Help/About
     [ProvideMenuResource("Menus.ctmenu", 1)]
-    [Guid(MeadowPackage.PackageGuidString)]
-    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "pkgdef, VS and vsixmanifest are valid VS terms")]
-    [ProvideToolWindow(typeof(MeadowWindow))]
+    [Guid(GuidList.guidMeadowPackageString)]
     public sealed class MeadowPackage : AsyncPackage
     {
-         /// <summary>
-        /// MeadowPackage GUID string.
-        /// </summary>
-        public const string PackageGuidString = "9e640b9d-2a9e-4da3-ba5e-351adc854fd2";
+        private const string NoDevicesFound = "No Devices Found";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MeadowPackage"/> class.
@@ -76,8 +75,123 @@ namespace Meadow
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
 
-            await MeadowWindowCommand.InitializeAsync(this);
+            // Add our command handlers for menu (commands must be declared in the .vsct file)
+            if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService mcs)
+            {
+                CommandID menuMeadowDeviceListComboCommandID = new CommandID(GuidList.guidMeadowPackageCmdSet, (int)PkgCmdIDList.cmdidMeadowDeviceListCombo);
+                OleMenuCommand menuMeadowDeviceListComboCommand = new OleMenuCommand(new EventHandler(OnMeadowDeviceListCombo), menuMeadowDeviceListComboCommandID);
+                mcs.AddCommand(menuMeadowDeviceListComboCommand);
+
+                CommandID menuMeadowDeviceListComboGetListCommandID = new CommandID(GuidList.guidMeadowPackageCmdSet, (int)PkgCmdIDList.cmdidMeadowDeviceListComboGetList);
+                MenuCommand menuMeadowDeviceListComboGetListCommand = new OleMenuCommand(new EventHandler(OnMeadowDeviceListComboGetList), menuMeadowDeviceListComboGetListCommandID);
+                mcs.AddCommand(menuMeadowDeviceListComboGetListCommand);
+            }
         }
         #endregion
+
+        private void OnMeadowDeviceListCombo(object sender, EventArgs e)
+        {
+            if (e is OleMenuCmdEventArgs eventArgs)
+            {
+                IntPtr vOut = eventArgs.OutValue;
+
+                if (vOut != IntPtr.Zero)
+                {
+                    string deviceTarget = string.Empty;
+                    var portList = MeadowDeviceManager.GetSerialPorts();
+                    if (portList.Count > 0)
+                    {
+                        // when vOut is non-NULL, the IDE is requesting the current value for the combo
+                        MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath);
+                        deviceTarget = settings.DeviceTarget;
+                    }
+                    Marshal.GetNativeVariantForObject(deviceTarget, vOut);
+                }
+                else if (eventArgs.InValue is string newChoice)
+                {
+                    // new value was selected check if it is in our list
+                    bool validInput = false;
+                    var portList = MeadowDeviceManager.GetSerialPorts();
+                    for (int i = 0; i < portList.Count; i++)
+                    {
+                        if (string.Compare(portList[i], newChoice, StringComparison.CurrentCultureIgnoreCase) == 0)
+                        {
+                            validInput = true;
+                            break;
+                        }
+                    }
+
+                    if (validInput)
+                    {
+                        MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath, false)
+                        {
+                            DeviceTarget = newChoice
+                        };
+                        settings.Save();
+					}
+					else
+					{
+                        if (!newChoice.Equals(NoDevicesFound))
+						{
+                            throw (new ArgumentException("Invalid Device Selected"));
+                        }
+					}
+                }
+            }
+            else
+            {
+                // We should never get here; EventArgs are required.
+                throw (new ArgumentException("EventArgs Required")); // force an exception to be thrown
+            }
+        }
+
+        private void OnMeadowDeviceListComboGetList(object sender, EventArgs e)
+        {
+            if (e is OleMenuCmdEventArgs eventArgs)
+            {
+                object inParam = eventArgs.InValue;
+                IntPtr vOut = eventArgs.OutValue;
+
+                if (inParam != null)
+                {
+                    throw (new ArgumentException("InParam Invalid")); // force an exception to be thrown
+                }
+                else if (vOut != IntPtr.Zero)
+                {
+                    var captions = MeadowDeviceManager.GetSerialPorts();
+                    if (captions.Count > 0)
+                    {
+                        Marshal.GetNativeVariantForObject(captions, vOut);
+                    }
+                    else
+                    {
+                        Marshal.GetNativeVariantForObject(new string[] { NoDevicesFound }, vOut);
+                    }
+                }
+                else
+                {
+                    throw (new ArgumentException("OutParam Required")); // force an exception to be thrown
+                }
+            }
+        }
+    }
+
+    static class GuidList
+    {
+        /// <summary>
+        /// MeadowPackage GUID string.
+        /// </summary>
+        public const string guidMeadowPackageString = "9e640b9d-2a9e-4da3-ba5e-351adc854fd2";
+        public const string guidMeadowPackageCmdSetString = "0af06414-3c09-44ff-88a1-c4e1a35b0bdf";
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1823:AvoidUnusedPrivateFields")]
+        public static readonly Guid guidMeadowPackage = new Guid(guidMeadowPackageString);
+        public static readonly Guid guidMeadowPackageCmdSet = new Guid(guidMeadowPackageCmdSetString);
+    }
+
+    static class PkgCmdIDList
+    {
+        public const uint cmdidMeadowDeviceListCombo = 0x101;
+        public const uint cmdidMeadowDeviceListComboGetList = 0x102;
     }
 }

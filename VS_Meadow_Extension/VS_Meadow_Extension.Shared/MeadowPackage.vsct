@@ -31,15 +31,43 @@
     group; your package should define its own command set in order to avoid collisions
     with command ids defined by other packages. -->
 
+    <Menus>
+
+      <!--In this section you can define new menus. A menu in VS is the generic way of
+      refering to both menus (all types, including context menus and MenuControllers)
+      and toolbars (both toolwindow and top-level). A menu is a container for groups. -->
+      <Menu guid="guidMeadowPackageCmdSet" id="MyToolbar" priority="0x0000" type="Toolbar">
+        <Strings>
+          <ButtonText>Meadow Device List</ButtonText>
+        </Strings>
+      </Menu>
+    </Menus>
+
     <!-- In this section you can define new menu groups. A menu group is a container for
          other menus or buttons (commands); from a visual point of view you can see the
          group as the part of a menu contained between two lines. The parent of a group
          must be a menu. -->
     <Groups>
-      <Group guid="guidMeadowPackageCmdSet" id="MyMenuGroup" priority="0x0600">
+      <Group guid="guidMeadowPackageCmdSet" id="MeadowMenuGroup" priority="0x0600">
         <Parent guid="guidSHLMainMenu" id="IDM_VS_MENU_TOOLS" />
       </Group>
     </Groups>
+
+    <Combos>
+      <Combo guid="guidMeadowPackageCmdSet" id="cmdidMeadowDeviceListCombo" priority="0x0010" type="DropDownCombo" defaultWidth="70" idCommandList="cmdidMeadowDeviceListComboGetList">
+        <Parent guid="guidMeadowPackageCmdSet" id="MeadowMenuGroup"/>
+        <CommandFlag>IconAndText</CommandFlag>
+        <CommandFlag>CommandWellOnly</CommandFlag>
+        <Strings>
+          <MenuText>Meadow Devices: </MenuText>
+          <ButtonText>Meadow Devices: </ButtonText>
+          <ToolTipText>Select Device</ToolTipText>
+          <CanonicalName>Meadow Devices</CanonicalName>
+          <LocCanonicalName>Meadow Devices</LocCanonicalName>
+          <CommandName>Meadow Devices</CommandName>
+        </Strings>
+      </Combo>
+    </Combos>
 
     <!--Buttons section. -->
     <!--This section defines the elements the user can interact with, like a menu command or a button
@@ -52,13 +80,6 @@
               <CommandFlag>DefaultInvisible</CommandFlag>
               <CommandFlag>DynamicVisibility</CommandFlag>
           If you do not want an image next to your command, remove the Icon node /> -->
-      <Button guid="guidMeadowPackageCmdSet" id="cmdidMeadowWindowCommand" priority="0x0100" type="Button">
-        <Parent guid="guidSHLMainMenu" id="IDG_VS_WNDO_OTRWNDWS1" />
-        <Icon guid="guidImages1" id="bmpPic1" />
-        <Strings>
-          <ButtonText>Meadow</ButtonText>
-        </Strings>
-      </Button>
     </Buttons>
 
     <!--The bitmaps section is used to define the bitmaps that are used for the commands.-->
@@ -74,9 +95,15 @@
     
   </Commands>
 
-  <KeyBindings>
-    <KeyBinding guid="guidMeadowPackageCmdSet" id="cmdidMeadowWindowCommand" editor="guidVSStd97" key1="M" mod1="Control Shift" />
-  </KeyBindings>
+  <!--Inside this section, we have the ability to place groups inside menus or menus / commands inside
+  groups. For instance, it is possible to place one of VisualStudio's menus or commands inside one of our  
+  groups or one of our groups inside a menu defined somewhere else. -->
+  <CommandPlacements>
+    <!-- Place our group (MeadowMenuGroup) onto our toolbar (MyToolbar)-->
+    <CommandPlacement guid="guidMeadowPackageCmdSet" id="MeadowMenuGroup" priority="0x0100">
+      <Parent guid="guidMeadowPackageCmdSet" id="MyToolbar"/>
+    </CommandPlacement>
+  </CommandPlacements>
   
   <Symbols>
     <!-- This is the package guid. -->
@@ -84,9 +111,12 @@
 
     <!-- This is the guid used to group the menu commands together -->
     <GuidSymbol name="guidMeadowPackageCmdSet" value="{0af06414-3c09-44ff-88a1-c4e1a35b0bdf}">
-      <IDSymbol name="MyMenuGroup" value="0x1020" />
+      <IDSymbol name="MeadowMenuGroup" value="0x1020" />
+      <IDSymbol name="MyToolbar" value="0x1000"/>
       <IDSymbol name="Command2Id" value="0x0100" />
-      <IDSymbol value="4129" name="cmdidMeadowWindowCommand" />
+      <IDSymbol name="cmdidMeadowWindowCommand" value="4129" />
+      <IDSymbol name="cmdidMeadowDeviceListCombo" value="0x101"/>
+      <IDSymbol name="cmdidMeadowDeviceListComboGetList" value="0x102"/>
     </GuidSymbol>
 
     <GuidSymbol name="guidImages" value="{1e20ddc7-e3f5-4951-9a20-397954732131}">

@@ -209,16 +209,6 @@
     <Compile Include="..\VS_Meadow_Extension.Shared\MeadowSettings.cs">
       <Link>MeadowSettings.cs</Link>
     </Compile>
-    <Compile Include="..\VS_Meadow_Extension.Shared\MeadowWindow.cs">
-      <Link>MeadowWindow.cs</Link>
-    </Compile>
-    <Compile Include="..\VS_Meadow_Extension.Shared\MeadowWindowCommand.cs">
-      <Link>MeadowWindowCommand.cs</Link>
-    </Compile>
-    <Compile Include="..\VS_Meadow_Extension.Shared\MeadowWindowControl.xaml.cs">
-      <DependentUpon>MeadowWindowControl.xaml</DependentUpon>
-      <Link>MeadowWindowControl.xaml.cs</Link>
-    </Compile>
     <Compile Include="..\VS_Meadow_Extension.Shared\ProjectProperties.cs">
       <Link>ProjectProperties.cs</Link>
     </Compile>
@@ -339,11 +329,6 @@
       <SubType>Designer</SubType>
       <Link>BuildSystem\Rules\MeadowDebugger.xaml</Link>
     </XamlPropertyRule>
-    <Page Include="..\VS_Meadow_Extension.Shared\MeadowWindowControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-      <Link>MeadowWindowControl.xaml</Link>
-    </Page>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\Meadow.CLI\Meadow.CLI.Core\Meadow.CLI.Core.VS2019.csproj">
