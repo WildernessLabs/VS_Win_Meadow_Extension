@@ -36,13 +36,6 @@
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MeadowSettings.cs">
     </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)MeadowWindow.cs">
-    </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)MeadowWindowCommand.cs">
-    </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)MeadowWindowControl.xaml.cs">
-      <DependentUpon>MeadowWindowControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)ProjectProperties.cs">
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Utility\OutputLogger.cs">
@@ -133,9 +126,5 @@
       <Generator>MSBuild:GenerateRuleSourceFromXaml</Generator>
       <SubType>Designer</SubType>
     </XamlPropertyRule>
-    <Page Include="$(MSBuildThisFileDirectory)MeadowWindowControl.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
 </Project>

@@ -114,7 +114,6 @@
       <IDSymbol name="MeadowMenuGroup" value="0x1020" />
       <IDSymbol name="MyToolbar" value="0x1000"/>
       <IDSymbol name="Command2Id" value="0x0100" />
-      <IDSymbol name="cmdidMeadowWindowCommand" value="4129" />
       <IDSymbol name="cmdidMeadowDeviceListCombo" value="0x101"/>
       <IDSymbol name="cmdidMeadowDeviceListComboGetList" value="0x102"/>
     </GuidSymbol>
