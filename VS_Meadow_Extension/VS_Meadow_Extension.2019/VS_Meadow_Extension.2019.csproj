@@ -3,9 +3,10 @@
   <PropertyGroup>
     <MinimumVisualStudioVersion>15.0</MinimumVisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -19,11 +20,16 @@
     <RootNamespace>Meadow</RootNamespace>
     <AssemblyName>Meadow.2019</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>Key.snk</AssemblyOriginatorKeyFile>
+    <GeneratePkgDefFile>true</GeneratePkgDefFile>
+    <UseCodebase>true</UseCodebase>
+    <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
+    <IncludeDebugSymbolsInVSIXContainer>false</IncludeDebugSymbolsInVSIXContainer>
+    <IncludeDebugSymbolsInLocalVSIXDeployment>false</IncludeDebugSymbolsInLocalVSIXDeployment>
+    <CopyBuildOutputToOutputDirectory>true</CopyBuildOutputToOutputDirectory>
+    <CopyOutputSymbolsToOutputDirectory>true</CopyOutputSymbolsToOutputDirectory>
     <StartAction>Program</StartAction>
-    <StartProgram>$(DevEnvDir)devenv.exe</StartProgram>
-    <StartArguments>/rootSuffix Exp</StartArguments>
+    <StartProgram Condition="'$(DevEnvDir)' != ''">$(DevEnvDir)devenv.exe</StartProgram>
+    <StartArguments>/rootsuffix Exp</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -33,7 +39,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CopyVsixExtensionFiles>False</CopyVsixExtensionFiles>
     <RuntimeIdentifier>win</RuntimeIdentifier>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -83,10 +88,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="EnvDTE" Version="8.0.0.0" />
-    <PackageReference Include="envdte100" Version="10.0.0.0" />
-    <PackageReference Include="EnvDTE80" Version="8.0.0.0" />
-    <PackageReference Include="envdte90" Version="9.0.0.0" />
     <PackageReference Include="Microsoft.Build" Version="15.1.0.0" />
     <PackageReference Include="Microsoft.Build.Framework" Version="15.1.0.0" />
     <PackageReference Include="Microsoft.Build.Tasks.Core" Version="15.1.0.0" />
@@ -106,25 +107,23 @@
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.ProjectSystem.Managed" Version="2.0.1.0" />
     <PackageReference Include="Microsoft.VisualStudio.ProjectSystem.Managed.VS" Version="2.0.1.0" />
+    <PackageReference Include="Microsoft.VisualStudio.SDK">
+      <Version>17.0.31902.203</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.0.0.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Shell.15.0" Version="15.0.0.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Shell.Framework" Version="15.0.0.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Shell.Interop" Version="7.1.40304.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Shell.Interop.10.0" Version="10.0.0.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Shell.Interop.11.0" Version="11.0.0.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Shell.Interop.12.0" Version="12.0.0.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Shell.Interop.12.1.DesignTime" />
-    <PackageReference Include="Microsoft.VisualStudio.Shell.Interop.14.0.DesignTime" Version="14.0.0.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Shell.Interop.8.0" Version="8.0.0.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Shell.Interop.9.0" Version="9.0.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.TextManager.Interop" Version="7.1.40304.0" />
     <PackageReference Include="Microsoft.VisualStudio.TextManager.Interop.10.0" Version="10.0.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.TextManager.Interop.11.0" Version="11.0.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.TextManager.Interop.12.0" Version="12.0.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.TextManager.Interop.8.0" Version="8.0.0.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Threading" Version="16.0.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Threading" Version="17.0.64" />
     <PackageReference Include="Microsoft.VisualStudio.Utilities" Version="15.0.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Validation" Version="15.3.0.0" />
+    <PackageReference Include="Microsoft.VSSDK.BuildTools">
+      <Version>17.1.1027-preview2</Version>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Win32.Primitives" Version="4.0.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.0.0" />
     <PackageReference Include="stdole" Version="7.0.3300.0" />
@@ -222,7 +221,6 @@
       <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="..\VS_Meadow_Extension.Shared\VS_Win_Meadow_Extension.Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
