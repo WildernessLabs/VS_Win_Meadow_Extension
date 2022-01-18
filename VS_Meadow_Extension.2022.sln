@@ -23,9 +23,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.CLI.Core.VS2019", ".
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "MeadowLogger", "..\Meadow.CLI\MeadowLogger\MeadowLogger.shproj", "{A04F6A20-2B23-4B29-9905-1B79A39BBF25}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{D11E57EA-1FEB-40BF-9AEE-C67E8040AE3B}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "VS_Win_Meadow_Extension.Shared", "VS_Meadow_Extension\VS_Meadow_Extension.Shared\VS_Win_Meadow_Extension.Shared.shproj", "{6BD8A462-77A3-442D-97C8-36CBDA794DC9}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		VS_Meadow_Extension\VS_Meadow_Extension.Shared\VS_Win_Meadow_Extension.Shared.projitems*{103d69c2-b61c-4e0b-b3ea-c85c6f831988}*SharedItemsImports = 4
 		..\Meadow.CLI\MeadowLogger\MeadowLogger.projitems*{15ef4d4e-3979-417e-8952-cc0b8b8dbac4}*SharedItemsImports = 5
+		VS_Meadow_Extension\VS_Meadow_Extension.Shared\VS_Win_Meadow_Extension.Shared.projitems*{6bd8a462-77a3-442d-97c8-36cbda794dc9}*SharedItemsImports = 13
 		..\Meadow.CLI\MeadowLogger\MeadowLogger.projitems*{a04f6a20-2b23-4b29-9905-1b79a39bbf25}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -110,6 +116,8 @@ Global
 		{D51C9F60-DF98-4DC6-BE6A-1EC2EC16381D} = {470F54A7-8B71-4ECF-94A2-CE167E75963E}
 		{48663609-C0AD-4B74-B2A2-C5117212212B} = {470F54A7-8B71-4ECF-94A2-CE167E75963E}
 		{0A4773F5-B5EC-4928-AAE7-64253877CF4E} = {470F54A7-8B71-4ECF-94A2-CE167E75963E}
+		{A04F6A20-2B23-4B29-9905-1B79A39BBF25} = {D11E57EA-1FEB-40BF-9AEE-C67E8040AE3B}
+		{6BD8A462-77A3-442D-97C8-36CBDA794DC9} = {D11E57EA-1FEB-40BF-9AEE-C67E8040AE3B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BF8000DF-DA09-4634-B870-07796C220A2F}
