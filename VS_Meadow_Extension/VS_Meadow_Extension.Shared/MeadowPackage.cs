@@ -103,6 +103,33 @@ namespace Meadow
                     {
                         // when vOut is non-NULL, the IDE is requesting the current value for the combo
                         MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath);
+
+                        // if last COM port is no longer in portList
+                        if (!portList.Contains(settings.DeviceTarget)) 
+                        {
+                            // choosing first COM port (not sure if you can find an actual Meadow COM port)
+                            string newChoice = portList[0]; 
+                            bool validInput = false;
+                            for (int i = 0; i < portList.Count; i++)
+                            {
+                                if (string.Compare(portList[i], newChoice, StringComparison.CurrentCultureIgnoreCase) == 0)
+                                {
+                                    validInput = true;
+                                    break;
+                                }
+                            }
+
+                            if (validInput)
+                            {
+                                // update MeadowSettings
+                                settings = new MeadowSettings(Globals.SettingsFilePath, false)
+                                {
+                                    DeviceTarget = newChoice
+                                };
+                                settings.Save();
+                            }
+                        }
+
                         deviceTarget = settings.DeviceTarget;
                     }
                     Marshal.GetNativeVariantForObject(deviceTarget, vOut);
