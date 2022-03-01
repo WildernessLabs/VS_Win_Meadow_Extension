@@ -1,6 +1,4 @@
-# Meadow Extension for Visual Studio for Windows
-
-This is the add-in for Visual Studio 2019 and 2022 that enables Meadow projects to be built and deployed on Windows. 
+<img src="Design/banner.jpg" style="margin-bottom:10px" />
 
 ## Build Status 
 
