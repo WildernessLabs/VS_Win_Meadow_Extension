@@ -20,6 +20,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 using Meadow.CLI.Core.DeviceManagement;
 using Meadow.Helpers;
+using System.Collections.Generic;
 
 namespace Meadow
 {
@@ -93,76 +94,57 @@ namespace Meadow
         {
             if (e is OleMenuCmdEventArgs eventArgs)
             {
+                var portList = MeadowDeviceManager.GetSerialPorts();
+
                 IntPtr vOut = eventArgs.OutValue;
 
+                // when vOut is non-NULL, the IDE is requesting the current value for the combo
                 if (vOut != IntPtr.Zero)
                 {
-                    string deviceTarget = string.Empty;
-                    var portList = MeadowDeviceManager.GetSerialPorts();
                     if (portList.Count > 0)
                     {
-                        // when vOut is non-NULL, the IDE is requesting the current value for the combo
+                        string deviceTarget = string.Empty;
+
                         MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath);
-
-                        // if last COM port is no longer in portList
-                        if (!portList.Contains(settings.DeviceTarget)) 
+                        if (portList.Count == 1)
                         {
-                            // choosing first COM port (not sure if you can find an actual Meadow COM port)
-                            string newChoice = portList[0]; 
-                            bool validInput = false;
-                            for (int i = 0; i < portList.Count; i++)
-                            {
-                                if (string.Compare(portList[i], newChoice, StringComparison.CurrentCultureIgnoreCase) == 0)
-                                {
-                                    validInput = true;
-                                    break;
-                                }
-                            }
+                            deviceTarget = portList[0];
+                            settings.DeviceTarget = portList[0];
+                            settings.Save();
+                        }
+                        else
+                        {
+                            bool valueInPortList = IsValueInPortList(portList, settings.DeviceTarget);
 
-                            if (validInput)
+                            if (valueInPortList)
                             {
-                                // update MeadowSettings
-                                settings = new MeadowSettings(Globals.SettingsFilePath, false)
-                                {
-                                    DeviceTarget = newChoice
-                                };
-                                settings.Save();
+                                deviceTarget = settings.DeviceTarget;
                             }
                         }
 
-                        deviceTarget = settings.DeviceTarget;
+                        Marshal.GetNativeVariantForObject(deviceTarget, vOut);
                     }
-                    Marshal.GetNativeVariantForObject(deviceTarget, vOut);
                 }
                 else if (eventArgs.InValue is string newChoice)
                 {
                     // new value was selected check if it is in our list
-                    bool validInput = false;
-                    var portList = MeadowDeviceManager.GetSerialPorts();
-                    for (int i = 0; i < portList.Count; i++)
-                    {
-                        if (string.Compare(portList[i], newChoice, StringComparison.CurrentCultureIgnoreCase) == 0)
-                        {
-                            validInput = true;
-                            break;
-                        }
-                    }
+                    bool valueInPortList = IsValueInPortList(portList, newChoice);
 
-                    if (validInput)
+                    if (valueInPortList)
                     {
                         MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath, false)
                         {
                             DeviceTarget = newChoice
                         };
                         settings.Save();
-					}
-					else
-					{
+                    }
+                    else
+                    {
                         if (!newChoice.Equals(NoDevicesFound))
-						{
+                        {
                             throw (new ArgumentException("Invalid Device Selected"));
                         }
-					}
+                    }
                 }
             }
             else
@@ -185,10 +167,10 @@ namespace Meadow
                 }
                 else if (vOut != IntPtr.Zero)
                 {
-                    var captions = MeadowDeviceManager.GetSerialPorts();
-                    if (captions.Count > 0)
+                    var portList = MeadowDeviceManager.GetSerialPorts();
+                    if (portList.Count > 0)
                     {
-                        Marshal.GetNativeVariantForObject(captions, vOut);
+                        Marshal.GetNativeVariantForObject(portList, vOut);
                     }
                     else
                     {
@@ -200,6 +182,21 @@ namespace Meadow
                     throw (new ArgumentException("OutParam Required")); // force an exception to be thrown
                 }
             }
+        }
+
+        private static bool IsValueInPortList(IList<string> portList, string newChoice)
+        {
+            bool validInput = false;
+            for (int i = 0; i < portList.Count; i++)
+            {
+                if (string.Compare(portList[i], newChoice, StringComparison.CurrentCultureIgnoreCase) == 0)
+                {
+                    validInput = true;
+                    break;
+                }
+            }
+
+            return validInput;
         }
     }
 
