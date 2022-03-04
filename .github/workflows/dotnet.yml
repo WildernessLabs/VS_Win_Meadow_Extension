@@ -37,7 +37,7 @@ jobs:
     - name: Add MSBuild to Path
       uses: microsoft/setup-msbuild@v1.1
       with:
-        vs-version: '[16.0, 17.0)'
+        vs-version: '[16.5, 16.11)'
 
     - name: Restore VS2019 dependencies
       run: msbuild main/VS_Meadow_Extension.2019.sln /t:Restore
