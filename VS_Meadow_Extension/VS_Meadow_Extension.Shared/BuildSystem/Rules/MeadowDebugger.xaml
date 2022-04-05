@@ -9,7 +9,14 @@
         <DataSource Persistence="UserFileWithXamlDefaults" HasConfigurationCondition="True"/>
     </Rule.DataSource>
 
-    <StringProperty Name="RunCommand" DisplayName="Command"
+	<DynamicEnumProperty Name="ActiveDebugProfile" DisplayName="Meadow Debugger" EnumProvider="MeadowDebugProfileEnumValueProvider"
+                       Description="Specifies the profile to use for debugging">
+		<DynamicEnumProperty.DataSource>
+			<DataSource Persistence="UserFile" HasConfigurationCondition="False" SourceOfDefaultValue="AfterContext" />
+		</DynamicEnumProperty.DataSource>
+	</DynamicEnumProperty>
+
+	<StringProperty Name="RunCommand" DisplayName="Command"
                 Default="$(WinDir)\System32\cscript.exe"
                 Description="The debug command to execute.">
         <StringProperty.ValueEditors>
