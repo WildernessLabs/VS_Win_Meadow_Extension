@@ -5,14 +5,15 @@ using System.Threading.Tasks;
 
 using Microsoft.Build.Framework.XamlTypes;
 using Microsoft.VisualStudio.ProjectSystem.Properties;
-
+using Meadow.CLI.Core.DeviceManagement;
+using Meadow.Helpers;
 
 namespace Meadow
 {
     /// <summary>
     /// Generates dynamic enum values.
     /// </summary>
-	public class MeadowDebugProfileEnumValueGenerator : IDynamicEnumValuesGenerator
+	public class MeadowDebugProfileEnumValuesGenerator : IDynamicEnumValuesGenerator
     {
         /// <summary>
         /// Gets whether the dropdown property UI should allow users to type in custom strings
@@ -22,7 +23,7 @@ namespace Meadow
         {
             get
             {
-                return true;
+                return false;
             }
         }
 
@@ -42,14 +43,23 @@ namespace Meadow
 
         internal static ICollection<IEnumValue> GetEnumeratorEnumValues()
         {
-            bool hasDevice = true; // Check out device list count here
+            var portList = MeadowDeviceManager.GetSerialPorts();
+            bool hasDevice = portList.Count > 0;
 
             if (hasDevice)
             {
                 var list = new Collection<IEnumValue>();
-                list.Add(new PageEnumValue(new EnumValue() { Name = "COM4", DisplayName = "COM4 (MeadowV1)" }));
-                list.Add(new PageEnumValue(new EnumValue() { Name = "COM5", DisplayName = "COM5 (MeadowV2)" }));
-                list.Add(new PageEnumValue(new EnumValue() { Name = "COM6", DisplayName = "COM6 (MeadowV1)" }));
+                MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath);
+                if (portList.Count == 1)
+                {
+                    settings.DeviceTarget = portList[0];
+                    settings.Save();
+                }
+                
+                foreach(var port in portList)
+				{
+                    list.Add(new PageEnumValue(new EnumValue() { Name = port, DisplayName = $"App {port}" }));
+                }
 
                 return list;
             }
@@ -57,7 +67,7 @@ namespace Meadow
             {
                 return new Collection<IEnumValue>()
                 {
-                    new PageEnumValue(new EnumValue() { Name = "ConnectDevices", DisplayName = "Connect Meadow Devices" })
+                    new PageEnumValue(new EnumValue() { Name = MeadowDeviceManager.NoDevicesFound, DisplayName = MeadowDeviceManager.NoDevicesFound })
                 };
             }
         }
