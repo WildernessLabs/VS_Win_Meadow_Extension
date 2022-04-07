@@ -47,8 +47,6 @@ namespace Meadow
     [Guid(GuidList.guidMeadowPackageString)]
     public sealed class MeadowPackage : AsyncPackage
     {
-        private const string NoDevicesFound = "No Devices Found";
-
         /// <summary>
         /// Initializes a new instance of the <see cref="MeadowPackage"/> class.
         /// </summary>
@@ -140,7 +138,7 @@ namespace Meadow
                     }
                     else
                     {
-                        if (!newChoice.Equals(NoDevicesFound))
+                        if (!newChoice.Equals(MeadowDeviceManager.NoDevicesFound))
                         {
                             throw (new ArgumentException("Invalid Device Selected"));
                         }
@@ -174,7 +172,7 @@ namespace Meadow
                     }
                     else
                     {
-                        Marshal.GetNativeVariantForObject(new string[] { NoDevicesFound }, vOut);
+                        Marshal.GetNativeVariantForObject(new string[] { MeadowDeviceManager.NoDevicesFound }, vOut);
                     }
                 }
                 else
