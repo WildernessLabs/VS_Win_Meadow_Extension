@@ -55,13 +55,15 @@ namespace Meadow
 
         ISourceBlock<IProjectVersionedValue<object>> IProjectValueDataSource.SourceBlock => throw new NotImplementedException();
 
-		public ILaunchSettingsProvider LaunchTargetsProvider { get; private set; }
+		public ILaunchSettingsProvider LaunchSettingsProvider { get; private set; }
+		public IProjectThreadingService ProjectThreadingService { get; private set; }
 
 		[ImportingConstructor]
-        public MeadowDebugProfileEnumValuesProvider(UnconfiguredProject unconfiguredProject, ILaunchSettingsProvider launchSettingsProvider)
+        public MeadowDebugProfileEnumValuesProvider(UnconfiguredProject unconfiguredProject, ILaunchSettingsProvider launchSettingsProvider, IProjectThreadingService threadingService)
             : base(unconfiguredProject.Services)
         {
-            LaunchTargetsProvider = launchSettingsProvider;
+            LaunchSettingsProvider = launchSettingsProvider;
+            ProjectThreadingService = threadingService;
         }
 
         /// <summary>
@@ -76,13 +78,8 @@ namespace Meadow
         /// Either a new <see cref="IDynamicEnumValuesGenerator"/> instance
         /// or an existing one, if the existing one can serve responses based on the given <paramref name="options"/>.
         /// </returns>
-        public async Task<IDynamicEnumValuesGenerator> GetProviderAsync(IList<NameValuePair> options)
-        {
-            // TODO: Provide your own implementation
-            await Task.Yield();
-
-            return new MeadowDebugProfileEnumValuesGenerator();
-        }
+        public Task<IDynamicEnumValuesGenerator> GetProviderAsync(IList<NameValuePair> options)
+            => Task.FromResult<IDynamicEnumValuesGenerator>(new MeadowDebugProfileEnumValuesGenerator(LaunchSettingsProvider, ProjectThreadingService));
 
         protected override void Initialize()
         {

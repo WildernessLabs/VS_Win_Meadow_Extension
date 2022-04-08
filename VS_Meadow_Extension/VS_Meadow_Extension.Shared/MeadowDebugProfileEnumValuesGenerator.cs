@@ -7,6 +7,11 @@ using Microsoft.Build.Framework.XamlTypes;
 using Microsoft.VisualStudio.ProjectSystem.Properties;
 using Meadow.CLI.Core.DeviceManagement;
 using Meadow.Helpers;
+using Microsoft.VisualStudio.Threading;
+using Microsoft.VisualStudio.ProjectSystem;
+using Microsoft.VisualStudio.ProjectSystem.Debug;
+using Microsoft;
+using System.Linq;
 
 namespace Meadow
 {
@@ -15,11 +20,21 @@ namespace Meadow
     /// </summary>
 	public class MeadowDebugProfileEnumValuesGenerator : IDynamicEnumValuesGenerator
     {
-        /// <summary>
-        /// Gets whether the dropdown property UI should allow users to type in custom strings
-        /// which will be validated by <see cref="TryCreateEnumValueAsync"/>.
-        /// </summary>
-        public bool AllowCustomValues
+        private readonly AsyncLazy<ICollection<IEnumValue>> listedValues;
+
+		internal MeadowDebugProfileEnumValuesGenerator(ILaunchSettingsProvider profileProvider, IProjectThreadingService threadingService)
+		{
+            listedValues = new AsyncLazy<ICollection<IEnumValue>>(delegate
+            {
+                return Task.FromResult(GetEnumeratorEnumValues());
+            }, threadingService.JoinableTaskFactory);
+        }
+
+		/// <summary>
+		/// Gets whether the dropdown property UI should allow users to type in custom strings
+		/// which will be validated by <see cref="TryCreateEnumValueAsync"/>.
+		/// </summary>
+		public bool AllowCustomValues
         {
             get
             {
@@ -36,9 +51,7 @@ namespace Meadow
         /// <seealso cref="TryCreateEnumValueAsync"/>
         public async Task<ICollection<IEnumValue>> GetListedValuesAsync()
         {
-            await Task.Yield();
-
-            return GetEnumeratorEnumValues();
+            return await listedValues.GetValueAsync();
         }
 
         internal static ICollection<IEnumValue> GetEnumeratorEnumValues()
@@ -46,9 +59,9 @@ namespace Meadow
             var portList = MeadowDeviceManager.GetSerialPorts();
             bool hasDevice = portList.Count > 0;
 
+            var list = new Collection<IEnumValue>();
             if (hasDevice)
             {
-                var list = new Collection<IEnumValue>();
                 MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath);
                 if (portList.Count == 1)
                 {
@@ -60,16 +73,14 @@ namespace Meadow
 				{
                     list.Add(new PageEnumValue(new EnumValue() { Name = port, DisplayName = $"App {port}" }));
                 }
-
-                return list;
             }
             else
             {
-                return new Collection<IEnumValue>()
-                {
-                    new PageEnumValue(new EnumValue() { Name = MeadowDeviceManager.NoDevicesFound, DisplayName = MeadowDeviceManager.NoDevicesFound })
-                };
+                list.Add(new PageEnumValue(new EnumValue() { Name = MeadowDeviceManager.NoDevicesFound, DisplayName = MeadowDeviceManager.NoDevicesFound }));
             }
+
+            // The list should have at least 1 value
+            return list;
         }
 
         /// <summary>
@@ -89,9 +100,8 @@ namespace Meadow
         /// </remarks>
         public async Task<IEnumValue> TryCreateEnumValueAsync(string userSuppliedValue)
         {
-            await Task.Yield();
-
-            return new PageEnumValue(new EnumValue() { Name = userSuppliedValue, DisplayName = userSuppliedValue });
+            return (await listedValues.GetValueAsync())
+                .FirstOrDefault();
         }
     }
 }
