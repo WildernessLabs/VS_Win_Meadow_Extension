@@ -50,6 +50,10 @@
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)VsixManifest.cs">
     </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)MeadowDebugProfileEnumValuesGenerator.cs">
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)MeadowDebugProfileEnumValuesProvider.cs">
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)Resources\MeadowPackage.ico">
@@ -119,12 +123,15 @@
     </XamlPropertyRule>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)BuildSystem\Rules\MeadowDebugger.xaml.cs">
-      <DependentUpon>MeadowDebugger.xaml</DependentUpon>
-    </Compile>
     <XamlPropertyRule Include="$(MSBuildThisFileDirectory)BuildSystem\Rules\MeadowDebugger.xaml">
       <Generator>MSBuild:GenerateRuleSourceFromXaml</Generator>
       <SubType>Designer</SubType>
     </XamlPropertyRule>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="$(MSBuildThisFileDirectory)BuildSystem\Rules\MeadowDebugger.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 </Project>
