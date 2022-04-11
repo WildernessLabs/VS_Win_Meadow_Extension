@@ -18,8 +18,8 @@
 		<sys:String x:Key="DebugTargetDropdownEnum">ActiveDebugProfile</sys:String>
 	</Rule.Metadata>
 
-	<DynamicEnumProperty Name="ActiveDebugProfile" DisplayName="Meadow Debugger" EnumProvider="MeadowDebugProfileEnumValueProvider"
-                       Description="Specifies the profile to use for debugging">
+	<DynamicEnumProperty Name="ActiveDebugProfile" DisplayName="Meadow Debugger" EnumProvider="MeadowDebugProfileEnumValuesProvider"
+                       Description="Specifies the profile to use for debugging" Visible="True">
 		<DynamicEnumProperty.DataSource>
 			<DataSource Persistence="UserFile" HasConfigurationCondition="False" SourceOfDefaultValue="AfterContext" />
 		</DynamicEnumProperty.DataSource>
