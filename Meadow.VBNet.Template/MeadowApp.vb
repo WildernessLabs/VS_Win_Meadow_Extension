@@ -7,8 +7,8 @@ Imports Meadow.Foundation
 Imports Meadow.Foundation.Leds
 
 Public Class MeadowApp
-	'Change F7MicroV2 to F7Micro for V1.x boards'
-	Inherits App(Of F7MicroV2, MeadowApp)
+	'Change F7FeatherV2 to F7FeatherV1 for V1.x boards'
+	Inherits App(Of F7FeatherV2, MeadowApp)
 
 	Private Dim onboardLed as RgbPwmLed
 
