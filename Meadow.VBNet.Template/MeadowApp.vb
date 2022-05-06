@@ -29,7 +29,6 @@ Public Class MeadowApp
 			Device.Pins.OnboardLedRed,
 			Device.Pins.OnboardLedGreen,
 			Device.Pins.OnboardLedBlue,
-			3.3f, 3.3f, 3.3f,
 			Meadow.Peripherals.Leds.IRgbLed.CommonType.CommonAnode)
 
 		
