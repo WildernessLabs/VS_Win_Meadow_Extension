@@ -17,7 +17,7 @@ namespace Meadow
 
             if (string.IsNullOrEmpty(settings.DeviceTarget))
             {
-                throw new Exception("Device has not been selected. Hit Ctrl+Shift+M to access the Device list.");
+                throw new Exception("Meadow device has not been selected. Select your device using the Meadow Device Selector on the toolbar.");
             }
 
             return MeadowDeviceManager.GetMeadowForSerialPort(settings.DeviceTarget, logger: logger);
