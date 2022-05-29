@@ -18,7 +18,7 @@ Public Class MeadowApp
 		Console.WriteLine("Hello VB.NET!")
 
 		Initialize()
-		CycleColors(1000)
+		CycleColors(TimeSpan.FromMilliseconds(1000))
 
 	End Sub
 
@@ -30,8 +30,6 @@ Public Class MeadowApp
 			Device.Pins.OnboardLedGreen,
 			Device.Pins.OnboardLedBlue,
 			Meadow.Peripherals.Leds.IRgbLed.CommonType.CommonAnode)
-
-
 
 	End Sub
 
