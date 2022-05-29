@@ -52,7 +52,7 @@ namespace $safeprojectname$
 
 		void ShowColorPulse(Color color, TimeSpan duration)
 		{
-			onboardLed.StartPulse(color, (duration / 2));
+			onboardLed.StartPulse(color, duration / 2);
 			Thread.Sleep(duration);
 			onboardLed.Stop();
 		}
