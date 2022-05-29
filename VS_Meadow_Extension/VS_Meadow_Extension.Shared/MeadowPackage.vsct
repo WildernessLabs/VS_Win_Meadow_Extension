@@ -54,7 +54,7 @@
     </Groups>
 
     <Combos>
-      <Combo guid="guidMeadowPackageCmdSet" id="cmdidMeadowDeviceListCombo" priority="0x0010" type="DropDownCombo" defaultWidth="140" idCommandList="cmdidMeadowDeviceListComboGetList">
+      <Combo guid="guidMeadowPackageCmdSet" id="cmdidMeadowDeviceListCombo" priority="0x0010" type="DropDownCombo" defaultWidth="70" idCommandList="cmdidMeadowDeviceListComboGetList">
         <Parent guid="guidMeadowPackageCmdSet" id="MeadowMenuGroup"/>
         <CommandFlag>IconAndText</CommandFlag>
         <CommandFlag>CommandWellOnly</CommandFlag>
