@@ -8,28 +8,28 @@ type MeadowApp() =
     // Change F7FeatherV2 to F7FeatherV1 for V1.x boards
     inherit App<F7FeatherV2, MeadowApp>()
         
-    do Console.WriteLine "Init with FSharp!"
+    do Console.WriteLine "Initialize hardware... [F#]"
     let led = new RgbPwmLed(MeadowApp.Device, MeadowApp.Device.Pins.OnboardLedRed,MeadowApp.Device.Pins.OnboardLedGreen, MeadowApp.Device.Pins.OnboardLedBlue,Meadow.Peripherals.Leds.IRgbLed.CommonType.CommonAnode)
     
-    let ShowcolorPulse (color : Color) (duration : TimeSpan)  = 
+    let ShowColorPulse (color : Color) (duration : TimeSpan)  = 
         led.StartPulse(color, duration.Divide(2)) |> ignore
         Threading.Thread.Sleep (duration) |> ignore
         led.Stop |> ignore
     
-    let cyclecolors (duration : TimeSpan)  = 
+    let cyclecolors (duration : TimeSpan) = 
         while true do
-            ShowcolorPulse Color.Blue duration 
-            ShowcolorPulse Color.Cyan duration
-            ShowcolorPulse Color.Green duration
-            ShowcolorPulse Color.GreenYellow duration
-            ShowcolorPulse Color.Yellow duration
-            ShowcolorPulse Color.Orange duration
-            ShowcolorPulse Color.OrangeRed duration
-            ShowcolorPulse Color.Red duration
-            ShowcolorPulse Color.MediumVioletRed duration
-            ShowcolorPulse Color.Purple duration
-            ShowcolorPulse Color.Magenta duration
-            ShowcolorPulse Color.Pink duration
+            ShowColorPulse Color.Blue duration 
+            ShowColorPulse Color.Cyan duration
+            ShowColorPulse Color.Green duration
+            ShowColorPulse Color.GreenYellow duration
+            ShowColorPulse Color.Yellow duration
+            ShowColorPulse Color.Orange duration
+            ShowColorPulse Color.OrangeRed duration
+            ShowColorPulse Color.Red duration
+            ShowColorPulse Color.MediumVioletRed duration
+            ShowColorPulse Color.Purple duration
+            ShowColorPulse Color.Magenta duration
+            ShowColorPulse Color.Pink duration
             
     do cyclecolors (TimeSpan.FromSeconds(1))
 

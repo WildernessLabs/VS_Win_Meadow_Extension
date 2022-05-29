@@ -15,15 +15,13 @@ Public Class MeadowApp
 	Public Sub New()
 		MyBase.New
 
-		Console.WriteLine("Hello VB.NET!")
-
 		Initialize()
 		CycleColors(TimeSpan.FromMilliseconds(1000))
 
 	End Sub
 
 	Private Sub Initialize()
-		Console.WriteLine("Initialize hardware...")
+		Console.WriteLine("Initialize hardware... [VB.NET]")
 
 		onboardLed = New RgbPwmLed(Device,
 			Device.Pins.OnboardLedRed,
