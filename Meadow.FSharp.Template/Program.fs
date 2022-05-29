@@ -11,27 +11,27 @@ type MeadowApp() =
     do Console.WriteLine "Init with FSharp!"
     let led = new RgbPwmLed(MeadowApp.Device, MeadowApp.Device.Pins.OnboardLedRed,MeadowApp.Device.Pins.OnboardLedGreen, MeadowApp.Device.Pins.OnboardLedBlue,Meadow.Peripherals.Leds.IRgbLed.CommonType.CommonAnode)
     
-    let ShowcolorPulses color duration = 
-        led.StartPulse(color, (duration / 2)) |> ignore
-        Threading.Thread.Sleep (int duration) |> ignore
+    let ShowcolorPulse (color : Color) (duration : TimeSpan)  = 
+        led.StartPulse(color, duration.Divide(2)) |> ignore
+        Threading.Thread.Sleep (duration) |> ignore
         led.Stop |> ignore
     
-    let cyclecolors duration = 
+    let cyclecolors (duration : TimeSpan)  = 
         while true do
-            ShowcolorPulses Color.Blue duration 
-            ShowcolorPulses Color.Cyan duration
-            ShowcolorPulses Color.Green duration
-            ShowcolorPulses Color.GreenYellow duration
-            ShowcolorPulses Color.Yellow duration
-            ShowcolorPulses Color.Orange duration
-            ShowcolorPulses Color.OrangeRed duration
-            ShowcolorPulses Color.Red duration
-            ShowcolorPulses Color.MediumVioletRed duration
-            ShowcolorPulses Color.Purple duration
-            ShowcolorPulses Color.Magenta duration
-            ShowcolorPulses Color.Pink duration
+            ShowcolorPulse Color.Blue duration 
+            ShowcolorPulse Color.Cyan duration
+            ShowcolorPulse Color.Green duration
+            ShowcolorPulse Color.GreenYellow duration
+            ShowcolorPulse Color.Yellow duration
+            ShowcolorPulse Color.Orange duration
+            ShowcolorPulse Color.OrangeRed duration
+            ShowcolorPulse Color.Red duration
+            ShowcolorPulse Color.MediumVioletRed duration
+            ShowcolorPulse Color.Purple duration
+            ShowcolorPulse Color.Magenta duration
+            ShowcolorPulse Color.Pink duration
             
-    do cyclecolors 1000
+    do cyclecolors (TimeSpan.FromSeconds(1))
 
 [<EntryPoint>]
 let main argv =

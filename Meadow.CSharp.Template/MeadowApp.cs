@@ -14,8 +14,8 @@ namespace $safeprojectname$
 
 		public MeadowApp()
 		{
-			Initialize();
-			CycleColors(1000);
+        	Initialize();
+        	CycleColors(TimeSpan.FromMilliseconds(1000));
 		}
 
 		void Initialize()
@@ -29,7 +29,7 @@ namespace $safeprojectname$
 				Meadow.Peripherals.Leds.IRgbLed.CommonType.CommonAnode);
 		}
 
-		void CycleColors(int duration)
+		void CycleColors(TimeSpan duration)
 		{
 			Console.WriteLine("Cycle colors...");
 
@@ -50,14 +50,14 @@ namespace $safeprojectname$
 			}
 		}
 
-		void ShowColorPulse(Color color, int duration = 1000)
+		void ShowColorPulse(Color color, TimeSpan duration)
 		{
 			onboardLed.StartPulse(color, (duration / 2));
 			Thread.Sleep(duration);
 			onboardLed.Stop();
 		}
 
-		void ShowColor(Color color, int duration = 1000)
+		void ShowColor(Color color, TimeSpan duration)
 		{
 			Console.WriteLine($"Color: {color}");
 			onboardLed.SetColor(color);
