@@ -14,8 +14,8 @@ namespace $safeprojectname$
 
 		public MeadowApp()
 		{
-        	Initialize();
-        	CycleColors(TimeSpan.FromMilliseconds(1000));
+			Initialize();
+			CycleColors(TimeSpan.FromMilliseconds(1000));
 		}
 
 		void Initialize()
