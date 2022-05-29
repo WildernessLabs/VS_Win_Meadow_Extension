@@ -35,7 +35,6 @@ type MeadowApp() =
 
 [<EntryPoint>]
 let main argv =
-    Console.WriteLine "Hello World from F#!"
     let app = new MeadowApp()
     Threading.Thread.Sleep (System.Threading.Timeout.Infinite)
     0 // return an integer exit code
