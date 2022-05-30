@@ -7,15 +7,15 @@ using Meadow.Foundation.Leds;
 
 namespace $safeprojectname$
 {
-	// Change F7MicroV2 to F7Micro for V1.x boards
-    public class MeadowApp : App<F7MicroV2, MeadowApp>
+	// Change F7FeatherV2 to F7FeatherV1 for V1.x boards
+    public class MeadowApp : App<F7FeatherV2, MeadowApp>
     {
 		RgbPwmLed onboardLed;
 
 		public MeadowApp()
 		{
 			Initialize();
-			CycleColors(1000);
+			CycleColors(TimeSpan.FromMilliseconds(1000));
 		}
 
 		void Initialize()
@@ -26,11 +26,10 @@ namespace $safeprojectname$
 				redPwmPin: Device.Pins.OnboardLedRed,
 				greenPwmPin: Device.Pins.OnboardLedGreen,
 				bluePwmPin: Device.Pins.OnboardLedBlue,
-				3.3f, 3.3f, 3.3f,
 				Meadow.Peripherals.Leds.IRgbLed.CommonType.CommonAnode);
 		}
 
-		void CycleColors(int duration)
+		void CycleColors(TimeSpan duration)
 		{
 			Console.WriteLine("Cycle colors...");
 
@@ -51,14 +50,14 @@ namespace $safeprojectname$
 			}
 		}
 
-		void ShowColorPulse(Color color, int duration = 1000)
+		void ShowColorPulse(Color color, TimeSpan duration)
 		{
-			onboardLed.StartPulse(color, (duration / 2));
+			onboardLed.StartPulse(color, duration / 2);
 			Thread.Sleep(duration);
 			onboardLed.Stop();
 		}
 
-		void ShowColor(Color color, int duration = 1000)
+		void ShowColor(Color color, TimeSpan duration)
 		{
 			Console.WriteLine($"Color: {color}");
 			onboardLed.SetColor(color);
