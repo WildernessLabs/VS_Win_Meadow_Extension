@@ -131,14 +131,10 @@ namespace Meadow
                     bool valueInPortList = IsValueInPortList(portList, newChoice);
 
                     if (valueInPortList)
-                    {
-                        MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath, false)
-                        {
-                            DeviceTarget = newChoice
-                        };
-                        settings.Save();
-                    }
-                    else
+					{
+						SaveChoiceToSettings(newChoice);
+					}
+					else
                     {
                         if (!newChoice.Equals(NoDevicesFound))
                         {
@@ -154,7 +150,7 @@ namespace Meadow
             }
         }
 
-        private void OnMeadowDeviceListComboGetList(object sender, EventArgs e)
+		private void OnMeadowDeviceListComboGetList(object sender, EventArgs e)
         {
             if (e is OleMenuCmdEventArgs eventArgs)
             {
@@ -171,6 +167,11 @@ namespace Meadow
                     if (portList.Count > 0)
                     {
                         Marshal.GetNativeVariantForObject(portList, vOut);
+
+                        if (portList.Count == 1)
+						{
+                            SaveChoiceToSettings(portList[0]);
+                        }
                     }
                     else
                     {
@@ -197,6 +198,15 @@ namespace Meadow
             }
 
             return validInput;
+        }
+
+        private static void SaveChoiceToSettings(string newChoice)
+        {
+            MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath, false)
+            {
+                DeviceTarget = newChoice
+            };
+            settings.Save();
         }
     }
 
