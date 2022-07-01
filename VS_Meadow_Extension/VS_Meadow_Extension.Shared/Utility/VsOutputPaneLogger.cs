@@ -20,7 +20,9 @@ namespace Meadow
   
         Guid meadowPaneGuid = new Guid("C2FCAB2F-BFEB-4B1A-B385-08D4C81107FE");
 
-        public IDisposable BeginScope<TState>(TState state) => default;
+		public IVsOutputWindowPane Pane { get; internal set; }
+
+		public IDisposable BeginScope<TState>(TState state) => default;
 
         public bool IsEnabled(LogLevel logLevel) => logLevel >= LogLevel.Information;
 
@@ -60,7 +62,7 @@ namespace Meadow
                         }
                         else
 						{
-                            // It already exists, to clear it for this run
+                            // It already exists, so clear it for this run
                             meadowOutputPane.Clear();
                         }
 
@@ -68,7 +70,7 @@ namespace Meadow
                         meadowOutputPane?.Activate();
                     }
                 }
-
+                Pane = meadowOutputPane;
                 meadowOutputPane?.OutputString(value + Environment.NewLine);
             } catch (Exception ex)
             {

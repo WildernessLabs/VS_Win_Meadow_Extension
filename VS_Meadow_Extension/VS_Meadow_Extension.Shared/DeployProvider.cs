@@ -34,6 +34,14 @@ namespace Meadow
         [Import]
         private ProjectProperties Properties { get; set; }
 
+        private ConfiguredProject configuredProject;
+
+        [ImportingConstructor]
+        public DeployProvider(ConfiguredProject configuredProject)
+        {
+            this.configuredProject = configuredProject;
+        }
+
         public async Task DeployAsync(CancellationToken cts, TextWriter outputPaneWriter)
         {
             logger?.DisconnectPane();
@@ -121,17 +129,12 @@ namespace Meadow
 
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-            IVsOutputWindow outWindow = Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
-            Guid generalPaneGuid = VSConstants.GUID_OutWindowDebugPane; // P.S. There's also the GUID_OutWindowDebugPane available.
+            var meadowOutputPane = new VsOutputPaneLogger(configuredProject.UnconfiguredProject.ProjectService.Services.ThreadingPolicy);
 
-			outWindow.GetPane(ref generalPaneGuid, out IVsOutputWindowPane generalPane);
-			generalPane.Activate();
-            generalPane.Clear();
-
-            generalPane.OutputString(" Launching application..." + Environment.NewLine);
+            meadowOutputPane.Report("Launching application..." + Environment.NewLine);
 
             logger.DisconnectTextWriter();
-            logger.ConnectPane(generalPane);
+            logger.ConnectPane(meadowOutputPane.Pane);
         }
 
         public void Rollback()
