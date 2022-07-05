@@ -90,11 +90,11 @@ namespace Meadow
         }
         #endregion
 
-        private void OnMeadowDeviceListCombo(object sender, EventArgs e)
+        private async void OnMeadowDeviceListCombo(object sender, EventArgs e)
         {
             if (e is OleMenuCmdEventArgs eventArgs)
             {
-                var portList = MeadowDeviceManager.GetSerialPorts();
+                var portList = await MeadowDeviceManager.GetSerialPorts();
 
                 IntPtr vOut = eventArgs.OutValue;
 
@@ -150,7 +150,7 @@ namespace Meadow
             }
         }
 
-		private void OnMeadowDeviceListComboGetList(object sender, EventArgs e)
+        private async void OnMeadowDeviceListComboGetList(object sender, EventArgs e)
         {
             if (e is OleMenuCmdEventArgs eventArgs)
             {
@@ -163,7 +163,7 @@ namespace Meadow
                 }
                 else if (vOut != IntPtr.Zero)
                 {
-                    var portList = MeadowDeviceManager.GetSerialPorts();
+                    var portList = await MeadowDeviceManager.GetSerialPorts();
                     if (portList.Count > 0)
                     {
                         Marshal.GetNativeVariantForObject(portList, vOut);
