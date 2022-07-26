@@ -106,7 +106,8 @@ namespace Meadow
 
                 var appPathDll = Path.Combine(folder, "App.dll");
 
-                await Meadow.DeployAppAsync(appPathDll, true, token);
+                var includePdbs = configuredProject?.ProjectConfiguration?.Dimensions["Configuration"].Contains("Debug");
+                await Meadow.DeployAppAsync(appPathDll, includePdbs, token);
             }
             catch (Exception ex)
             {
