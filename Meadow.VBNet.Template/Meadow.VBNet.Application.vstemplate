@@ -19,7 +19,6 @@
   </TemplateData>
   <TemplateContent>
     <Project TargetFileName="Meadow.VBNet.Application.vbproj" File="Meadow.VBNet.Application.vbproj" ReplaceParameters="true">
-      <ProjectItem ReplaceParameters="true" TargetFileName="Program.vb">Program.vb</ProjectItem>
       <ProjectItem ReplaceParameters="true" TargetFileName="MeadowApp.vb">MeadowApp.vb</ProjectItem>
     </Project>
   </TemplateContent>

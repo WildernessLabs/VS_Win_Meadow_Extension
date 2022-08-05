@@ -64,7 +64,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Meadow.VBNet.Application.vbproj" />
-    <None Include="Program.vb" />
     <None Include="MeadowApp.vb" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

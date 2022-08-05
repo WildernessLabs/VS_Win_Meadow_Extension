@@ -56,7 +56,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="MeadowApp.cs" />
-    <None Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
