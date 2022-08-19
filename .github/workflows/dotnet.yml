@@ -39,7 +39,7 @@ jobs:
       uses: microsoft/setup-msbuild@v1.1
 
     - name: Restore VS2019 dependencies
-      run: msbuild main/VS_Meadow_Extension.2019.sln /t:Restore
+      run: msbuild main/VS_Meadow_Extension.2019.sln /t:Restore /p:Configuration=Release
 
     - name: Build VS2019 Extension
       id: VS2019-Extension
@@ -91,7 +91,7 @@ jobs:
         vs-version: '[17.0, 18.0)'
 
     - name: Restore VS2022 dependencies
-      run: msbuild main/VS_Meadow_Extension.2022.sln /t:Restore
+      run: msbuild main/VS_Meadow_Extension.2022.sln /t:Restore /p:Configuration=Release
 
     - name: Build VS2022 Extension
       id: VS2022-Extension

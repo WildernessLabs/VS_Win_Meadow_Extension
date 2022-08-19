@@ -71,7 +71,7 @@ namespace Meadow
                     }
                 }
                 Pane = meadowOutputPane;
-                meadowOutputPane?.OutputString(value + Environment.NewLine);
+                meadowOutputPane?.OutputStringThreadSafe(value + Environment.NewLine);
             } catch (Exception ex)
             {
                 Console.WriteLine(ex);
