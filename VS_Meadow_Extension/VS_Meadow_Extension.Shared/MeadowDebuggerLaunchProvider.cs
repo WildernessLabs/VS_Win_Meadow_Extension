@@ -72,6 +72,7 @@ namespace Meadow
                 var meadowSession = new MeadowSoftDebuggerSession(DeployProvider.Meadow);
 
                 var startArgs = new SoftDebuggerConnectArgs(profile.Name, IPAddress.Loopback, 55898);
+                await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 var startInfo = new StartInfo(startArgs, debuggingOptions, VsHierarchy.GetProject());
 
                 var sessionInfo = new SessionMarshalling(meadowSession, startInfo);
