@@ -59,7 +59,7 @@ namespace Meadow
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
             textWriter?.WriteLine(msg);
-            outputPane?.OutputString(msg);
+            outputPane?.OutputStringThreadSafe(msg);
         }
 
 
