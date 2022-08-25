@@ -88,7 +88,7 @@ jobs:
     - name: Add MSBuild to Path
       uses: microsoft/setup-msbuild@v1.1
       with:
-        vs-version: '[17.0, 17.3)'
+        vs-version: '[17.0, 18.0)'
 
     - name: Restore VS2022 dependencies
       run: msbuild main/VS_Meadow_Extension.2022.sln /t:Restore /p:Configuration=Release
