@@ -90,29 +90,33 @@ namespace Meadow
 
                 Meadow = new MeadowDeviceHelper(device, logger);
 
-                //wrap this is a try/catch so it doesn't crash if the developer is offline
-                try
-                {
-                    string osVersion = await Meadow.GetOSVersion(TimeSpan.FromSeconds(30), token)
-                        .ConfigureAwait(false);
-
-                    await new DownloadManager(logger).DownloadLatestAsync(osVersion)
-                        .ConfigureAwait(false);
-                }
-                catch
-                {
-                    logger.Log("OS download failed, make sure you have an active internet connection");
-                }
-
                 var appPathDll = Path.Combine(folder, "App.dll");
 
-                var includePdbs = configuredProject?.ProjectConfiguration?.Dimensions["Configuration"].Contains("Debug");
-                await Meadow.DeployAppAsync(appPathDll, includePdbs.HasValue && includePdbs.Value, token);
+                if (Meadow.DeviceAndAppVersionsMatch(appPathDll))
+                {
+
+                    //wrap this is a try/catch so it doesn't crash if the developer is offline
+                    try
+                    {
+                        string osVersion = await Meadow.GetOSVersion(TimeSpan.FromSeconds(30), token)
+                            .ConfigureAwait(false);
+
+                        await new DownloadManager(logger).DownloadLatestAsync(osVersion)
+                            .ConfigureAwait(false);
+                    }
+                    catch
+                    {
+                        logger.Log("OS download failed, make sure you have an active internet connection");
+                    }
+
+                    var includePdbs = configuredProject?.ProjectConfiguration?.Dimensions["Configuration"].Contains("Debug");
+                    await Meadow.DeployAppAsync(appPathDll, includePdbs.HasValue && includePdbs.Value, token);
+                }
             }
             catch (Exception ex)
             {
                 appDeployed = false;
-                await outputPaneWriter.WriteAsync($"Deploy failed: {ex.Message}");
+                await outputPaneWriter.WriteAsync($"Deploy failed: {ex.Message}//nStackTrace://n{ex.StackTrace}");
                 await outputPaneWriter.WriteAsync($"Reset Meadow and try again.");
                 throw ex;
             }
