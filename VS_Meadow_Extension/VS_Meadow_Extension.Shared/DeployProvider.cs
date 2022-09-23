@@ -92,7 +92,7 @@ namespace Meadow
 
                 var appPathDll = Path.Combine(folder, "App.dll");
 
-                if (Meadow.DeviceAndAppVersionsMatch(appPathDll))
+                // TODO Use one Assembly get picked up correctly if (Meadow.DeviceAndAppVersionsMatch(appPathDll))
                 {
 
                     //wrap this is a try/catch so it doesn't crash if the developer is offline
