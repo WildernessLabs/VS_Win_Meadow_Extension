@@ -96,7 +96,7 @@ namespace Meadow
                     string osVersion = await Meadow.GetOSVersion(TimeSpan.FromSeconds(30), token)
                         .ConfigureAwait(false);
 
-                    await new DownloadManager(logger).DownloadLatestAsync(osVersion)
+                    await new DownloadManager(logger).DownloadOsBinaries(osVersion)
                         .ConfigureAwait(false);
                 }
                 catch
@@ -107,7 +107,7 @@ namespace Meadow
                 var appPathDll = Path.Combine(folder, "App.dll");
 
                 var includePdbs = configuredProject?.ProjectConfiguration?.Dimensions["Configuration"].Contains("Debug");
-                await Meadow.DeployAppAsync(appPathDll, includePdbs.HasValue && includePdbs.Value, token);
+                await Meadow.DeployApp(appPathDll, includePdbs.HasValue && includePdbs.Value, token);
             }
             catch (Exception ex)
             {

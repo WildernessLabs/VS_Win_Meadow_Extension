@@ -30,7 +30,7 @@ namespace Meadow
             var connectArgs = meadowStartInfo.StartArgs as SoftDebuggerConnectArgs;
             var port = connectArgs?.DebugPort ?? 0;
 
-            meadowDebugServer = await meadow.StartDebuggingSessionAsync(port, meadowDebugCancelTokenSource.Token);
+            meadowDebugServer = await meadow.StartDebuggingSession(port, meadowDebugCancelTokenSource.Token);
 
             base.OnRun(startInfo);
         }
@@ -40,7 +40,7 @@ namespace Meadow
             if (!meadowDebugCancelTokenSource.IsCancellationRequested)
                 meadowDebugCancelTokenSource?.Cancel();
 
-            await meadowDebugServer?.StopListeningAsync();
+            await meadowDebugServer?.StopListening();
             meadowDebugServer?.Dispose();
             meadowDebugServer = null;
             meadow?.Dispose();
