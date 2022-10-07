@@ -64,7 +64,7 @@ namespace Meadow
 
             try
             {
-                await DeployAppAsync(Path.Combine(projectDir, outputPath), new OutputPaneWriter(outputPaneWriter), cts).ConfigureAwait(false);
+                await DeployAppAsync(Path.Combine(projectDir, outputPath), new OutputPaneWriter(outputPaneWriter), cts);
             }
             catch (Exception ex)
             {
@@ -93,11 +93,9 @@ namespace Meadow
                 //wrap this is a try/catch so it doesn't crash if the developer is offline
                 try
                 {
-                    string osVersion = await Meadow.GetOSVersion(TimeSpan.FromSeconds(30), token)
-                        .ConfigureAwait(false);
+                    string osVersion = await Meadow.GetOSVersion(TimeSpan.FromSeconds(30), token);
 
-                    await new DownloadManager(logger).DownloadOsBinaries(osVersion)
-                        .ConfigureAwait(false);
+                    await new DownloadManager(logger).DownloadOsBinaries(osVersion);
                 }
                 catch
                 {
