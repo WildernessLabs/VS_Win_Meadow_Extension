@@ -49,17 +49,24 @@ namespace Meadow
 
         public async void Log(string msg)
         {
-            if (stopwatch.IsRunning)
-                stopwatch.Restart();
-            else
-                stopwatch.Start();
+			try
+			{
+                if (stopwatch.IsRunning)
+                    stopwatch.Restart();
+                else
+                    stopwatch.Start();
 
-            msg = $"{CurrentTimeStamp} {msg,-25}";
+                msg = $"{CurrentTimeStamp} {msg,-25}";
 
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-            textWriter?.WriteLine(msg);
-            outputPane?.OutputStringThreadSafe(msg);
+                textWriter?.WriteLine(msg);
+                outputPane?.OutputStringThreadSafe(msg);
+            }
+			catch (Exception ex)
+			{
+                Debug.WriteLine($"A Disposed Object Exception may have occured. Let's not crash the IDE.{Environment.NewLine}Exception:{Environment.NewLine}{ex.Message}{Environment.NewLine}StackTrace:{Environment.NewLine}{ex.StackTrace}");
+            }
         }
 
 
