@@ -60,6 +60,7 @@
     <Content Include="meadow_icon.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="meadow.config.yaml" />
     <None Include="Meadow.FSharp.Application.fsproj" />
     <None Include="Program.fs" />
   </ItemGroup>

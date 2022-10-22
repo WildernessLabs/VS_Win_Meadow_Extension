@@ -52,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="meadow.config.yaml" />
     <None Include="MeadowApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
