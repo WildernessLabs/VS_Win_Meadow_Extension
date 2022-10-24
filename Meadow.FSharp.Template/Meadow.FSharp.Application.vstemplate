@@ -19,8 +19,8 @@
   </TemplateData>
   <TemplateContent>
     <Project TargetFileName="Meadow.FSharp.Application.fsproj" File="Meadow.FSharp.Application.fsproj" ReplaceParameters="true">
-      <Folder Name="Properties" TargetFolderName="Properties" />
       <ProjectItem ReplaceParameters="true" TargetFileName="Program.fs">Program.fs</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="meadow.config.yaml">meadow.config.yaml</ProjectItem>
     </Project>
   </TemplateContent>
 </VSTemplate>

@@ -16,9 +16,13 @@ namespace Meadow
     class VsOutputPaneLogger : IProgress<string>, ILogger
     {
         IProjectThreadingService ThreadingService;
-        IVsOutputWindowPane OutputPane;
+        IVsOutputWindowPane meadowOutputPane;
+  
+        Guid meadowPaneGuid = new Guid("C2FCAB2F-BFEB-4B1A-B385-08D4C81107FE");
 
-        public IDisposable BeginScope<TState>(TState state) => default;
+		public IVsOutputWindowPane Pane { get; internal set; }
+
+		public IDisposable BeginScope<TState>(TState state) => default;
 
         public bool IsEnabled(LogLevel logLevel) => logLevel >= LogLevel.Information;
 
@@ -40,13 +44,34 @@ namespace Meadow
             try
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                if (OutputPane == null)
+                if (meadowOutputPane == null)
                 {
-                    IVsOutputWindow outWindow = Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
-                    Guid generalPaneGuid = VSConstants.GUID_OutWindowDebugPane; // P.S. There's also the GUID_OutWindowDebugPane available.
-                    outWindow.GetPane(ref generalPaneGuid, out OutputPane);
+                    IVsOutputWindow outputWindow = Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
+                    if (outputWindow != null)
+                    {
+                        //check if the meadowOutputPane already exists, there can be only 1
+                        outputWindow.GetPane(ref meadowPaneGuid, out meadowOutputPane);
+
+                        if (meadowOutputPane == null) {
+                            var returnStatus = outputWindow.CreatePane(ref meadowPaneGuid, "Meadow", Convert.ToInt32(true), Convert.ToInt32(true));
+                            if (returnStatus == VSConstants.S_OK)
+                            {
+                                //Retrieve newly created Pane
+                                outputWindow.GetPane(ref meadowPaneGuid, out meadowOutputPane);
+                            }
+                        }
+                        else
+						{
+                            // It already exists, so clear it for this run
+                            meadowOutputPane.Clear();
+                        }
+
+                        // Activate the pane, it should have been created by now
+                        meadowOutputPane?.Activate();
+                    }
                 }
-                OutputPane.OutputString(value + Environment.NewLine);
+                Pane = meadowOutputPane;
+                meadowOutputPane?.OutputStringThreadSafe(value + Environment.NewLine);
             } catch (Exception ex)
             {
                 Console.WriteLine(ex);
