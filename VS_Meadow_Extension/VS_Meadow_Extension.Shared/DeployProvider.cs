@@ -104,7 +104,7 @@ namespace Meadow
                 var solDir = Path.GetDirectoryName(solution.FileName);
                 fullPathToCsProj = Path.Combine(solDir, relativePathToCsProj);
 
-                foreach (object prj in dte2.Solution.Projects)
+                foreach (object prj in solution.Projects)
                 {
                     EnvDTE.Project proj = prj as EnvDTE.Project;
                     if (proj != null)
