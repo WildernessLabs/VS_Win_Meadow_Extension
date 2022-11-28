@@ -67,6 +67,7 @@ namespace Meadow
 
             if (device != null)
             {
+                MeadowPackage.DebugOrDeployInProgress = true;
                 DeployProvider.Meadow = new MeadowDeviceHelper(device, outputPane);
 
                 var meadowSession = new MeadowSoftDebuggerSession(DeployProvider.Meadow);
@@ -94,6 +95,7 @@ namespace Meadow
         public Task OnAfterLaunchAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
         {
             vsSession?.Start();
+            MeadowPackage.DebugOrDeployInProgress = false;
             return Task.CompletedTask;
         }
 
