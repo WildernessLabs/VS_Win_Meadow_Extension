@@ -26,7 +26,6 @@ namespace Meadow
         // in the debug launch provider ?
         internal static MeadowDeviceHelper Meadow;
         static OutputLogger logger = new OutputLogger();
-        bool appDeployed = false;
 
         /// <summary>
         /// Provides access to the project's properties.
@@ -46,7 +45,7 @@ namespace Meadow
         {
             logger?.DisconnectPane();
             logger?.ConnectTextWriter(outputPaneWriter);
-            appDeployed = false;
+            MeadowPackage.DebugOrDeployInProgress = false;
 
             var generalProperties = await Properties.GetConfigurationGeneralPropertiesAsync();
             var name = await generalProperties.Rule.GetPropertyValueAsync("AssemblyName");
@@ -57,7 +56,7 @@ namespace Meadow
                 return;
             }
 
-            appDeployed = true;
+            MeadowPackage.DebugOrDeployInProgress = true;
 
             var projectDir = await generalProperties.Rule.GetPropertyValueAsync("ProjectDir");
             var outputPath = Path.Combine(projectDir, await generalProperties.Rule.GetPropertyValueAsync("OutputPath"));
@@ -68,7 +67,7 @@ namespace Meadow
             }
             catch (Exception ex)
             {
-                appDeployed = false;
+                MeadowPackage.DebugOrDeployInProgress = false;
                 logger?.Log($"Deploy failed: {ex.Message}");
                 logger?.Log("Reset Meadow and try again.");
                 throw ex;
@@ -84,7 +83,7 @@ namespace Meadow
                 var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger);
                 if (device == null)
                 {
-                    appDeployed = false;
+                    MeadowPackage.DebugOrDeployInProgress = false;
                     throw new Exception("A device has not been selected. Please attach a device, then select it from the Device list.");
                 }
 
@@ -109,7 +108,7 @@ namespace Meadow
             }
             catch (Exception ex)
             {
-                appDeployed = false;
+                MeadowPackage.DebugOrDeployInProgress = false;
                 await outputPaneWriter.WriteAsync($"Deploy failed: {ex.Message}//nStackTrace://n{ex.StackTrace}");
                 await outputPaneWriter.WriteAsync($"Reset Meadow and try again.");
                 throw ex;
@@ -123,7 +122,7 @@ namespace Meadow
 
         public async void Commit()
         {
-            if (!appDeployed)
+            if (!MeadowPackage.DebugOrDeployInProgress)
                 return;
 
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
@@ -134,10 +133,12 @@ namespace Meadow
 
             logger.DisconnectTextWriter();
             logger.ConnectPane(meadowOutputPane.Pane);
+            MeadowPackage.DebugOrDeployInProgress = false;
         }
 
         public void Rollback()
         {
+            MeadowPackage.DebugOrDeployInProgress = false;
             Console.Write("Rolling Back");
         }
     }

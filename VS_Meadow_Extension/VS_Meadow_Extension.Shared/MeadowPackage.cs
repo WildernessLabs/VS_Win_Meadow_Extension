@@ -49,6 +49,10 @@ namespace Meadow
     {
         private const string NoDevicesFound = "No Devices Found";
 
+        public static bool DebugOrDeployInProgress { get; set; } = false;
+
+        private MeadowSettings meadowSettings = new MeadowSettings(Globals.SettingsFilePath);
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MeadowPackage"/> class.
         /// </summary>
@@ -92,95 +96,89 @@ namespace Meadow
 
         private async void OnMeadowDeviceListCombo(object sender, EventArgs e)
         {
-            if (e is OleMenuCmdEventArgs eventArgs)
+            if (!DebugOrDeployInProgress)
             {
-                var portList = await MeadowDeviceManager.GetSerialPorts();
-
-                IntPtr vOut = eventArgs.OutValue;
-
-                // when vOut is non-NULL, the IDE is requesting the current value for the combo
-                if (vOut != IntPtr.Zero)
+                if (e is OleMenuCmdEventArgs eventArgs)
                 {
-                    if (portList.Count > 0)
-                    {
-                        string deviceTarget = string.Empty;
+                    var portList = await MeadowDeviceManager.GetSerialPorts();
 
-                        MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath);
-                        if (portList.Count == 1)
+                    IntPtr vOut = eventArgs.OutValue;
+
+                    // when vOut is non-NULL, the IDE is requesting the current value for the combo
+                    if (vOut != IntPtr.Zero)
+                    {
+                        if (portList.Count > 0)
                         {
-                            deviceTarget = portList[0];
-                            settings.DeviceTarget = portList[0];
-                            settings.Save();
+                            string deviceTarget = string.Empty;
+
+                            bool IsSavedValueInPortList = IsValueInPortList(portList, meadowSettings.DeviceTarget);
+                            if (IsSavedValueInPortList)
+                            {
+                                deviceTarget = meadowSettings.DeviceTarget;
+                            }
+
+                            Marshal.GetNativeVariantForObject(deviceTarget, vOut);
+                        }
+						else
+						{
+                            Marshal.GetNativeVariantForObject(NoDevicesFound, vOut);
+                        }
+                    }
+                    else if (eventArgs.InValue is string newChoice)
+                    {
+                        // new value was selected check if it is in our list
+                        bool valueInPortList = IsValueInPortList(portList, newChoice);
+
+                        if (valueInPortList)
+                        {
+                            SaveDeviceChoiceToSettings(newChoice);
                         }
                         else
                         {
-                            bool valueInPortList = IsValueInPortList(portList, settings.DeviceTarget);
-
-                            if (valueInPortList)
+                            if (!newChoice.Equals(NoDevicesFound))
                             {
-                                deviceTarget = settings.DeviceTarget;
+                                throw (new ArgumentException("Invalid Device Selected"));
                             }
                         }
-
-                        Marshal.GetNativeVariantForObject(deviceTarget, vOut);
                     }
                 }
-                else if (eventArgs.InValue is string newChoice)
+                else
                 {
-                    // new value was selected check if it is in our list
-                    bool valueInPortList = IsValueInPortList(portList, newChoice);
-
-                    if (valueInPortList)
-					{
-						SaveChoiceToSettings(newChoice);
-					}
-					else
-                    {
-                        if (!newChoice.Equals(NoDevicesFound))
-                        {
-                            throw (new ArgumentException("Invalid Device Selected"));
-                        }
-                    }
+                    // We should never get here; EventArgs are required.
+                    throw (new ArgumentException("EventArgs Required")); // force an exception to be thrown
                 }
-            }
-            else
-            {
-                // We should never get here; EventArgs are required.
-                throw (new ArgumentException("EventArgs Required")); // force an exception to be thrown
             }
         }
 
         private async void OnMeadowDeviceListComboGetList(object sender, EventArgs e)
         {
-            if (e is OleMenuCmdEventArgs eventArgs)
+            if (!DebugOrDeployInProgress)
             {
-                object inParam = eventArgs.InValue;
-                IntPtr vOut = eventArgs.OutValue;
+                if (e is OleMenuCmdEventArgs eventArgs)
+                {
+                    object inParam = eventArgs.InValue;
+                    IntPtr vOut = eventArgs.OutValue;
 
-                if (inParam != null)
-                {
-                    throw (new ArgumentException("InParam Invalid")); // force an exception to be thrown
-                }
-                else if (vOut != IntPtr.Zero)
-                {
-                    var portList = await MeadowDeviceManager.GetSerialPorts();
-                    if (portList.Count > 0)
+                    if (inParam != null)
                     {
-                        Marshal.GetNativeVariantForObject(portList, vOut);
-
-                        if (portList.Count == 1)
-						{
-                            SaveChoiceToSettings(portList[0]);
+                        throw (new ArgumentException("InParam Invalid")); // force an exception to be thrown
+                    }
+                    else if (vOut != IntPtr.Zero)
+                    {
+                        var portList = await MeadowDeviceManager.GetSerialPorts();
+                        if (portList.Count > 0)
+                        {
+                            Marshal.GetNativeVariantForObject(portList, vOut);
+                        }
+                        else
+                        {
+                            Marshal.GetNativeVariantForObject(new string[] { NoDevicesFound }, vOut);
                         }
                     }
                     else
                     {
-                        Marshal.GetNativeVariantForObject(new string[] { NoDevicesFound }, vOut);
+                        throw (new ArgumentException("OutParam Required")); // force an exception to be thrown
                     }
-                }
-                else
-                {
-                    throw (new ArgumentException("OutParam Required")); // force an exception to be thrown
                 }
             }
         }
@@ -200,13 +198,10 @@ namespace Meadow
             return validInput;
         }
 
-        private static void SaveChoiceToSettings(string newChoice)
+        private void SaveDeviceChoiceToSettings(string newChoice)
         {
-            MeadowSettings settings = new MeadowSettings(Globals.SettingsFilePath, false)
-            {
-                DeviceTarget = newChoice
-            };
-            settings.Save();
+            meadowSettings.DeviceTarget = newChoice;
+            meadowSettings.Save();
         }
     }
 
