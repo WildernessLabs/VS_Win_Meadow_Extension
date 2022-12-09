@@ -61,7 +61,7 @@ namespace Meadow
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
                 textWriter?.WriteLine(msg);
-                outputPane?.OutputStringThreadSafe(msg);
+                outputPane?.OutputStringThreadSafe(msg + Environment.NewLine);
             }
 			catch (Exception ex)
 			{
