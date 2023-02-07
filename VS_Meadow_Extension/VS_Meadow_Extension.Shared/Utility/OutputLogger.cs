@@ -6,7 +6,6 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
 using Meadow.CLI.Core.Logging;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio;
 using EnvDTE;
 using System.Net;
@@ -27,7 +26,7 @@ namespace Meadow
 
 		public OutputLogger()
         {
-            Task.Run(async () =>
+            System.Threading.Tasks.Task.Run(async () =>
             {
                 //stopwatch = new Stopwatch();
                 if (meadowOutputPane == null)
