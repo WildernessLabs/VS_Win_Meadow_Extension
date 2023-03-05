@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="VS_Meadow_Extension.2022.d5eb772d-2173-4795-b60b-67929a9bf12d" Version="0.90.2" Language="en-US" Publisher="Wilderness Labs" />
+        <Identity Id="VS_Meadow_Extension.2022.d5eb772d-2173-4795-b60b-67929a9bf12d" Version="0.95.0" Language="en-US" Publisher="Wilderness Labs" />
         <DisplayName>VS 2022 Tools for Meadow</DisplayName>
         <Description xml:space="preserve">Tools for developing Meadow applications</Description>
         <Icon>wildernesslabs_icon.png</Icon>
@@ -17,6 +17,15 @@
         </InstallationTarget>
         <InstallationTarget Version="[17.0, 18.0)" Id="Microsoft.VisualStudio.Enterprise">
             <ProductArchitecture>amd64</ProductArchitecture>
+        </InstallationTarget>
+        <InstallationTarget Version="[17.0, 18.0)" Id="Microsoft.VisualStudio.Community">
+            <ProductArchitecture>arm64</ProductArchitecture>
+        </InstallationTarget>
+        <InstallationTarget Version="[17.0, 18.0)" Id="Microsoft.VisualStudio.Pro">
+            <ProductArchitecture>arm64</ProductArchitecture>
+        </InstallationTarget>
+        <InstallationTarget Version="[17.0, 18.0)" Id="Microsoft.VisualStudio.Enterprise">
+            <ProductArchitecture>arm64</ProductArchitecture>
         </InstallationTarget>
     </Installation>
     <Dependencies>

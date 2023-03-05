@@ -68,7 +68,7 @@ namespace Meadow
             catch (Exception ex)
             {
                 MeadowPackage.DebugOrDeployInProgress = false;
-                logger?.Log($"Deploy failed: {ex.Message}");
+                logger?.Log($"Deploy failed: {ex.Message}{Environment.NewLine}StackTrace:{Environment.NewLine}{ex.StackTrace}");
                 logger?.Log("Reset Meadow and try again.");
                 throw ex;
             }
@@ -109,7 +109,7 @@ namespace Meadow
             catch (Exception ex)
             {
                 MeadowPackage.DebugOrDeployInProgress = false;
-                await outputPaneWriter.WriteAsync($"Deploy failed: {ex.Message}//nStackTrace://n{ex.StackTrace}");
+                await outputPaneWriter.WriteAsync($"Deploy failed: {ex.Message}{Environment.NewLine}StackTrace:{Environment.NewLine}{ex.StackTrace}");
                 await outputPaneWriter.WriteAsync($"Reset Meadow and try again.");
                 throw ex;
             }
