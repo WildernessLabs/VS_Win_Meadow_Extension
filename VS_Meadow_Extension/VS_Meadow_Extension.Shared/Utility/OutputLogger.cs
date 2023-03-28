@@ -15,7 +15,6 @@ namespace Meadow
     public class OutputLogger : IProgress<string>, ILogger
     {
         private TextWriter textWriter;
-        private IVsOutputWindowPane outputPane;
         private IVsOutputWindowPane meadowOutputPane;
 		Guid meadowPaneGuid = new Guid("C2FCAB2F-BFEB-4B1A-B385-08D4C81107FE");
 		private IVsStatusbar statusBar;
@@ -28,11 +27,9 @@ namespace Meadow
         {
             System.Threading.Tasks.Task.Run(async () =>
             {
-                //stopwatch = new Stopwatch();
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 if (meadowOutputPane == null)
                 {
-
-                    await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                     IVsOutputWindow outputWindow = Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
                     if (outputWindow != null)
                     {
@@ -51,7 +48,7 @@ namespace Meadow
                         else
                         {
                             // It already exists, so clear it for this run
-                            meadowOutputPane.Clear();
+                            meadowOutputPane?.Clear();
                         }
 
                         // Activate the pane, it should have been created by now
@@ -61,16 +58,6 @@ namespace Meadow
 
                 statusBar = Package.GetGlobalService(typeof(SVsStatusbar)) as IVsStatusbar;
 			});
-        }
-
-        public void ConnectPane(IVsOutputWindowPane pane)
-        {
-            outputPane = pane;
-        }
-
-        public void DisconnectPane()
-        {
-            outputPane = null;
         }
 
         public void ConnectTextWriter(TextWriter writer)
@@ -104,30 +91,29 @@ namespace Meadow
                     {
 						// Display the progress bar.
 						nextProgress = 0;
-						statusBar.Progress(ref progressBarCookie, 1, "File Transfer Started", 0, 0);
+						statusBar?.Progress(ref progressBarCookie, 1, "File Transfer Started", 0, 0);
 					}
                     else if (msg == "]")
                     {
 						// Clear the progress bar.
-						statusBar.Progress(ref progressBarCookie, 0, "File Transfer Completed", 0, 0);
+						statusBar?.Progress(ref progressBarCookie, 0, "File Transfer Completed", 0, 0);
 					}
                     else if (msg == "=")
                     {
-                        statusBar.Progress(ref progressBarCookie, 1, "File Transferring", nextProgress, TOTAL_PROGRESS);
+                        statusBar?.Progress(ref progressBarCookie, 1, "File Transferring", nextProgress, TOTAL_PROGRESS);
 						nextProgress += PROGESS_INCREMENTS;
 					}
                     else
                     {
-						statusBar.Progress(ref progressBarCookie, 0, "", 0, 0);
+						statusBar?.Progress(ref progressBarCookie, 0, "", 0, 0);
 
 						textWriter?.Write(msg);
-                        outputPane?.OutputStringThreadSafe(msg);
                     }
                 }
             }
 			catch (Exception ex)
 			{
-                Debug.WriteLine($"A Disposed Object Exception may have occured. Let's not crash the IDE.{Environment.NewLine}Exception:{Environment.NewLine}{ex.Message}{Environment.NewLine}StackTrace:{Environment.NewLine}{ex.StackTrace}");
+                //Debug.WriteLine($"A Disposed Object Exception may have occured. Let's not crash the IDE.{Environment.NewLine}Exception:{Environment.NewLine}{ex.Message}{Environment.NewLine}StackTrace:{Environment.NewLine}{ex.StackTrace}");
             }
         }
 

@@ -99,7 +99,7 @@ namespace Meadow
                 }
                 catch
                 {
-                    DeployOutputLogger.Log("OS download failed, make sure you have an active internet connection");
+                    DeployOutputLogger?.Log("OS download failed, make sure you have an active internet connection");
                 }
 
                 var appPathDll = Path.Combine(folder, "App.dll");
@@ -128,10 +128,10 @@ namespace Meadow
 
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-            DeployOutputLogger.ShowMeadowLogs();
-            DeployOutputLogger.Log("Launching application..." + Environment.NewLine);
+            DeployOutputLogger?.ShowMeadowLogs();
+            DeployOutputLogger?.Log("Launching application..." + Environment.NewLine);
 
-            DeployOutputLogger.DisconnectTextWriter();
+            DeployOutputLogger?.DisconnectTextWriter();
 
             MeadowPackage.DebugOrDeployInProgress = false;
         }
