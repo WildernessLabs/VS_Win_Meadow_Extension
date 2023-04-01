@@ -1,12 +1,14 @@
 ﻿<Project Sdk="Meadow.Sdk/1.1.0">
   <PropertyGroup>
-    <OutputType>Library</OutputType>
     <TargetFramework>netstandard2.1</TargetFramework>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <OutputType>Library</OutputType>
     <AssemblyName>App</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <None Include="meadow.config.yaml" />
+    <None Include="app.config.yaml" />
+    <None Include="wifi.config.yaml" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
@@ -15,6 +17,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Update="meadow.config.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="app.config.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="wifi.config.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
