@@ -25,7 +25,7 @@ namespace Meadow
         // TODO: tad bit hack right now - maybe we can use DI to import this DeployProvider
         // in the debug launch provider ?
         internal static MeadowDeviceHelper Meadow;
-        static OutputLogger logger = new OutputLogger();
+        public static OutputLogger DeployOutputLogger = new OutputLogger();
 
         /// <summary>
         /// Provides access to the project's properties.
@@ -43,15 +43,14 @@ namespace Meadow
 
         public async Task DeployAsync(CancellationToken cts, TextWriter outputPaneWriter)
         {
-            logger?.DisconnectPane();
-            logger?.ConnectTextWriter(outputPaneWriter);
+            DeployOutputLogger?.ConnectTextWriter(outputPaneWriter);
             MeadowPackage.DebugOrDeployInProgress = false;
 
             var generalProperties = await Properties.GetConfigurationGeneralPropertiesAsync();
             var name = await generalProperties.Rule.GetPropertyValueAsync("AssemblyName");
-            
+
             //This is to avoid repeat deploys for multiple projects in the solution
-            if(name != "App")
+            if (name != "App")
             {
                 return;
             }
@@ -68,8 +67,10 @@ namespace Meadow
             catch (Exception ex)
             {
                 MeadowPackage.DebugOrDeployInProgress = false;
-                logger?.Log($"Deploy failed: {ex.Message}{Environment.NewLine}StackTrace:{Environment.NewLine}{ex.StackTrace}");
-                logger?.Log("Reset Meadow and try again.");
+
+                DeployOutputLogger?.Log($"Deploy failed: {ex.Message}{Environment.NewLine}StackTrace:{Environment.NewLine}{ex.StackTrace}");
+                DeployOutputLogger?.Log("Reset Meadow and try again.");
+
                 throw ex;
             }
         }
@@ -80,25 +81,25 @@ namespace Meadow
             {
                 Meadow?.Dispose();
 
-                var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger);
+                var device = await MeadowProvider.GetMeadowSerialDeviceAsync(DeployOutputLogger);
                 if (device == null)
                 {
                     MeadowPackage.DebugOrDeployInProgress = false;
                     throw new Exception("A device has not been selected. Please attach a device, then select it from the Device list.");
                 }
 
-                Meadow = new MeadowDeviceHelper(device, logger);
+                Meadow = new MeadowDeviceHelper(device, DeployOutputLogger);
 
                 //wrap this is a try/catch so it doesn't crash if the developer is offline
                 try
                 {
                     string osVersion = await Meadow.GetOSVersion(TimeSpan.FromSeconds(30), token);
 
-                    await new DownloadManager(logger).DownloadOsBinaries(osVersion);
+                    await new DownloadManager(DeployOutputLogger).DownloadOsBinaries(osVersion);
                 }
                 catch
                 {
-                    logger.Log("OS download failed, make sure you have an active internet connection");
+                    DeployOutputLogger?.Log("OS download failed, make sure you have an active internet connection");
                 }
 
                 var appPathDll = Path.Combine(folder, "App.dll");
@@ -127,12 +128,11 @@ namespace Meadow
 
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-            var meadowOutputPane = new VsOutputPaneLogger(configuredProject.UnconfiguredProject.ProjectService.Services.ThreadingPolicy);
+            DeployOutputLogger?.ShowMeadowLogs();
+            DeployOutputLogger?.Log("Launching application..." + Environment.NewLine);
 
-            meadowOutputPane.Report("Launching application..." + Environment.NewLine);
+            DeployOutputLogger?.DisconnectTextWriter();
 
-            logger.DisconnectTextWriter();
-            logger.ConnectPane(meadowOutputPane.Pane);
             MeadowPackage.DebugOrDeployInProgress = false;
         }
 

@@ -32,8 +32,6 @@ namespace Meadow
             SocketTimeout = 0
         };
 
-        VsOutputPaneLogger outputPane;
-
         // FIXME: Find a nicer way than storing this
         DebuggerSession vsSession;
 
@@ -50,7 +48,6 @@ namespace Meadow
         {
             vsHierarchies = new OrderPrecedenceImportCollection<IVsHierarchy>(
                 projectCapabilityCheckProvider: configuredProj);
-            outputPane = new VsOutputPaneLogger(configuredProj.UnconfiguredProject.ProjectService.Services.ThreadingPolicy);
         }
 
         public async Task<IReadOnlyList<IDebugLaunchSettings>> QueryDebugTargetsAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
@@ -63,12 +60,12 @@ namespace Meadow
 
             DeployProvider.Meadow?.Dispose();
 
-            var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger: outputPane);
+            var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger: DeployProvider.DeployOutputLogger);
 
             if (device != null)
             {
                 MeadowPackage.DebugOrDeployInProgress = true;
-                DeployProvider.Meadow = new MeadowDeviceHelper(device, outputPane);
+                DeployProvider.Meadow = new MeadowDeviceHelper(device, DeployProvider.DeployOutputLogger);
 
                 var meadowSession = new MeadowSoftDebuggerSession(DeployProvider.Meadow);
 
@@ -77,7 +74,7 @@ namespace Meadow
                 var startInfo = new StartInfo(startArgs, debuggingOptions, VsHierarchy.GetProject());
 
                 var sessionInfo = new SessionMarshalling(meadowSession, startInfo);
-                vsSession = new DebuggerSession(startInfo, outputPane, meadowSession, this);
+                vsSession = new DebuggerSession(startInfo, DeployProvider.DeployOutputLogger, meadowSession, this);
 
                 var settings = new MonoDebugLaunchSettings(launchOptions, sessionInfo);
 

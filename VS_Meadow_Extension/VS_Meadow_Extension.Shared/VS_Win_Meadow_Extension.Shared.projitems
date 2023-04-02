@@ -46,8 +46,6 @@
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Utility\OutputPaneWriter.cs">
     </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)Utility\VsOutputPaneLogger.cs">
-    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)VsixManifest.cs">
     </Compile>
   </ItemGroup>
