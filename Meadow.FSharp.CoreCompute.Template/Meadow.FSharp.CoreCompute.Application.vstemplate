@@ -2,8 +2,8 @@
   <TemplateData>
     <Name>Meadow Application</Name>
     <Description>Create a basic Meadow Core-Compute Module application</Description>
-    <ProjectType>CSharp</ProjectType>
-    <LanguageTag>C#</LanguageTag>
+    <ProjectType>FSharp</ProjectType>
+    <LanguageTag>F#</LanguageTag>
     <PlatformTag>Meadow</PlatformTag>
     <ProjectTypeTag>IoT</ProjectTypeTag>
     <ProjectSubType>
