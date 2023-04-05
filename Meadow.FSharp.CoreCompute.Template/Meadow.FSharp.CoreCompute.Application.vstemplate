@@ -18,8 +18,8 @@
     <Icon>meadow_icon.png</Icon>
   </TemplateData>
   <TemplateContent>
-    <Project TargetFileName="Meadow.FSharp.CoreCompute.Application.csproj" File="Meadow.FSharp.CoreCompute.Application.csproj" ReplaceParameters="true">
-      <ProjectItem ReplaceParameters="true" TargetFileName="Program.fs">MeadowApp.cs</ProjectItem>
+    <Project TargetFileName="Meadow.FSharp.CoreCompute.Application.fsproj" File="Meadow.FSharp.CoreCompute.Application.fsproj" ReplaceParameters="true">
+      <ProjectItem ReplaceParameters="true" TargetFileName="Program.fs">Program.fs</ProjectItem>
       <ProjectItem ReplaceParameters="true" TargetFileName="meadow.config.yaml">meadow.config.yaml</ProjectItem>
       <ProjectItem ReplaceParameters="true" TargetFileName="app.config.yaml">app.config.yaml</ProjectItem>
       <ProjectItem ReplaceParameters="true" TargetFileName="wifi.config.yaml">wifi.config.yaml</ProjectItem>
