@@ -8,6 +8,8 @@
 
 The [Meadow.CLI](https://github.com/WildernessLabs/Meadow.CLI) repo must be cloned adjacent to this checkout using the `develop` branch.
 
+To develop for this extension, you will also need the **Visual Studio extension development** and **.NET desktop environment** workloads. Visual Studio should prompt to install these the first time you open one of the extension solutions.
+
 ## License
 
 Released under the [Apache 2 license](license.md).
