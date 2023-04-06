@@ -6,9 +6,11 @@
 
 ## Getting Started
 
-The [Meadow.CLI](https://github.com/WildernessLabs/Meadow.CLI) repo must be cloned adjacent to this checkout using the `develop` branch.
+To develop for this extension, you will need some prerequisites.
 
-To develop for this extension, you will also need the **Visual Studio extension development** and **.NET desktop environment** workloads. Visual Studio should prompt to install these the first time you open one of the extension solutions.
+The [Meadow.CLI](https://github.com/WildernessLabs/Meadow.CLI) repo must be cloned adjacent to this checkout using the `develop` branch. This repo is used to resolve shared code and project references.
+
+You will also need the **Visual Studio extension development** and **.NET desktop environment** workloads. Visual Studio should prompt to install these the first time you open one of the extension solutions.
 
 ## License
 
