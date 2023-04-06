@@ -1,7 +1,7 @@
 ﻿<VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Project">
   <TemplateData>
-    <Name>Meadow Application</Name>
-    <Description>Create a basic Meadow Core-Compute Module application</Description>
+    <Name>Meadow Application (Core-Compute module)</Name>
+    <Description>Create a basic Meadow Core-Compute module application</Description>
     <ProjectType>FSharp</ProjectType>
     <LanguageTag>F#</LanguageTag>
     <PlatformTag>Meadow</PlatformTag>
