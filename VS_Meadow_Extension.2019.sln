@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29215.179
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{F27FC7D7-ADB6-4538-BF59-CBFE72C5AA71}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Templates", "Templates", "{470F54A7-8B71-4ECF-94A2-CE167E75963E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.CSharp.Template", "Meadow.CSharp.Template\Meadow.CSharp.Template.csproj", "{2CA2AE75-18E0-4EF2-80A7-63E51446BBFE}"
 EndProject
