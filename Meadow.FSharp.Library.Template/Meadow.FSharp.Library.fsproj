@@ -5,6 +5,9 @@
     <AssemblyName>MeadowLibrary</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Class1.fs" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Meadow.Foundation" Version="0.*" />
   </ItemGroup>
 </Project>
