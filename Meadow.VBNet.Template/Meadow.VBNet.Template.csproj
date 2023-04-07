@@ -61,6 +61,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="meadow.config.yaml" />
+    <None Include="app.config.yaml" />
+    <None Include="wifi.config.yaml" />
     <None Include="Meadow.VBNet.Application.vbproj" />
     <None Include="MeadowApp.vb" />
   </ItemGroup>
