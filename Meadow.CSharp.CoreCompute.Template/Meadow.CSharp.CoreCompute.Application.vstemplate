@@ -1,9 +1,9 @@
 ﻿<VSTemplate Version="3.0.0" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" Type="Project">
   <TemplateData>
-    <Name>Meadow Application</Name>
-    <Description>Create a basic Meadow application</Description>
-    <ProjectType>FSharp</ProjectType>
-    <LanguageTag>F#</LanguageTag>
+    <Name>Meadow Application (Core-Compute module)</Name>
+    <Description>Create a basic Meadow Core-Compute module application</Description>
+    <ProjectType>CSharp</ProjectType>
+    <LanguageTag>C#</LanguageTag>
     <PlatformTag>Meadow</PlatformTag>
     <ProjectTypeTag>IoT</ProjectTypeTag>
     <ProjectSubType>
@@ -18,8 +18,8 @@
     <Icon>meadow_icon.png</Icon>
   </TemplateData>
   <TemplateContent>
-    <Project TargetFileName="Meadow.FSharp.Application.fsproj" File="Meadow.FSharp.Application.fsproj" ReplaceParameters="true">
-      <ProjectItem ReplaceParameters="true" TargetFileName="Program.fs">Program.fs</ProjectItem>
+    <Project TargetFileName="Meadow.CSharp.CoreCompute.Application.csproj" File="Meadow.CSharp.CoreCompute.Application.csproj" ReplaceParameters="true">
+      <ProjectItem ReplaceParameters="true" TargetFileName="MeadowApp.cs">MeadowApp.cs</ProjectItem>
       <ProjectItem ReplaceParameters="true" TargetFileName="meadow.config.yaml">meadow.config.yaml</ProjectItem>
       <ProjectItem ReplaceParameters="true" TargetFileName="app.config.yaml">app.config.yaml</ProjectItem>
       <ProjectItem ReplaceParameters="true" TargetFileName="wifi.config.yaml">wifi.config.yaml</ProjectItem>

@@ -21,6 +21,8 @@
     <Project TargetFileName="Meadow.CSharp.Application.csproj" File="Meadow.CSharp.Application.csproj" ReplaceParameters="true">
       <ProjectItem ReplaceParameters="true" TargetFileName="MeadowApp.cs">MeadowApp.cs</ProjectItem>
       <ProjectItem ReplaceParameters="true" TargetFileName="meadow.config.yaml">meadow.config.yaml</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="app.config.yaml">app.config.yaml</ProjectItem>
+      <ProjectItem ReplaceParameters="true" TargetFileName="wifi.config.yaml">wifi.config.yaml</ProjectItem>
     </Project>
   </TemplateContent>
 </VSTemplate>

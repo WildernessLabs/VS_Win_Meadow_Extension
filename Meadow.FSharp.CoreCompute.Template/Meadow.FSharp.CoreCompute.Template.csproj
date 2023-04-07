@@ -9,11 +9,11 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectTypeGuids>{82b43b9b-a64c-4715-b499-d71e9ca2bd60};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-    <ProjectGuid>{0A4773F5-B5EC-4928-AAE7-64253877CF4E}</ProjectGuid>
+    <ProjectGuid>{CB325E0A-BCC0-457E-B893-F70995970B3F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Meadow.VBNet.Template</RootNamespace>
-    <AssemblyName>Meadow.VBNet.Template</AssemblyName>
+    <RootNamespace>Meadow.FSharp.CoreCompute.Template</RootNamespace>
+    <AssemblyName>Meadow.FSharp.CoreCompute.Template</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <GeneratePkgDefFile>false</GeneratePkgDefFile>
@@ -54,7 +54,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <VSTemplate Include="Meadow.VBNet.Application.vstemplate" />
+    <VSTemplate Include="Meadow.FSharp.CoreCompute.Application.vstemplate" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="meadow_icon.png" />
@@ -63,8 +63,8 @@
     <None Include="meadow.config.yaml" />
     <None Include="app.config.yaml" />
     <None Include="wifi.config.yaml" />
-    <None Include="Meadow.VBNet.Application.vbproj" />
-    <None Include="MeadowApp.vb" />
+    <None Include="Meadow.FSharp.CoreCompute.Application.fsproj" />
+    <None Include="Program.fs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
