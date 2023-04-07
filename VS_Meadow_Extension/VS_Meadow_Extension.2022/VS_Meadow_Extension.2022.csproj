@@ -173,6 +173,13 @@
       <Project>{a48fc00c-9ba3-43e3-ba1d-55fd6128d425}</Project>
       <Name>Meadow.CLI.Core.VS2019</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Meadow.FSharp.CoreCompute.Template\Meadow.FSharp.CoreCompute.Template.csproj">
+      <Project>{cb325e0a-bcc0-457e-b893-f70995970b3f}</Project>
+      <Name>Meadow.FSharp.CoreCompute.Template</Name>
+      <VSIXSubPath>ProjectTemplates</VSIXSubPath>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+    </ProjectReference>
     <ProjectReference Include="..\..\Meadow.FSharp.Library.Template\Meadow.FSharp.Library.Template.csproj">
       <Project>{CE404DDC-B2DF-4E4D-B0CF-BCA50AE34041}</Project>
       <Name>Meadow.FSharp.Library.Template</Name>
@@ -188,6 +195,13 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
     </ProjectReference>
+    <ProjectReference Include="..\..\Meadow.CSharp.CoreCompute.Template\Meadow.CSharp.CoreCompute.Template.csproj">
+      <Project>{c6173bb4-d339-48ec-bfae-d39ef3099596}</Project>
+      <Name>Meadow.CSharp.CoreCompute.Template</Name>
+      <VSIXSubPath>ProjectTemplates</VSIXSubPath>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+    </ProjectReference>
     <ProjectReference Include="..\..\Meadow.CSharp.Library.Template\Meadow.CSharp.Library.Template.csproj">
       <Project>{D4B7449D-E200-4513-B32E-E6DB6BC4BC50}</Project>
       <Name>Meadow.CSharp.Library.Template</Name>
@@ -199,6 +213,13 @@
     <ProjectReference Include="..\..\Meadow.CSharp.Template\Meadow.CSharp.Template.csproj">
       <Project>{2CA2AE75-18E0-4EF2-80A7-63E51446BBFE}</Project>
       <Name>Meadow.CSharp.Template</Name>
+      <VSIXSubPath>ProjectTemplates</VSIXSubPath>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Meadow.VBNet.CoreCompute.Template\Meadow.VBNet.CoreCompute.Template.csproj">
+      <Project>{08199114-e58d-44cb-bf60-27bce1838465}</Project>
+      <Name>Meadow.VBNet.CoreCompute.Template</Name>
       <VSIXSubPath>ProjectTemplates</VSIXSubPath>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <IncludeOutputGroupsInVSIX>TemplateProjectOutputGroup%3b</IncludeOutputGroupsInVSIX>
