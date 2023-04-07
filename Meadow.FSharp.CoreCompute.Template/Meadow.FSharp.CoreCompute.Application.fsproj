@@ -6,6 +6,9 @@
     <AssemblyName>App</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="meadow.config.yaml" />
+    <None Include="app.config.yaml" />
+    <None Include="wifi.config.yaml" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
