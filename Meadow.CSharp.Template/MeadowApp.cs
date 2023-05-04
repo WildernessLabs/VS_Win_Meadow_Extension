@@ -4,7 +4,6 @@ using Meadow.Foundation;
 using Meadow.Foundation.Leds;
 using Meadow.Peripherals.Leds;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace $safeprojectname$
@@ -16,15 +15,14 @@ namespace $safeprojectname$
 
         public override Task Run()
         {
-        Console.WriteLine("Run...");
+            Resolver.Log.Info("Run...");
 
-        CycleColors(TimeSpan.FromMilliseconds(1000));
-            return base.Run();
+            return CycleColors(TimeSpan.FromMilliseconds(1000));
         }
 
         public override Task Initialize()
         {
-            Console.WriteLine("Initialize...");
+            Resolver.Log.Info("Initialize...");
 
             onboardLed = new RgbPwmLed(
                 redPwmPin: Device.Pins.OnboardLedRed,
@@ -35,32 +33,31 @@ namespace $safeprojectname$
             return base.Initialize();
         }
 
-        void CycleColors(TimeSpan duration)
+        async Task CycleColors(TimeSpan duration)
         {
-            Console.WriteLine("Cycle colors...");
+            Resolver.Log.Info("Cycle colors...");
 
             while (true)
             {
-                ShowColorPulse(Color.Blue, duration);
-                ShowColorPulse(Color.Cyan, duration);
-                ShowColorPulse(Color.Green, duration);
-                ShowColorPulse(Color.GreenYellow, duration);
-                ShowColorPulse(Color.Yellow, duration);
-                ShowColorPulse(Color.Orange, duration);
-                ShowColorPulse(Color.OrangeRed, duration);
-                ShowColorPulse(Color.Red, duration);
-                ShowColorPulse(Color.MediumVioletRed, duration);
-                ShowColorPulse(Color.Purple, duration);
-                ShowColorPulse(Color.Magenta, duration);
-                ShowColorPulse(Color.Pink, duration);
+                await ShowColorPulse(Color.Blue, duration);
+                await ShowColorPulse(Color.Cyan, duration);
+                await ShowColorPulse(Color.Green, duration);
+                await ShowColorPulse(Color.GreenYellow, duration);
+                await ShowColorPulse(Color.Yellow, duration);
+                await ShowColorPulse(Color.Orange, duration);
+                await ShowColorPulse(Color.OrangeRed, duration);
+                await ShowColorPulse(Color.Red, duration);
+                await ShowColorPulse(Color.MediumVioletRed, duration);
+                await ShowColorPulse(Color.Purple, duration);
+                await ShowColorPulse(Color.Magenta, duration);
+                await ShowColorPulse(Color.Pink, duration);
             }
         }
 
-        void ShowColorPulse(Color color, TimeSpan duration)
+        async Task ShowColorPulse(Color color, TimeSpan duration)
         {
-            onboardLed.StartPulse(color, duration / 2);
-            Thread.Sleep(duration);
-            onboardLed.Stop();
+            await onboardLed.StartPulse(color, duration / 2);
+            await Task.Delay(duration);
         }
     }
 }
