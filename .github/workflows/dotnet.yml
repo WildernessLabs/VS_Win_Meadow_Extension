@@ -53,10 +53,10 @@ jobs:
         name: Meadow.2019.vsix
         path: 'main\VS_Meadow_Extension\VS_Meadow_Extension.2019\bin\Release\*.vsix'
           
-    - if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-      name: Publish VS2019 Extension
-      run: |
-        & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\Enterprise\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe" publish -payload "main\VS_Meadow_Extension\VS_Meadow_Extension.2019\bin\Release\Meadow.2019.vsix" -publishManifest "main\publishManifest.json" -ignoreWarnings "VSIXValidatorWarning01,VSIXValidatorWarning02" -personalAccessToken "${{secrets.MARKETPLACE_PUBLISH_PAT}}"
+#    - if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+#      name: Publish VS2019 Extension
+#      run: |
+#        & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\Enterprise\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe" publish -payload "main\VS_Meadow_Extension\VS_Meadow_Extension.2019\bin\Release\Meadow.2019.vsix" -publishManifest "main\publishManifest.json" -ignoreWarnings "VSIXValidatorWarning01,VSIXValidatorWarning02" -personalAccessToken "${{secrets.MARKETPLACE_PUBLISH_PAT}}"
     
   build-2022:
     runs-on: windows-2022
@@ -113,7 +113,7 @@ jobs:
 #        tag_name: ${{ github.ref }}
 #        release_name: ${{ github.ref }}
       
-    - if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-      name: Publish VS2022 Extension
-      run: |
-        & "${env:ProgramFiles}\Microsoft Visual Studio\2022\Enterprise\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe" publish -payload "main\VS_Meadow_Extension\VS_Meadow_Extension.2022\bin\Release\Meadow.2022.vsix" -publishManifest "main\publishManifest.2022.json" -ignoreWarnings "None" -personalAccessToken "${{secrets.MARKETPLACE_PUBLISH_PAT}}"
+#    - if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+#      name: Publish VS2022 Extension
+#      run: |
+#        & "${env:ProgramFiles}\Microsoft Visual Studio\2022\Enterprise\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe" publish -payload "main\VS_Meadow_Extension\VS_Meadow_Extension.2022\bin\Release\Meadow.2022.vsix" -publishManifest "main\publishManifest.2022.json" -ignoreWarnings "None" -personalAccessToken "${{secrets.MARKETPLACE_PUBLISH_PAT}}"
