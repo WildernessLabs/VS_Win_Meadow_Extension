@@ -9,7 +9,6 @@ using Meadow.CLI.Core.Logging;
 using Microsoft.VisualStudio;
 using EnvDTE;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace Meadow
 {
@@ -133,7 +132,7 @@ namespace Meadow
 			Log(msg);
 		}
 
-		internal async Task ShowMeadowLogs()
+		internal async System.Threading.Tasks.Task ShowMeadowLogs()
 		{
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 			meadowOutputPane?.Activate();
