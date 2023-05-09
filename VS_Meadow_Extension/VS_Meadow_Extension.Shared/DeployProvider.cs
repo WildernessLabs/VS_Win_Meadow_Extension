@@ -128,7 +128,6 @@ namespace Meadow
 
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-            DeployOutputLogger?.ShowMeadowLogs();
             DeployOutputLogger?.Log("Launching application..." + Environment.NewLine);
 
             DeployOutputLogger?.DisconnectTextWriter();

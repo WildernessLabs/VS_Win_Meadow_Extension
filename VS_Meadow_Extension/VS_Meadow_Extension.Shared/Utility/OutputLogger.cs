@@ -9,6 +9,7 @@ using Meadow.CLI.Core.Logging;
 using Microsoft.VisualStudio;
 using EnvDTE;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace Meadow
 {
@@ -52,8 +53,8 @@ namespace Meadow
                         }
 
                         // Activate the pane, it should have been created by now
-                        meadowOutputPane?.Activate();
-                    }
+                        await ShowMeadowLogs();
+					}
                 }
 
                 statusBar = Package.GetGlobalService(typeof(SVsStatusbar)) as IVsStatusbar;
@@ -132,7 +133,7 @@ namespace Meadow
 			Log(msg);
 		}
 
-		internal async void ShowMeadowLogs()
+		internal async Task ShowMeadowLogs()
 		{
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 			meadowOutputPane?.Activate();

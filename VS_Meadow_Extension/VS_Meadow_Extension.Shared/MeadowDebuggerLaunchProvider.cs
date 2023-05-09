@@ -93,6 +93,13 @@ namespace Meadow
         {
             vsSession?.Start();
             MeadowPackage.DebugOrDeployInProgress = false;
+
+            Task.Run(async () =>
+            {
+                await Task.Delay(10000);
+                await DeployProvider.DeployOutputLogger?.ShowMeadowLogs();
+            });
+
             return Task.CompletedTask;
         }
 
