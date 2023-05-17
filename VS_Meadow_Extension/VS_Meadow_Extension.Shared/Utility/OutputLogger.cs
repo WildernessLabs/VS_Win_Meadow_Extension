@@ -46,13 +46,13 @@ namespace Meadow
                             }
                         }
                     }
-
-                    // It should exist now, so clear it for this run
-                    meadowOutputPane?.Clear();
-
-                    // Activate the pane, it should have been created by now
-                    await ShowMeadowLogs();
                 }
+
+                // It should exist now, so clear it for this run
+                meadowOutputPane?.Clear();
+
+                // Activate the pane, it should have been created by now
+                await ShowMeadowLogs();
 
                 statusBar = Package.GetGlobalService(typeof(SVsStatusbar)) as IVsStatusbar;
             });
