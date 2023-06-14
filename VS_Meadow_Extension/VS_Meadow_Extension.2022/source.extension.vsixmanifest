@@ -6,7 +6,6 @@
         <Description xml:space="preserve">Tools for developing Meadow applications</Description>
         <Icon>wildernesslabs_icon.png</Icon>
         <Tags>Meadow, Wilderness Labs</Tags>
-        <Preview>true</Preview>
     </Metadata>
     <Installation>
         <InstallationTarget Version="[17.0, 18.0)" Id="Microsoft.VisualStudio.Community">
