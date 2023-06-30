@@ -4,6 +4,14 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+### 1.0.4
+
+- Fix Deploy/Debug regression (we’ve tested deploying/debugging on Windows, macOS and Linux (using VSCode))
+
+### 1.0.0
+
+- Official 1.0.0 release to coincide with Meadow OS 1.0.0 release
+
 ### 0.9.0
 
 - Compatibility updates for Meadow OS beta 3.10.
@@ -52,4 +60,3 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Known Issues
 
-- Debugging not supported.
