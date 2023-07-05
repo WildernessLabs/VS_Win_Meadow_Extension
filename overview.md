@@ -4,6 +4,10 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+### 1.1.0
+
+- Fix Meadow Tab Focus bug.
+
 ### 1.0.4
 
 - Fix Deploy/Debug regression (we’ve tested deploying/debugging on Windows, macOS and Linux (using VSCode))
