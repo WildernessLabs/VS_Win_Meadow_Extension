@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="VS_Meadow_Extension.ProjectType..fe358059-9487-4fe7-a01a-4b67b8231321" Version="1.1.0" Language="en-US" Publisher="Wilderness Labs" />
+        <Identity Id="VS_Meadow_Extension.ProjectType..fe358059-9487-4fe7-a01a-4b67b8231321" Version="1.1.2" Language="en-US" Publisher="Wilderness Labs" />
         <DisplayName>VS 2019 Tools for Meadow</DisplayName>
         <Description xml:space="preserve">Tools for developing Meadow applications</Description>
         <Icon>wildernesslabs_icon.png</Icon>

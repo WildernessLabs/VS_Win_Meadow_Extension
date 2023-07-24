@@ -4,9 +4,18 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+### 1.1.2
+
+- Update spacing meadow.*.yaml to meet specs and sync with Meadow.Sdk templates.
+
+### 1.1.1
+
+- Update spacing app.*.yaml to meet specs and sync with Meadow.Sdk templates.
+
 ### 1.1.0
 
-- Fix Meadow Tab Focus bug.
+- Update overview.md. 
+- Sync extension release numbers
 
 ### 1.0.4
 
