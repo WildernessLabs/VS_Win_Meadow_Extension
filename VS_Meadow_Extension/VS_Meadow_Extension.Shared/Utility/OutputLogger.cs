@@ -48,9 +48,6 @@ namespace Meadow
                     }
                 }
 
-                // It should exist now, so clear it for this run
-                meadowOutputPane?.Clear();
-
                 // Activate the pane, it should have been created by now
                 await ShowMeadowLogs();
 
@@ -58,10 +55,14 @@ namespace Meadow
             });
         }
 
-        public void ConnectTextWriter(TextWriter writer)
+		public async System.Threading.Tasks.Task ConnectTextWriter(TextWriter writer)
         {
-            textWriter = writer;
-        }
+			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+			textWriter = writer;
+
+			// It should exist now, so clear it for this run
+			meadowOutputPane?.Clear();
+		}
 
         public void DisconnectTextWriter()
         {

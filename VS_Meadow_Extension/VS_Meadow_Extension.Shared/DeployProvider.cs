@@ -43,7 +43,7 @@ namespace Meadow
 
         public async Task DeployAsync(CancellationToken cts, TextWriter outputPaneWriter)
         {
-            DeployOutputLogger?.ConnectTextWriter(outputPaneWriter);
+            await DeployOutputLogger?.ConnectTextWriter(outputPaneWriter);
             MeadowPackage.DebugOrDeployInProgress = false;
 
             var generalProperties = await Properties.GetConfigurationGeneralPropertiesAsync();
