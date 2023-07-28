@@ -4,6 +4,10 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+### 1.2.0
+
+- Clear Meadow Log each run. Move focus back to Meadow pane each run.
+
 ### 1.1.2
 
 - Update spacing meadow.*.yaml to meet specs and sync with Meadow.Sdk templates.
