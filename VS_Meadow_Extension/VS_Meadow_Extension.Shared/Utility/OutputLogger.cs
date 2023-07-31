@@ -23,7 +23,7 @@ namespace Meadow
 		private const uint PROGESS_INCREMENTS = 5;
 		private const uint TOTAL_PROGRESS = 100;
 
-		public OutputLogger()
+        public OutputLogger()
         {
             System.Threading.Tasks.Task.Run(async () =>
             {
@@ -45,25 +45,24 @@ namespace Meadow
                                 outputWindow.GetPane(ref meadowPaneGuid, out meadowOutputPane);
                             }
                         }
-                        else
-                        {
-                            // It already exists, so clear it for this run
-                            meadowOutputPane?.Clear();
-                        }
-
-                        // Activate the pane, it should have been created by now
-                        meadowOutputPane?.Activate();
                     }
                 }
 
+                // Activate the pane, it should have been created by now
+                await ShowMeadowLogs();
+
                 statusBar = Package.GetGlobalService(typeof(SVsStatusbar)) as IVsStatusbar;
-			});
+            });
         }
 
-        public void ConnectTextWriter(TextWriter writer)
+		public async System.Threading.Tasks.Task ConnectTextWriter(TextWriter writer)
         {
-            textWriter = writer;
-        }
+			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+			textWriter = writer;
+
+			// It should exist now, so clear it for this run
+			meadowOutputPane?.Clear();
+		}
 
         public void DisconnectTextWriter()
         {
@@ -132,7 +131,7 @@ namespace Meadow
 			Log(msg);
 		}
 
-		internal async void ShowMeadowLogs()
+		internal async System.Threading.Tasks.Task ShowMeadowLogs()
 		{
 			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 			meadowOutputPane?.Activate();
