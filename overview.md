@@ -4,6 +4,10 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+### 1.3.0
+
+- Sync with Meadow.CLI versioning
+
 ### 1.2.0
 
 - Clear Meadow Log each run. Move focus back to Meadow pane each run.
