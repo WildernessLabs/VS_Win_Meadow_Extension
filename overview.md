@@ -4,6 +4,11 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+### 1.3.4
+
+- Update dfu-util version check
+- Push App.dll to device instead of App.exe
+
 ### 1.3.0
 
 - Sync with Meadow.CLI versioning
