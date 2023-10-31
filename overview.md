@@ -4,6 +4,10 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+### 1.4.0
+
+- Fix IDE crash caused by uncaught TimeoutException
+
 ### 1.3.4
 
 - Update dfu-util version check
