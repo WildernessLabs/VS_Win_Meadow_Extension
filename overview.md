@@ -4,6 +4,11 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+### 1.5.0
+
+- Improve dependency filter for App.dll
+- Do a directory existing check before we check for internet.
+
 ### 1.4.0
 
 - Fix IDE crash caused by uncaught TimeoutException
