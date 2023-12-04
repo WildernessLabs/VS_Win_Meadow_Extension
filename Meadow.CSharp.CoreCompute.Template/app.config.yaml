@@ -11,7 +11,8 @@ Lifecycle:
     # When app set to restart automatically on app failure, 
 #    AppFailureRestartDelaySeconds: 15
 
-#Logging:
+# Logging configuration.
+Logging:
 
     # Adjust the level of logging detail.
 #    LogLevel:
@@ -19,7 +20,8 @@ Lifecycle:
         # Trace, Debug, Information, Warning, or Error
 #        Default: Trace
 
-#Update:
+# Meadow.Cloud configuration.
+Update:
 
     # Enable Meadow.Cloud OTA updates
 #    Enabled: true

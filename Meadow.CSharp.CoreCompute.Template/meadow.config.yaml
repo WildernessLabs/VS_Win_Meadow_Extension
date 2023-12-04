@@ -2,6 +2,7 @@
 # To learn more about these config options, check out the OS & Device Configuration documentation.
 # http://developer.wildernesslabs.co/Meadow/Meadow.OS/Configuration/OS_Device_Configuration/
 
+# Device Configuration.
 Device:
 
     # Name of the device on the network.
@@ -11,7 +12,8 @@ Device:
     # (e.g., Core-Compute module with SD add-on)? Optional; default value is `false`.
 #    SdStorageSupported: true
 
-#Coprocessor:
+# Control how the ESP coprocessor will start and operate.
+Coprocessor:
 
     # Should the ESP32 automatically attempt to connect to an access point at startup?
     # If set to true, wifi.config.yaml credentials must be stored in the device.
@@ -23,7 +25,8 @@ Device:
     # Maximum number of retry attempts for connections etc. before an error code is returned.
 #    MaximumRetryCount: 7
 
-#Network:
+# Network Configuration.
+Network:
 
     # Network Interface (Default value is WiFi with DHCP)
 #    Interfaces:
