@@ -11,71 +11,71 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-2019:
-    runs-on: windows-2019
-    name: Build VS2019 Extension
+  # build-2019:
+  #   runs-on: windows-2019
+  #   name: Build VS2019 Extension
 
-    steps:
-    - name: Checkout current repo
-      uses: actions/checkout@v2
-      with:
-        path: main
+  #   steps:
+  #   - name: Checkout current repo
+  #     uses: actions/checkout@v2
+  #     with:
+  #       path: main
 
-    - if: ${{ github.ref == 'refs/heads/main' }}
-      name: Checkout Meadow.CLI.Core side-by-side
-      uses: actions/checkout@v2
-      with:
-        repository: WildernessLabs/Meadow.CLI
-        path: Meadow.CLI
-        ref: main
+  #   - if: ${{ github.ref == 'refs/heads/main' }}
+  #     name: Checkout Meadow.CLI.Core side-by-side
+  #     uses: actions/checkout@v2
+  #     with:
+  #       repository: WildernessLabs/Meadow.CLI
+  #       path: Meadow.CLI
+  #       ref: main
 
-    - if: ${{ github.ref != 'refs/heads/main' }}
-      name: Checkout Meadow.CLI.Core side-by-side
-      uses: actions/checkout@v2
-      with:
-        repository: WildernessLabs/Meadow.CLI
-        path: Meadow.CLI
-        ref: develop
+  #   - if: ${{ github.ref != 'refs/heads/main' }}
+  #     name: Checkout Meadow.CLI.Core side-by-side
+  #     uses: actions/checkout@v2
+  #     with:
+  #       repository: WildernessLabs/Meadow.CLI
+  #       path: Meadow.CLI
+  #       ref: develop
 
-    - name: Setup .NET Core SDK 5.0.x and 6.0.x
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: |
-          5.0.x
-          6.0.x
+  #   - name: Setup .NET Core SDK 5.0.x and 6.0.x
+  #     uses: actions/setup-dotnet@v1
+  #     with:
+  #       dotnet-version: |
+  #         5.0.x
+  #         6.0.x
 
-    - name: Setup NuGet
-      uses: NuGet/setup-nuget@v1.0.5
+  #   - name: Setup NuGet
+  #     uses: NuGet/setup-nuget@v1.0.5
 
-    - name: Add MSBuild to Path
-      uses: microsoft/setup-msbuild@v1.1
+  #   - name: Add MSBuild to Path
+  #     uses: microsoft/setup-msbuild@v1.1
 
-    - if: ${{ github.event_name == 'workflow_dispatch' }}
-      name: Update VS2019 Version Numbers
-      run: |
-        $content = Get-Content main/VS_Meadow_Extension/VS_Meadow_Extension.2019/source.extension.vsixmanifest | Out-String
-        $newcontent = $content -replace 'Version="1.*" Language="en-US" Publisher="Wilderness Labs"', 'Version="${{ ENV.IDE_TOOLS_RELEASE_VERSION }}" Language="en-US" Publisher="Wilderness Labs"'
-        $newcontent | Set-Content main/VS_Meadow_Extension/VS_Meadow_Extension.2019/source.extension.vsixmanifest
+  #   - if: ${{ github.event_name == 'workflow_dispatch' }}
+  #     name: Update VS2019 Version Numbers
+  #     run: |
+  #       $content = Get-Content main/VS_Meadow_Extension/VS_Meadow_Extension.2019/source.extension.vsixmanifest | Out-String
+  #       $newcontent = $content -replace 'Version="1.*" Language="en-US" Publisher="Wilderness Labs"', 'Version="${{ ENV.IDE_TOOLS_RELEASE_VERSION }}" Language="en-US" Publisher="Wilderness Labs"'
+  #       $newcontent | Set-Content main/VS_Meadow_Extension/VS_Meadow_Extension.2019/source.extension.vsixmanifest
 
-    - name: Restore VS2019 dependencies
-      run: msbuild main/VS_Meadow_Extension.2019.sln /t:Restore /p:Configuration=Release
+  #   - name: Restore VS2019 dependencies
+  #     run: msbuild main/VS_Meadow_Extension.2019.sln /t:Restore /p:Configuration=Release
 
-    - name: Build VS2019 Extension
-      id: VS2019-Extension
-      run: msbuild main/VS_Meadow_Extension.2019.sln /t:Rebuild /p:Configuration=Release
-      env:
-        DevEnvDir: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE'
+  #   - name: Build VS2019 Extension
+  #     id: VS2019-Extension
+  #     run: msbuild main/VS_Meadow_Extension.2019.sln /t:Rebuild /p:Configuration=Release
+  #     env:
+  #       DevEnvDir: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\IDE'
         
-    - name: Upload VSIX Artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: Meadow.Win.VS2019.vsix.${{ ENV.IDE_TOOLS_RELEASE_VERSION }}
-        path: 'main\VS_Meadow_Extension\VS_Meadow_Extension.2019\bin\Release\*.vsix'
+  #   - name: Upload VSIX Artifacts
+  #     uses: actions/upload-artifact@v2
+  #     with:
+  #       name: Meadow.Win.VS2019.vsix.${{ ENV.IDE_TOOLS_RELEASE_VERSION }}
+  #       path: 'main\VS_Meadow_Extension\VS_Meadow_Extension.2019\bin\Release\*.vsix'
           
-    #- if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
-    #  name: Publish VS2019 Extension
-    #  run: |
-    #    & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\Enterprise\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe" publish -payload "main\VS_Meadow_Extension\VS_Meadow_Extension.2019\bin\Release\Meadow.2019.vsix" -publishManifest "main\publishManifest.json" -ignoreWarnings "VSIXValidatorWarning01,VSIXValidatorWarning02" -personalAccessToken "${{secrets.MARKETPLACE_PUBLISH_PAT}}"
+  #   - if: ${{ github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' }}
+  #     name: Publish VS2019 Extension
+  #     run: |
+  #       & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\2019\Enterprise\VSSDK\VisualStudioIntegration\Tools\Bin\VsixPublisher.exe" publish -payload "main\VS_Meadow_Extension\VS_Meadow_Extension.2019\bin\Release\Meadow.2019.vsix" -publishManifest "main\publishManifest.json" -ignoreWarnings "VSIXValidatorWarning01,VSIXValidatorWarning02" -personalAccessToken "${{secrets.MARKETPLACE_PUBLISH_PAT}}"
     
   build-2022:
     runs-on: windows-2022

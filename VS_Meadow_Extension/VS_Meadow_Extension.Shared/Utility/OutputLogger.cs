@@ -5,10 +5,10 @@ using System.IO;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
-using Meadow.CLI.Core.Logging;
 using Microsoft.VisualStudio;
 using EnvDTE;
 using System.Net;
+using Microsoft.Extensions.Logging;
 
 namespace Meadow
 {

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Meadow.Helpers;
 using Meadow.CLI.Core.DeviceManagement;
 using Meadow.CLI.Core.Devices;
-using Meadow.CLI.Core.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace Meadow
 {
