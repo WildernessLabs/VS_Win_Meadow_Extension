@@ -4,16 +4,20 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using EnvDTE;
 using Meadow.CLI.Core;
 using Meadow.CLI.Core.DeviceManagement;
 using Meadow.CLI.Core.Devices;
 using Meadow.Helpers;
 using Meadow.Utility;
 using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Build;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
+using Microsoft.VisualStudio.Threading;
+using static IdentityModel.OidcConstants;
 using Task = System.Threading.Tasks.Task;
 
 namespace Meadow
@@ -43,35 +47,72 @@ namespace Meadow
 
         public async Task DeployAsync(CancellationToken cts, TextWriter outputPaneWriter)
         {
-            await DeployOutputLogger?.ConnectTextWriter(outputPaneWriter);
-            MeadowPackage.DebugOrDeployInProgress = false;
-
-            var generalProperties = await Properties.GetConfigurationGeneralPropertiesAsync();
-            var name = await generalProperties.Rule.GetPropertyValueAsync("AssemblyName");
-
-            //This is to avoid repeat deploys for multiple projects in the solution
-            if (name != "App")
+            if (cts.IsCancellationRequested)
             {
                 return;
             }
 
-            MeadowPackage.DebugOrDeployInProgress = true;
+            // Get the currently selected project
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-            var projectDir = await generalProperties.Rule.GetPropertyValueAsync("ProjectDir");
-            var outputPath = Path.Combine(projectDir, await generalProperties.Rule.GetPropertyValueAsync("OutputPath"));
-
-            try
+            var dte = Package.GetGlobalService(typeof(DTE)) as DTE;
+            if (dte == null)
             {
-                await DeployAppAsync(Path.Combine(projectDir, outputPath), new OutputPaneWriter(outputPaneWriter), cts);
+                return;
             }
-            catch (Exception ex)
+
+            var solution = dte.Solution;
+            var startupProjects = solution.SolutionBuild.StartupProjects;
+            if (startupProjects == null)
             {
-                MeadowPackage.DebugOrDeployInProgress = false;
+                return;
+            }
 
-                DeployOutputLogger?.Log($"Deploy failed: {ex.Message}{Environment.NewLine}StackTrace:{Environment.NewLine}{ex.StackTrace}");
-                DeployOutputLogger?.Log("Reset Meadow and try again.");
+            MeadowPackage.DebugOrDeployInProgress = false;
 
-                throw ex;
+            foreach (string filename in (Array)startupProjects)
+            {
+                if (!filename.EndsWith(".csproj"))
+                {
+                    continue;
+                }
+                var csprojContent = File.ReadAllText(filename);
+                if (csprojContent.Contains("Sdk=\"Meadow.Sdk/1.1.0\""))
+                {
+                    await DeployOutputLogger?.ConnectTextWriter(outputPaneWriter);
+
+                    var generalProperties = await Properties.GetConfigurationGeneralPropertiesAsync();
+
+                    foreach (var item in generalProperties.Rule.Properties)
+                    {
+                        var val = await item.GetValueAsync();
+                        DeployOutputLogger?.Log($"{item.Name}: {val}");
+                    }
+
+                    var csprojPath = await generalProperties.Rule.GetPropertyValueAsync("ProjectDir");
+
+                    if (csprojPath.Contains(filename))
+                    {
+                        var projectDir = await generalProperties.Rule.GetPropertyValueAsync("ProjectDir");
+                        var outputPath = Path.Combine(projectDir, await generalProperties.Rule.GetPropertyValueAsync("OutputPath"));
+
+                        try
+                        {
+                            MeadowPackage.DebugOrDeployInProgress = true;
+                            await DeployAppAsync(Path.Combine(projectDir, outputPath), new OutputPaneWriter(outputPaneWriter), cts);
+                        }
+                        catch (Exception ex)
+                        {
+                            MeadowPackage.DebugOrDeployInProgress = false;
+
+                            DeployOutputLogger?.Log($"Deploy failed: {ex.Message}{Environment.NewLine}StackTrace:{Environment.NewLine}{ex.StackTrace}");
+                            DeployOutputLogger?.Log("Reset Meadow and try again.");
+
+                            throw ex;
+                        }
+                    }
+                    break;
+                }
             }
         }
 
