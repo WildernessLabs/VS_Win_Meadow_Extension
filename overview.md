@@ -4,6 +4,11 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+### 1.6.0
+
+- Add a cancelation check
+- Add a more realiable check to make sure out start-up project is a Meadow one.
+
 ### 1.5.0
 
 - Improve dependency filter for App.dll
