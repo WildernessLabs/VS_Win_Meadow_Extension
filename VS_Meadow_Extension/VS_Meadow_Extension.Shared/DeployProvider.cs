@@ -168,8 +168,8 @@ namespace Meadow
 
             var appPathDll = Path.Combine(folder, "App.dll");
 
-            var includePdbs = configuredProject?.ProjectConfiguration?.Dimensions["Configuration"].Contains("Debug");
-            await Meadow.DeployApp(appPathDll, includePdbs.HasValue && includePdbs.Value, token);
+            var includePdbs = false;
+            await Meadow.DeployApp(appPathDll, includePdbs, token);
         }
 
         public bool IsDeploySupported
