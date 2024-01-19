@@ -51,42 +51,23 @@ namespace Meadow
 
         public async Task<bool> DeployMeadowProjectsAsync(CancellationToken cts, TextWriter outputPaneWriter)
         {
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-            var dte = Package.GetGlobalService(typeof(DTE)) as DTE;
-            if (dte == null)
-            {
-                return false;
-            }
-
-            var solution = dte.Solution;
-            var startupProjects = solution.SolutionBuild.StartupProjects;
-            if (startupProjects == null)
+            if (cts.IsCancellationRequested)
             {
                 return false;
             }
 
             MeadowPackage.DebugOrDeployInProgress = false;
 
-            foreach (string filename in (Array)startupProjects)
+			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+			var filename = this.configuredProject.UnconfiguredProject.FullPath;
+
+            var projFileContent = File.ReadAllText(filename);
+            if (projFileContent.Contains(MeadowSDKVersion))
             {
-                if (cts.IsCancellationRequested)
-                {
-                    return false;
-                }
+                await DeployOutputLogger?.ConnectTextWriter(outputPaneWriter);
 
-                if (!filename.EndsWith(".csproj"))
-                {
-                    continue;
-                }
-
-                var csprojContent = File.ReadAllText(filename);
-                if (csprojContent.Contains(MeadowSDKVersion))
-                {
-                    await DeployOutputLogger?.ConnectTextWriter(outputPaneWriter);
-
-                    return await DeployMeadowAppAsync(cts, outputPaneWriter, filename);
-                }
+                return await DeployMeadowAppAsync(cts, outputPaneWriter, filename);
             }
 
             return false;
