@@ -11,6 +11,7 @@ using Meadow.CLI.Core.DeviceManagement;
 using Meadow.CLI.Core.Devices;
 using Meadow.Helpers;
 using Meadow.Utility;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Tasks;
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.OLE.Interop;
@@ -43,6 +44,8 @@ namespace Meadow
 
         const string MeadowSDKVersion = "Sdk=\"Meadow.Sdk/1.1.0\"";
 
+        private DTE dte;
+
         [ImportingConstructor]
         public DeployProvider(ConfiguredProject configuredProject)
         {
@@ -58,16 +61,53 @@ namespace Meadow
 
             MeadowPackage.DebugOrDeployInProgress = false;
 
-			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-			var filename = this.configuredProject.UnconfiguredProject.FullPath;
+            var filename = this.configuredProject.UnconfiguredProject.FullPath;
 
             var projFileContent = File.ReadAllText(filename);
             if (projFileContent.Contains(MeadowSDKVersion))
             {
-                await DeployOutputLogger?.ConnectTextWriter(outputPaneWriter);
+                if (await IsMeadowApp())
+                {
+                    await DeployOutputLogger?.ConnectTextWriter(outputPaneWriter);
 
-                return await DeployMeadowAppAsync(cts, outputPaneWriter, filename);
+                    return await DeployMeadowAppAsync(cts, outputPaneWriter, filename);
+                }
+            }
+
+            return false;
+        }
+
+        private async Task<bool> IsMeadowApp()
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            // Get the DTE service
+            if (dte == null)
+            {
+                dte = Package.GetGlobalService(typeof(SDTE)) as DTE;
+            }
+
+            if (dte.Solution != null)
+            {
+                var startupProjects = dte.Solution.SolutionBuild?.StartupProjects as Array;
+                foreach (string startupProject in startupProjects)
+                {
+                    if (configuredProject.UnconfiguredProject.FullPath.Contains(startupProject))
+                    {
+                        // Assume configuredProject is your ConfiguredProject object
+                        var properties = configuredProject.Services.ProjectPropertiesProvider.GetCommonProperties();
+
+                        // We unfortunately still need to retrieve the AssemblyName property because we need both
+                        // the configuredProject to be a start-up project, but also an App (not library)
+                        string assemblyName = await properties.GetEvaluatedPropertyValueAsync("AssemblyName");
+                        if (!string.IsNullOrEmpty(assemblyName) && assemblyName.Equals("App", StringComparison.OrdinalIgnoreCase))
+                        {
+                            return true;
+                        }
+                    }
+                }
             }
 
             return false;
@@ -79,11 +119,11 @@ namespace Meadow
             {
                 var generalProperties = await Properties.GetConfigurationGeneralPropertiesAsync();
 
-				var projectFullPath = await generalProperties.Rule.GetPropertyValueAsync("MSBuildProjectFullPath");
+                var projectFullPath = await generalProperties.Rule.GetPropertyValueAsync("MSBuildProjectFullPath");
                 if (projectFullPath.Contains(filename))
                 {
                     var projectDir = await generalProperties.Rule.GetPropertyValueAsync("ProjectDir");
-					var outputPath = Path.Combine(projectDir, await generalProperties.Rule.GetPropertyValueAsync("OutputPath"));
+                    var outputPath = Path.Combine(projectDir, await generalProperties.Rule.GetPropertyValueAsync("OutputPath"));
 
                     MeadowPackage.DebugOrDeployInProgress = true;
                     await DeployAppAsync(outputPath, new OutputPaneWriter(outputPaneWriter), cts);
