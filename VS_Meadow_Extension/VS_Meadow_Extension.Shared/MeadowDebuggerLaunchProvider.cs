@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Threading.Tasks;
 
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Debug;
@@ -13,6 +14,7 @@ using Microsoft.VisualStudio.ProjectSystem.VS.Debug;
 using Mono.Debugging.Soft;
 using Mono.Debugging.Client;
 using Mono.Debugging.VisualStudio;
+
 using Meadow.CLI.Core.Devices;
 
 namespace Meadow
@@ -34,6 +36,7 @@ namespace Meadow
 
         // FIXME: Find a nicer way than storing this
         DebuggerSession vsSession;
+        private ConfiguredProject configuredProject;
 
         // https://github.com/microsoft/VSProjectSystem/blob/master/doc/overview/mef.md
         [ImportMany(ExportContractNames.VsTypes.IVsHierarchy)]
@@ -46,23 +49,21 @@ namespace Meadow
         [ImportingConstructor]
         public MeadowDebuggerLaunchProvider(ConfiguredProject configuredProj)
         {
+            this.configuredProject = configuredProj;
+
             vsHierarchies = new OrderPrecedenceImportCollection<IVsHierarchy>(
                 projectCapabilityCheckProvider: configuredProj);
         }
 
         public async Task<IReadOnlyList<IDebugLaunchSettings>> QueryDebugTargetsAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
         {
-            if (launchOptions.HasFlag(DebugLaunchOptions.NoDebug))
-            {
-                vsSession = null;
-                return Array.Empty<IDebugLaunchSettings>();
-            }
-
             DeployProvider.Meadow?.Dispose();
 
             var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger: DeployProvider.DeployOutputLogger);
 
-            if (device != null)
+            if (!launchOptions.HasFlag(DebugLaunchOptions.NoDebug)
+                && await IsMeadowApp()
+                && device != null)
             {
                 MeadowPackage.DebugOrDeployInProgress = true;
                 DeployProvider.Meadow = new MeadowDeviceHelper(device, DeployProvider.DeployOutputLogger);
@@ -81,7 +82,7 @@ namespace Meadow
                 return new[] { settings };
             }
             else
-			{
+            {
                 vsSession = null;
                 return Array.Empty<IDebugLaunchSettings>();
             }
@@ -91,14 +92,17 @@ namespace Meadow
 
         public Task OnAfterLaunchAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
         {
-            vsSession?.Start();
-            MeadowPackage.DebugOrDeployInProgress = false;
-
-            Task.Run(async () =>
+            if (vsSession != null)
             {
-                await Task.Delay(10000);
-                await DeployProvider.DeployOutputLogger?.ShowMeadowLogs();
-            });
+                vsSession.Start();
+                MeadowPackage.DebugOrDeployInProgress = false;
+
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(10000);
+                    await DeployProvider.DeployOutputLogger?.ShowMeadowLogs();
+                });
+            }
 
             return Task.CompletedTask;
         }
@@ -107,6 +111,24 @@ namespace Meadow
         {
             // nop here because VS is responseable for starting us and then calling On*LaunchAsync above
             return true;
+        }
+
+        private async Task<bool> IsMeadowApp()
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            // Assume configuredProject is your ConfiguredProject object
+            var properties = configuredProject.Services.ProjectPropertiesProvider.GetCommonProperties();
+
+            // We unfortunately still need to retrieve the AssemblyName property because we need both
+            // the configuredProject to be a start-up project, but also an App (not library)
+            string assemblyName = await properties.GetEvaluatedPropertyValueAsync("AssemblyName");
+            if (!string.IsNullOrEmpty(assemblyName) && assemblyName.Equals("App", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }
