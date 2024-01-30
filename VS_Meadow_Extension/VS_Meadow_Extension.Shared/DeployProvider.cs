@@ -43,13 +43,14 @@ namespace Meadow
         private ConfiguredProject configuredProject;
 
         const string MeadowSDKVersion = "Sdk=\"Meadow.Sdk/1.1.0\"";
-
-        private DTE dte;
+        private bool isDeploySupported;
 
         [ImportingConstructor]
         public DeployProvider(ConfiguredProject configuredProject)
         {
             this.configuredProject = configuredProject;
+            _ = Task.Run(async () => { isDeploySupported = await IsMeadowApp(); });
+
         }
 
         public async Task<bool> DeployMeadowProjectsAsync(CancellationToken cts, TextWriter outputPaneWriter)
@@ -73,40 +74,6 @@ namespace Meadow
                     await DeployOutputLogger?.ConnectTextWriter(outputPaneWriter);
 
                     return await DeployMeadowAppAsync(cts, outputPaneWriter, filename);
-                }
-            }
-
-            return false;
-        }
-
-        private async Task<bool> IsMeadowApp()
-        {
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-            // Get the DTE service
-            if (dte == null)
-            {
-                dte = Package.GetGlobalService(typeof(SDTE)) as DTE;
-            }
-
-            if (dte.Solution != null)
-            {
-                var startupProjects = dte.Solution.SolutionBuild?.StartupProjects as Array;
-                foreach (string startupProject in startupProjects)
-                {
-                    if (configuredProject.UnconfiguredProject.FullPath.Contains(startupProject))
-                    {
-                        // Assume configuredProject is your ConfiguredProject object
-                        var properties = configuredProject.Services.ProjectPropertiesProvider.GetCommonProperties();
-
-                        // We unfortunately still need to retrieve the AssemblyName property because we need both
-                        // the configuredProject to be a start-up project, but also an App (not library)
-                        string assemblyName = await properties.GetEvaluatedPropertyValueAsync("AssemblyName");
-                        if (!string.IsNullOrEmpty(assemblyName) && assemblyName.Equals("App", StringComparison.OrdinalIgnoreCase))
-                        {
-                            return true;
-                        }
-                    }
                 }
             }
 
@@ -137,9 +104,9 @@ namespace Meadow
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex);
-
                 DeployFailed();
+
+                throw ex;
             }
 
             return false;
@@ -149,7 +116,7 @@ namespace Meadow
         {
             MeadowPackage.DebugOrDeployInProgress = false;
 
-            DeployOutputLogger?.Log("Deploy failed. Please Reset Meadow and try again.");
+            DeployOutputLogger?.Log("Deploy failed. If a Meadow device is attached, please Reset Meadow and try again.");
         }
 
         public async Task DeployAsync(CancellationToken cts, TextWriter outputPaneWriter)
@@ -195,7 +162,7 @@ namespace Meadow
 
         public bool IsDeploySupported
         {
-            get { return true; }
+            get { return isDeploySupported; }
         }
 
         public async void Commit()
@@ -217,6 +184,24 @@ namespace Meadow
         {
             MeadowPackage.DebugOrDeployInProgress = false;
             Console.Write("Rolling Back");
+        }
+
+        private async Task<bool> IsMeadowApp()
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            // Assume configuredProject is your ConfiguredProject object
+            var properties = configuredProject.Services.ProjectPropertiesProvider.GetCommonProperties();
+
+            // We unfortunately still need to retrieve the AssemblyName property because we need both
+            // the configuredProject to be a start-up project, but also an App (not library)
+            string assemblyName = await properties.GetEvaluatedPropertyValueAsync("AssemblyName");
+            if (!string.IsNullOrEmpty(assemblyName) && assemblyName.Equals("App", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }
