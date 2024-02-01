@@ -215,16 +215,13 @@ namespace Meadow
             // No point installing if we don't have an internet connection
             if (NetworkInterface.GetIsNetworkAvailable())
             {
-                string templateName = "Meadow";
-                // Check if the package is installed
-                if (!await IsTemplateInstalled(templateName))
+                string packageName = "WildernessLabs.Meadow.Template";
+                
+                // Install the package.
+                // If an update is available it should update it automagically.
+                if (!await InstallPackage(packageName))
                 {
-                    string packageName = "WildernessLabs.Meadow.Template";
-                    // Install the package
-                    if (!await InstallPackage(packageName))
-                    {
-                        // Unable to install ProjectTemplates Throw Up a Message??
-                    }
+                    // Unable to install ProjectTemplates Throw Up a Message??
                 }
             }
         }
@@ -232,11 +229,6 @@ namespace Meadow
         private async Task<bool> InstallPackage(string packageName)
         {
             return await StartPackageProcess("new install", packageName);
-        }
-
-        private async Task<bool> IsTemplateInstalled(string templateName)
-        {
-            return await StartPackageProcess("new list", templateName);
         }
 
         private async Task<bool> StartPackageProcess(string command, string packageName)
