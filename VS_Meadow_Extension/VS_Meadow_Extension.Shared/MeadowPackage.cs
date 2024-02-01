@@ -215,13 +215,13 @@ namespace Meadow
             // No point installing if we don't have an internet connection
             if (NetworkInterface.GetIsNetworkAvailable())
             {
-				string templateName = "Meadow";
-				// Check if the package is installed
-				if (!await IsTemplateInstalled(templateName))
+                string templateName = "Meadow";
+                // Check if the package is installed
+                if (!await IsTemplateInstalled(templateName))
                 {
-					string packageName = "WildernessLabs.Meadow.Template";
-					// Install the package
-					if (!await InstallPackage(packageName))
+                    string packageName = "WildernessLabs.Meadow.Template";
+                    // Install the package
+                    if (!await InstallPackage(packageName))
                     {
                         // Unable to install ProjectTemplates Throw Up a Message??
                     }
@@ -231,7 +231,7 @@ namespace Meadow
 
         private async Task<bool> InstallPackage(string packageName)
         {
-			return await StartPackageProcess("new install", packageName);
+            return await StartPackageProcess("new install", packageName);
         }
 
         private async Task<bool> IsTemplateInstalled(string templateName)
@@ -241,22 +241,22 @@ namespace Meadow
 
         private async Task<bool> StartPackageProcess(string command, string packageName)
         {
-			System.Diagnostics.Process process = new System.Diagnostics.Process();
-			process.StartInfo.FileName = "dotnet";
-			process.StartInfo.Arguments = $"{command} {packageName}";
-			process.StartInfo.RedirectStandardOutput = true;
-			process.StartInfo.UseShellExecute = false;
-			process.StartInfo.CreateNoWindow = true;
-			process.Start();
+            System.Diagnostics.Process process = new System.Diagnostics.Process();
+            process.StartInfo.FileName = "dotnet";
+            process.StartInfo.Arguments = $"{command} {packageName}";
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.CreateNoWindow = true;
+            process.Start();
 
-			string output = await process.StandardOutput.ReadToEndAsync();
-			process.WaitForExit();
+            string output = await process.StandardOutput.ReadToEndAsync();
+            process.WaitForExit();
 
-			// Check if the package name exists in the output
-			return output.Contains(packageName);
-		}
+            // Check if the package name exists in the output
+            return output.Contains(packageName);
+        }
 
-	}
+    }
 
     static class GuidList
     {
