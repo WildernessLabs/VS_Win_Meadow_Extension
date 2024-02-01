@@ -34,17 +34,7 @@
         <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[17.0,18.0)" DisplayName="Visual Studio core editor" />
     </Prerequisites>
     <Assets>
-        <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="VS_Meadow_Extension.2022" Path="|VS_Meadow_Extension.2022|" />
-        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="VS_Meadow_Extension.2022" Path="|VS_Meadow_Extension.2022;PkgdefProjectOutputGroup|" />
+        <Asset Type="Microsoft.VisualStudio.MefComponent" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%|" />
         <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="Project" d:ProjectName="%CurrentProject%" Path="|%CurrentProject%;PkgdefProjectOutputGroup|" />
-        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="Meadow.CSharp.Library.Template" Path="ProjectTemplates" d:TargetPath="|Meadow.CSharp.Library.Template;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" />
-        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="Meadow.CSharp.Template" Path="ProjectTemplates" d:TargetPath="|Meadow.CSharp.Template;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" />
-        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="Meadow.CSharp.CoreCompute.Template" Path="ProjectTemplates" d:TargetPath="|Meadow.CSharp.CoreCompute.Template;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" />
-        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="Meadow.FSharp.Library.Template" Path="ProjectTemplates" d:TargetPath="|Meadow.FSharp.Library.Template;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" />
-        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="Meadow.FSharp.Template" Path="ProjectTemplates" d:TargetPath="|Meadow.FSharp.Template;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" />
-        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="Meadow.FSharp.CoreCompute.Template" Path="ProjectTemplates" d:TargetPath="|Meadow.FSharp.CoreCompute.Template;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" />
-        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="Meadow.VBNet.Library.Template" Path="ProjectTemplates" d:TargetPath="|Meadow.VBNet.Library.Template;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" />
-        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="Meadow.VBNet.Template" Path="ProjectTemplates" d:TargetPath="|Meadow.VBNet.Template;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" />
-        <Asset Type="Microsoft.VisualStudio.ProjectTemplate" d:Source="Project" d:ProjectName="Meadow.VBNet.CoreCompute.Template" Path="ProjectTemplates" d:TargetPath="|Meadow.VBNet.CoreCompute.Template;TemplateProjectOutputGroup|" d:VsixSubPath="ProjectTemplates" />
     </Assets>
 </PackageManifest>

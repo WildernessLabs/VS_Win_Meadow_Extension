@@ -21,6 +21,7 @@ using Microsoft.VisualStudio.Shell.Interop;
 using Meadow.CLI.Core.DeviceManagement;
 using Meadow.Helpers;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 
 namespace Meadow
 {
@@ -81,6 +82,9 @@ namespace Meadow
             // When initialized asynchronously, the current thread may be a background thread at this point.
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+
+            // Install dependencies
+            await InstallDependencies();
 
             // Add our command handlers for menu (commands must be declared in the .vsct file)
             if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService mcs)
@@ -205,7 +209,54 @@ namespace Meadow
             meadowSettings.DeviceTarget = newChoice;
             meadowSettings.Save();
         }
-    }
+
+        private async Task InstallDependencies()
+        {
+            // No point installing if we don't have an internet connection
+            if (NetworkInterface.GetIsNetworkAvailable())
+            {
+				string templateName = "Meadow";
+				// Check if the package is installed
+				if (!await IsTemplateInstalled(templateName))
+                {
+					string packageName = "WildernessLabs.Meadow.Template";
+					// Install the package
+					if (!await InstallPackage(packageName))
+                    {
+                        // Unable to install ProjectTemplates Throw Up a Message??
+                    }
+                }
+            }
+        }
+
+        private async Task<bool> InstallPackage(string packageName)
+        {
+			return await StartPackageProcess("new install", packageName);
+        }
+
+        private async Task<bool> IsTemplateInstalled(string templateName)
+        {
+            return await StartPackageProcess("new list", templateName);
+        }
+
+        private async Task<bool> StartPackageProcess(string command, string packageName)
+        {
+			System.Diagnostics.Process process = new System.Diagnostics.Process();
+			process.StartInfo.FileName = "dotnet";
+			process.StartInfo.Arguments = $"{command} {packageName}";
+			process.StartInfo.RedirectStandardOutput = true;
+			process.StartInfo.UseShellExecute = false;
+			process.StartInfo.CreateNoWindow = true;
+			process.Start();
+
+			string output = await process.StandardOutput.ReadToEndAsync();
+			process.WaitForExit();
+
+			// Check if the package name exists in the output
+			return output.Contains(packageName);
+		}
+
+	}
 
     static class GuidList
     {
