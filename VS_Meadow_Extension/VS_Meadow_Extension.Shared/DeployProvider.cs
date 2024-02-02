@@ -43,7 +43,7 @@ namespace Meadow
         private ConfiguredProject configuredProject;
 
         const string MeadowSDKVersion = "Sdk=\"Meadow.Sdk/1.1.0\"";
-        private bool isDeploySupported;
+        private bool isDeploySupported = true;
 
         [ImportingConstructor]
         public DeployProvider(ConfiguredProject configuredProject)
