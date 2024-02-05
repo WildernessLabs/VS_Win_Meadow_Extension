@@ -215,13 +215,18 @@ namespace Meadow
             // No point installing if we don't have an internet connection
             if (NetworkInterface.GetIsNetworkAvailable())
             {
-                string packageName = "WildernessLabs.Meadow.Template";
-                
-                // Install the package.
-                // If an update is available it should update it automagically.
-                if (!await InstallPackage(packageName))
+                string templateName = "Meadow";
+                // Check if the package is installed
+                if (!await IsTemplateInstalled(templateName))
                 {
-                    // Unable to install ProjectTemplates Throw Up a Message??
+                    string packageName = "WildernessLabs.Meadow.Template";
+
+                    // Install the package.
+                    // If an update is available it should update it automagically.
+                    if (!await InstallPackage(packageName))
+                    {
+                        // Unable to install ProjectTemplates Throw Up a Message??
+                    }
                 }
             }
         }
@@ -231,23 +236,30 @@ namespace Meadow
             return await StartPackageProcess("new install", packageName);
         }
 
-        private async Task<bool> StartPackageProcess(string command, string packageName)
+        private async Task<bool> IsTemplateInstalled(string templateName)
         {
-            System.Diagnostics.Process process = new System.Diagnostics.Process();
-            process.StartInfo.FileName = "dotnet";
-            process.StartInfo.Arguments = $"{command} {packageName}";
-            process.StartInfo.RedirectStandardOutput = true;
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.CreateNoWindow = true;
-            process.Start();
-
-            string output = await process.StandardOutput.ReadToEndAsync();
-            process.WaitForExit();
-
-            // Check if the package name exists in the output
-            return output.Contains(packageName);
+            return await StartPackageProcess("new list", templateName);
         }
 
+        private async Task<bool> StartPackageProcess(string command, string packageName)
+        {
+            return await Task.Run(async () =>
+            {
+                System.Diagnostics.Process process = new System.Diagnostics.Process();
+                process.StartInfo.FileName = "dotnet";
+                process.StartInfo.Arguments = $"{command} {packageName}";
+                process.StartInfo.RedirectStandardOutput = true;
+                process.StartInfo.UseShellExecute = false;
+                process.StartInfo.CreateNoWindow = true;
+                process.Start();
+
+                string output = await process.StandardOutput.ReadToEndAsync();
+                process.WaitForExit();
+
+                // Check if the package name exists in the output
+                return output.Contains(packageName);
+            });
+        }
     }
 
     static class GuidList
