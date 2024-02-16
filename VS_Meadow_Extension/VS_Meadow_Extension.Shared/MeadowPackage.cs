@@ -1,22 +1,10 @@
 ﻿using System;
-using System.ComponentModel.Composition;
 using System.ComponentModel.Design;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
-
-using EnvDTE;
-using EnvDTE80;
-using Microsoft.Win32;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.OLE.Interop;
-using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
 
 using Meadow.CLI.Core.DeviceManagement;
 using Meadow.Helpers;
@@ -215,9 +203,9 @@ namespace Meadow
             // No point installing if we don't have an internet connection
             if (NetworkInterface.GetIsNetworkAvailable())
             {
-                string templateName = "Meadow";
+                //string templateName = "Meadow";
                 // Check if the package is installed
-                if (!await IsTemplateInstalled(templateName))
+                //if (!await IsTemplateInstalled(templateName))
                 {
                     string packageName = "WildernessLabs.Meadow.Template";
 
@@ -233,21 +221,21 @@ namespace Meadow
 
         private async Task<bool> InstallPackage(string packageName)
         {
-            return await StartPackageProcess("new install", packageName);
+            return await StartDotNetProcess("new install", packageName);
         }
 
         private async Task<bool> IsTemplateInstalled(string templateName)
         {
-            return await StartPackageProcess("new list", templateName);
+            return await StartDotNetProcess("new list", templateName);
         }
 
-        private async Task<bool> StartPackageProcess(string command, string packageName)
+        private async Task<bool> StartDotNetProcess(string command, string parameters)
         {
             return await Task.Run(async () =>
             {
                 System.Diagnostics.Process process = new System.Diagnostics.Process();
                 process.StartInfo.FileName = "dotnet";
-                process.StartInfo.Arguments = $"{command} {packageName}";
+                process.StartInfo.Arguments = $"{command} {parameters}";
                 process.StartInfo.RedirectStandardOutput = true;
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.CreateNoWindow = true;
@@ -257,7 +245,7 @@ namespace Meadow
                 process.WaitForExit();
 
                 // Check if the package name exists in the output
-                return output.Contains(packageName);
+                return output.Contains(parameters);
             });
         }
     }
