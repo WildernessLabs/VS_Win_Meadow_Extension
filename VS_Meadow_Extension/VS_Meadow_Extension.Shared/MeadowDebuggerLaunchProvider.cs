@@ -8,11 +8,9 @@ using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Debug;
-using Microsoft.VisualStudio.ProjectSystem.Properties;
 using Microsoft.VisualStudio.ProjectSystem.VS.Debug;
 
 using Mono.Debugging.Soft;
-using Mono.Debugging.Client;
 using Mono.Debugging.VisualStudio;
 
 using Meadow.CLI.Core.Devices;

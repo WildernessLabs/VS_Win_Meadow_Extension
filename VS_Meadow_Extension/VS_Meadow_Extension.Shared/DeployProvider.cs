@@ -1,26 +1,14 @@
 ﻿using System;
 using System.ComponentModel.Composition;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using EnvDTE;
 using Meadow.CLI.Core;
-using Meadow.CLI.Core.DeviceManagement;
 using Meadow.CLI.Core.Devices;
-using Meadow.Helpers;
 using Meadow.Utility;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Tasks;
-using Microsoft.VisualStudio;
-using Microsoft.VisualStudio.OLE.Interop;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Build;
 using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.Threading;
-using static IdentityModel.OidcConstants;
 using Task = System.Threading.Tasks.Task;
 
 namespace Meadow
