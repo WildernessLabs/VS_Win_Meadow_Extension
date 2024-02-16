@@ -4,6 +4,15 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+### 2.0.0
+
+- Bump to protocol 8
+
+### 1.8.1
+
+- Moved Template update to background thread
+- Deploy menu item is now more project sensitive
+
 ### 1.8.0
 
 - Add a cancelation check
