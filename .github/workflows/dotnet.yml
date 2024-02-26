@@ -48,7 +48,7 @@ jobs:
   #     uses: NuGet/setup-nuget@v1.0.5
 
   #   - name: Add MSBuild to Path
-  #     uses: microsoft/setup-msbuild@v1.1
+  #     uses: microsoft/setup-msbuild@v2
 
   #   - if: ${{ github.event_name == 'workflow_dispatch' }}
   #     name: Update VS2019 Version Numbers
@@ -122,7 +122,7 @@ jobs:
       uses: NuGet/setup-nuget@v2
 
     - name: Add MSBuild to Path
-      uses: microsoft/setup-msbuild@v1.1
+      uses: microsoft/setup-msbuild@v2
       with:
         vs-version: '[17.0, 18.0)'
 
