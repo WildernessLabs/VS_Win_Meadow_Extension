@@ -143,7 +143,7 @@ jobs:
         DevEnvDir: 'C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\IDE'
 
     - name: Upload VSIX Artifacts
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: Meadow.Win.VS2022.vsix.${{ ENV.IDE_TOOLS_RELEASE_VERSION }}
         path: 'main\VS_Meadow_Extension\VS_Meadow_Extension.2022\bin\Release\*.vsix'
