@@ -96,19 +96,27 @@ jobs:
         ref: main
 
     - if: ${{ github.ref != 'refs/heads/main' }}
-      name: Checkout Meadow.CLI.Core side-by-side
+      name: Checkout Meadow.CLI side-by-side
       uses: actions/checkout@v2
       with:
         repository: WildernessLabs/Meadow.CLI
         path: Meadow.CLI
         ref: dominique-MigrateVS2022ExtensionTov2
 
-    - name: Setup .NET Core SDK 5.0.x and 6.0.x
+    - name: Checkout Meadow.Contracts side-by-side
+      uses: actions/checkout@v2
+      with:
+        repository: WildernessLabs/Meadow.Contracts
+        path: Meadow.Contracts
+        ref: main
+
+    - name: Setup .NET Core SDK 6.0.x, 7.0.x & 8.0.x
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: |
           6.0.x
           7.0.x
+          8.0.x
 
     - name: Setup NuGet
       uses: NuGet/setup-nuget@v1.0.5
