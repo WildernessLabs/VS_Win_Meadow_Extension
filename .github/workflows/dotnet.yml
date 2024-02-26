@@ -119,7 +119,7 @@ jobs:
           8.0.x
 
     - name: Setup NuGet
-      uses: NuGet/setup-nuget@v1.0.5
+      uses: NuGet/setup-nuget@v2
 
     - name: Add MSBuild to Path
       uses: microsoft/setup-msbuild@v1.1
