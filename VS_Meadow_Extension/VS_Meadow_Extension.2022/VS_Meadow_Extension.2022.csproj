@@ -102,6 +102,9 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="System.IO.Ports">
+      <Version>8.0.0</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="source.extension.vsixmanifest">
@@ -110,9 +113,13 @@
     <None Include="Key.snk" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Meadow.CLI\Meadow.CLI.Core\Meadow.CLI.Core.VS2019.csproj">
-      <Project>{a48fc00c-9ba3-43e3-ba1d-55fd6128d425}</Project>
-      <Name>Meadow.CLI.Core.VS2019</Name>
+    <ProjectReference Include="..\..\..\Meadow.CLI\Source\v2\Meadow.CLI.Extension\Meadow.CLI.Extension.csproj">
+      <Project>{3e6191a9-2c04-45f5-af05-889cbb4327f4}</Project>
+      <Name>Meadow.CLI.Extension</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Meadow.CLI\Source\v2\Meadow.Hcom\Meadow.HCom.csproj">
+      <Project>{10f00ed3-2dca-41fd-9bf8-23a9ce1510bd}</Project>
+      <Name>Meadow.HCom</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="..\VS_Meadow_Extension.Shared\VS_Win_Meadow_Extension.Shared.projitems" Label="Shared" />

@@ -5,10 +5,7 @@ using System.Threading;
 
 using Mono.Debugging.Client;
 using Mono.Debugging.Soft;
-
-using Meadow.CLI.Core.DeviceManagement;
-using Meadow.CLI.Core.Devices;
-using Meadow.CLI.Core.Internals.MeadowCommunication.ReceiveClasses;
+using Meadow.Hcom;
 
 namespace Meadow
 {
@@ -16,9 +13,9 @@ namespace Meadow
     {
 		CancellationTokenSource meadowDebugCancelTokenSource;
 		DebuggingServer meadowDebugServer;
-        MeadowDeviceHelper meadow;
+		IMeadowConnection meadow;
 
-        public MeadowSoftDebuggerSession(MeadowDeviceHelper meadow)
+        public MeadowSoftDebuggerSession(IMeadowConnection meadow)
         {
             this.meadow = meadow;
             meadowDebugCancelTokenSource = new CancellationTokenSource();
@@ -30,7 +27,7 @@ namespace Meadow
             var connectArgs = meadowStartInfo.StartArgs as SoftDebuggerConnectArgs;
             var port = connectArgs?.DebugPort ?? 0;
 
-            meadowDebugServer = await meadow.StartDebuggingSession(port, meadowDebugCancelTokenSource.Token);
+            meadowDebugServer = await meadow.StartDebuggingSession(port, null, meadowDebugCancelTokenSource.Token);
 
             base.OnRun(startInfo);
         }
@@ -43,7 +40,7 @@ namespace Meadow
             await meadowDebugServer?.StopListening();
             meadowDebugServer?.Dispose();
             meadowDebugServer = null;
-            meadow?.Dispose();
+            // TODO meadow?.Dispose();
 
             base.OnExit();
         }

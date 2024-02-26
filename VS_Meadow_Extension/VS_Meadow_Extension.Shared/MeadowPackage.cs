@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
 using Microsoft.VisualStudio.Shell;
 
-using Meadow.CLI.Core.DeviceManagement;
 using Meadow.Helpers;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
+using Meadow.CLI.Commands.DeviceManagement;
 
 namespace Meadow
 {
@@ -94,7 +94,7 @@ namespace Meadow
             {
                 if (e is OleMenuCmdEventArgs eventArgs)
                 {
-                    var portList = await MeadowDeviceManager.GetSerialPorts();
+                    var portList = await MeadowConnectionManager.GetSerialPorts();
 
                     IntPtr vOut = eventArgs.OutValue;
 
@@ -159,7 +159,7 @@ namespace Meadow
                     }
                     else if (vOut != IntPtr.Zero)
                     {
-                        var portList = await MeadowDeviceManager.GetSerialPorts();
+                        var portList = await MeadowConnectionManager.GetSerialPorts();
                         if (portList.Count > 0)
                         {
                             Marshal.GetNativeVariantForObject(portList, vOut);

@@ -5,13 +5,13 @@ VisualStudioVersion = 17.1.31911.260
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS_Meadow_Extension.2022", "VS_Meadow_Extension\VS_Meadow_Extension.2022\VS_Meadow_Extension.2022.csproj", "{103D69C2-B61C-4E0B-B3EA-C85C6F831988}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.CLI.Core.VS2019", "..\Meadow.CLI\Meadow.CLI.Core\Meadow.CLI.Core.VS2019.csproj", "{15EF4D4E-3979-417E-8952-CC0B8B8DBAC4}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{D11E57EA-1FEB-40BF-9AEE-C67E8040AE3B}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "VS_Win_Meadow_Extension.Shared", "VS_Meadow_Extension\VS_Meadow_Extension.Shared\VS_Win_Meadow_Extension.Shared.shproj", "{6BD8A462-77A3-442D-97C8-36CBDA794DC9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Hcom", "..\Meadow.CLI\Meadow.Hcom\Meadow.Hcom.csproj", "{3599BE94-54F5-4943-AEAC-45083D49DA45}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.HCom", "..\Meadow.CLI\Source\v2\Meadow.Hcom\Meadow.HCom.csproj", "{10F00ED3-2DCA-41FD-9BF8-23A9CE1510BD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.CLI.Extension", "..\Meadow.CLI\Source\v2\Meadow.CLI.Extension\Meadow.CLI.Extension.csproj", "{3E6191A9-2C04-45F5-AF05-889CBB4327F4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,22 +23,22 @@ Global
 		{103D69C2-B61C-4E0B-B3EA-C85C6F831988}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{103D69C2-B61C-4E0B-B3EA-C85C6F831988}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{103D69C2-B61C-4E0B-B3EA-C85C6F831988}.Release|Any CPU.Build.0 = Release|Any CPU
-		{15EF4D4E-3979-417E-8952-CC0B8B8DBAC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{15EF4D4E-3979-417E-8952-CC0B8B8DBAC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{15EF4D4E-3979-417E-8952-CC0B8B8DBAC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{15EF4D4E-3979-417E-8952-CC0B8B8DBAC4}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3599BE94-54F5-4943-AEAC-45083D49DA45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3599BE94-54F5-4943-AEAC-45083D49DA45}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3599BE94-54F5-4943-AEAC-45083D49DA45}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3599BE94-54F5-4943-AEAC-45083D49DA45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{10F00ED3-2DCA-41FD-9BF8-23A9CE1510BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{10F00ED3-2DCA-41FD-9BF8-23A9CE1510BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{10F00ED3-2DCA-41FD-9BF8-23A9CE1510BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{10F00ED3-2DCA-41FD-9BF8-23A9CE1510BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E6191A9-2C04-45F5-AF05-889CBB4327F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E6191A9-2C04-45F5-AF05-889CBB4327F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E6191A9-2C04-45F5-AF05-889CBB4327F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E6191A9-2C04-45F5-AF05-889CBB4327F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{15EF4D4E-3979-417E-8952-CC0B8B8DBAC4} = {D11E57EA-1FEB-40BF-9AEE-C67E8040AE3B}
 		{6BD8A462-77A3-442D-97C8-36CBDA794DC9} = {D11E57EA-1FEB-40BF-9AEE-C67E8040AE3B}
-		{3599BE94-54F5-4943-AEAC-45083D49DA45} = {D11E57EA-1FEB-40BF-9AEE-C67E8040AE3B}
+		{10F00ED3-2DCA-41FD-9BF8-23A9CE1510BD} = {D11E57EA-1FEB-40BF-9AEE-C67E8040AE3B}
+		{3E6191A9-2C04-45F5-AF05-889CBB4327F4} = {D11E57EA-1FEB-40BF-9AEE-C67E8040AE3B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BF8000DF-DA09-4634-B870-07796C220A2F}
