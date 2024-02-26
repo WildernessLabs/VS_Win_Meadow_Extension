@@ -13,16 +13,16 @@ using System.Threading.Tasks;
 
 namespace Meadow
 {
-    public class OutputLogger : IProgress<uint>, ILogger
+    public class OutputLogger : IProgress<string>, ILogger
     {
         private TextWriter textWriter;
         private IVsOutputWindowPane meadowOutputPane;
-		Guid meadowPaneGuid = new Guid("C2FCAB2F-BFEB-4B1A-B385-08D4C81107FE");
-		private IVsStatusbar statusBar;
-		private uint progressBarCookie = 0;
-		private uint nextProgress = 0;
-		private const uint PROGESS_INCREMENTS = 5;
-		private const uint TOTAL_PROGRESS = 100;
+        Guid meadowPaneGuid = new Guid("C2FCAB2F-BFEB-4B1A-B385-08D4C81107FE");
+        private IVsStatusbar statusBar;
+        private uint progressBarCookie = 0;
+        private uint nextProgress = 0;
+        private const uint PROGESS_INCREMENTS = 5;
+        private const uint TOTAL_PROGRESS = 100;
 
         public OutputLogger()
         {
@@ -56,14 +56,14 @@ namespace Meadow
             });
         }
 
-		public async System.Threading.Tasks.Task ConnectTextWriter(TextWriter writer)
+        public async System.Threading.Tasks.Task ConnectTextWriter(TextWriter writer)
         {
-			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-			textWriter = writer;
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            textWriter = writer;
 
-			// It should exist now, so clear it for this run
-			meadowOutputPane?.Clear();
-		}
+            // It should exist now, so clear it for this run
+            meadowOutputPane?.Clear();
+        }
 
         public void DisconnectTextWriter()
         {
@@ -77,8 +77,8 @@ namespace Meadow
 
         public async void Log(string msg)
         {
-			try
-			{
+            try
+            {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 if (msg.Contains("StdOut") || msg.Contains("StdInfo"))
                 {
@@ -86,8 +86,8 @@ namespace Meadow
                     meadowOutputPane?.OutputStringThreadSafe(msg.Substring(15) + Environment.NewLine);
                 }
             }
-			catch (Exception ex)
-			{
+            catch (Exception ex)
+            {
                 Debug.WriteLine($"A Disposed Object Exception may have occured. Let's not crash the IDE.{Environment.NewLine}Exception:{Environment.NewLine}{ex.Message}{Environment.NewLine}StackTrace:{Environment.NewLine}{ex.StackTrace}");
             }
         }
@@ -102,23 +102,21 @@ namespace Meadow
             Log(msg);
         }
 
-		public void Report(uint percentage)
-		{
-            _ = Task.Run(async () => { 
-                await Report(string.Empty, percentage);
-			});
-		}
+        public void Report(string message)
+        {
+            Log(message);
+        }
 
-		internal async System.Threading.Tasks.Task ShowMeadowLogs()
-		{
-			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-			meadowOutputPane?.Activate();
-		}
+        internal async System.Threading.Tasks.Task ShowMeadowLogs()
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            meadowOutputPane?.Activate();
+        }
 
-		internal async Task Report(string fileName, uint percentage)
-		{
-			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-			statusBar?.Progress(ref progressBarCookie, 1, $"Transferring: {fileName}", percentage, TOTAL_PROGRESS);
-		}
-	}
+        internal async Task Report(string fileName, uint percentage)
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            statusBar?.Progress(ref progressBarCookie, 1, $"Transferring: {fileName}", percentage, TOTAL_PROGRESS);
+        }
+    }
 }
