@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Meadow
 {
-    public class OutputLogger : IProgress<string>, ILogger
+    public class OutputLogger : IProgress<uint>, ILogger
     {
         private TextWriter textWriter;
         private IVsOutputWindowPane meadowOutputPane;
@@ -102,9 +102,11 @@ namespace Meadow
             Log(msg);
         }
 
-		public void Report(string msg)
+		public void Report(uint percentage)
 		{
-			Log(msg);
+            _ = Task.Run(async () => { 
+                await Report(string.Empty, percentage);
+			});
 		}
 
 		internal async System.Threading.Tasks.Task ShowMeadowLogs()
