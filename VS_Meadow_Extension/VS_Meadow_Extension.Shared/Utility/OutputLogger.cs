@@ -113,10 +113,22 @@ namespace Meadow
             meadowOutputPane?.Activate();
         }
 
+        internal async Task ResetProgressBar()
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            statusBar?.Progress(ref progressBarCookie, 0, string.Empty, 0, TOTAL_PROGRESS);
+        }
+
         internal async Task Report(string fileName, uint percentage)
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             statusBar?.Progress(ref progressBarCookie, 1, $"Transferring: {fileName}", percentage, TOTAL_PROGRESS);
+        }
+
+        internal async Task Report(string osVersion, long byteReceived)
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            statusBar?.SetText($"Downloading OsVersion: {osVersion}; Bytes Received {(uint)byteReceived}");
         }
     }
 }

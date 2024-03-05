@@ -10,6 +10,7 @@ using Meadow.Hcom;
 using Meadow.Package;
 using Meadow.Software;
 using Meadow.Utility;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Build;
 using Microsoft.VisualStudio.Shell;
@@ -33,21 +34,22 @@ namespace Meadow
         private ProjectProperties Properties { get; set; }
 
         private ConfiguredProject configuredProject;
-		
-		const string MeadowSDKVersion = "Sdk=\"Meadow.Sdk/1.1.0\"";
 
-		private SettingsManager settingsManager;
+        const string MeadowSDKVersion = "Sdk=\"Meadow.Sdk/1.1.0\"";
 
-		private bool isDeploySupported = true;
+        private SettingsManager settingsManager;
+
+        private bool isDeploySupported = true;
+        private string osVersion;
 
         [ImportingConstructor]
         public DeployProvider(ConfiguredProject configuredProject)
         {
             this.configuredProject = configuredProject;
 
-			settingsManager = new CLI.SettingsManager();
+            settingsManager = new CLI.SettingsManager();
 
-			_ = Task.Run(async () => { isDeploySupported = await IsMeadowApp(); });
+            _ = Task.Run(async () => { isDeploySupported = await IsMeadowApp(); });
         }
 
         public async Task<bool> DeployMeadowProjectsAsync(CancellationToken cts, TextWriter outputPaneWriter)
@@ -91,7 +93,7 @@ namespace Meadow
 
                     MeadowPackage.DebugOrDeployInProgress = true;
 
-					await DeployAppAsync(outputPath, new OutputPaneWriter(outputPaneWriter), cts);
+                    await DeployAppAsync(outputPath, new OutputPaneWriter(outputPaneWriter), cts);
 
                     return true;
                 }
@@ -129,8 +131,8 @@ namespace Meadow
 
         async Task DeployAppAsync(string folder, IOutputPaneWriter outputPaneWriter, CancellationToken cancellationToken)
         {
-			// TODO Meadow?.Dispose();
-			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            // TODO Meadow?.Dispose();
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
             var route = settingsManager.GetSetting(CLI.SettingsManager.PublicSettings.Route);
 
@@ -162,7 +164,6 @@ namespace Meadow
             {
                 await MeadowConnection.WaitForMeadowAttach();
 
-
                 /*  device = await MeadowProvider.GetMeadowSerialDeviceAsync(DeployOutputLogger);
                 if (MeadowConnection.Device == null)
                 {
@@ -170,46 +171,85 @@ namespace Meadow
                     throw new Exception("A device has not been selected. Please attach a device, then select it from the Device list.");
                 }*/
 
-                //Meadow = new MeadowDeviceHelper(device, DeployOutputLogger);*/
+                var deviceInfo = await MeadowConnection.GetDeviceInfo(cancellationToken);
+                osVersion = deviceInfo.OsVersion;
 
-                //wrap this is a try/catch so it doesn't crash if the developer is offline
+                // TODO Pass in a proper MeadowCloudClient
+                var fileManager = new FileManager(null);
+                await fileManager.Refresh();
+
+                // for now we only support F7
+                // TODO: add switch and support for other platforms
+                var collection = fileManager.Firmware["Meadow F7"];
+
+                /* TODO Uncomment this once we have a property MeadowCloudClient above var isAvailable = await collection.IsVersionAvailableForDownload(osVersion);
+
+                if (!isAvailable)
+                {
+                    DeployOutputLogger?.Log($"Requested package version '{osVersion}' is not available");
+                }
+                else if (collection[osVersion] != null)
+                {
+                    DeployOutputLogger?.Log($"Firmware package '{osVersion}' already exists locally");
+                }
+                else
+                {
+                    DeployOutputLogger?.Log($"Downloading firmware package '{osVersion}'...");
+                }
+
+
+                collection.DownloadProgress += Firmware_DownloadProgress;
                 try
                 {
-                    var deviceInfo = await MeadowConnection.GetDeviceInfo(cancellationToken);//.GetOSVersion(TimeSpan.FromSeconds(30), token);
-                    var osVersion = deviceInfo.OsVersion;
+                    var result = await collection.RetrievePackage(osVersion, false);
 
-                    var fileManager = new FileManager(null);
-                    await fileManager.Refresh();
-
-                    // for now we only support F7
-                    // TODO: add switch and support for other platforms
-                    var collection = fileManager.Firmware["Meadow F7"];
-
-                    // TODO await new DownloadManager(DeployOutputLogger).DownloadOsBinaries(osVersion);
+                    if (!result)
+                    {
+                        DeployOutputLogger?.LogError($"Unable to download package '{osVersion}'");
+                    }
+                    else
+                    {
+                        DeployOutputLogger?.LogInformation($"Firmware package '{osVersion}' downloaded");
+                    }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    DeployOutputLogger?.Log("OS download failed, make sure you have an active internet connection");
+                    DeployOutputLogger?.Log($"Unable to download package '{osVersion}': {ex.Message}{Environment.NewLine}Ensure you have an active internet connection.");
                 }
+                finally
+                {
+                    collection.DownloadProgress -= Firmware_DownloadProgress;
+                }
+                */
 
                 var includePdbs = configuredProject?.ProjectConfiguration?.Dimensions["Configuration"].Contains("Debug");
 
-				await AppManager.DeployApplication(null, MeadowConnection, folder, includePdbs.HasValue && includePdbs.Value, false, DeployOutputLogger, cancellationToken);
-			}
+                await AppManager.DeployApplication(null, MeadowConnection, folder, includePdbs.HasValue && includePdbs.Value, false, DeployOutputLogger, cancellationToken);
+            }
             finally
             {
                 MeadowConnection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
             }
         }
 
-		private async void MeadowConnection_DeploymentProgress(object sender, (string fileName, long completed, long total) e)
-		{
-			var p = (uint)((e.completed / (double)e.total) * 100d);
+        private async void Firmware_DownloadProgress(object sender, long e)
+        {
+            await DeployOutputLogger?.Report(osVersion, e);
+        }
+
+        private async void MeadowConnection_DeploymentProgress(object sender, (string fileName, long completed, long total) e)
+        {
+            var p = (uint)((e.completed / (double)e.total) * 100d);
 
             await DeployOutputLogger?.Report(e.fileName, p);
-		}
 
-		public bool IsDeploySupported
+            if (p == 100)
+            {
+                await DeployOutputLogger?.ResetProgressBar();
+            }
+        }
+
+        public bool IsDeploySupported
         {
             get { return isDeploySupported; }
         }

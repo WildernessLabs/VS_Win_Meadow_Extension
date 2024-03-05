@@ -53,15 +53,13 @@ namespace Meadow
 
         public async Task<IReadOnlyList<IDebugLaunchSettings>> QueryDebugTargetsAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
         {
-			// TODO DeployProvider.MeadowConnection?.Dispose();
+            // TODO DeployProvider.MeadowConnection?.Dispose();
 
-			//var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger: DeployProvider.DeployOutputLogger);
-			var device = DeployProvider.MeadowConnection.Device;
+            //var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger: DeployProvider.DeployOutputLogger);
 
-
-			if (!launchOptions.HasFlag(DebugLaunchOptions.NoDebug)
+            if (!launchOptions.HasFlag(DebugLaunchOptions.NoDebug)
                 && await IsMeadowApp()
-                && device != null)
+                && DeployProvider.MeadowConnection != null)
             {
                 MeadowPackage.DebugOrDeployInProgress = true;
                 // TODO DeployProvider.Meadow = new MeadowDeviceHelper(device, DeployProvider.DeployOutputLogger);
