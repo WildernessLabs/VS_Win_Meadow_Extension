@@ -26,7 +26,7 @@ namespace Meadow
 
         public OutputLogger()
         {
-            System.Threading.Tasks.Task.Run(async () =>
+            _= Task.Run(async () =>
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 if (meadowOutputPane == null)

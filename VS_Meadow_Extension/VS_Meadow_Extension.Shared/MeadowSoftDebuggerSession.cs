@@ -1,7 +1,4 @@
-﻿using System;
-using System.Net;
-using System.Diagnostics;
-using System.Threading;
+﻿using System.Threading;
 
 using Mono.Debugging.Client;
 using Mono.Debugging.Soft;
