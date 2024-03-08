@@ -5,12 +5,9 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Meadow.CLI;
-using Meadow.Deployment;
 using Meadow.Hcom;
-using Meadow.Package;
 using Meadow.Software;
 using Meadow.Utility;
-using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Build;
 using Microsoft.VisualStudio.Shell;
@@ -22,9 +19,46 @@ namespace Meadow
     [AppliesTo(Globals.MeadowCapability)]
     internal class DeployProvider : IDeployProvider
     {
-        // TODO: tad bit hack right now - maybe we can use DI to import this DeployProvider
-        // in the debug launch provider ?
-        internal static IMeadowConnection MeadowConnection;
+        private static IMeadowConnection meadowConnection = null;
+        internal static IMeadowConnection MeadowConnection
+        {
+            get
+            {
+                var route = settingsManager.GetSetting(SettingsManager.PublicSettings.Route);
+
+                if (meadowConnection != null
+                    && meadowConnection.Name == route)
+                {
+                    return meadowConnection;
+                }
+                else if (meadowConnection != null)
+                {
+                    meadowConnection.Dispose();
+                    meadowConnection = null;
+                }
+
+                var retryCount = 0;
+
+            get_serial_connection:
+                try
+                {
+                    meadowConnection = new SerialConnection(route);
+                }
+                catch
+                {
+                    retryCount++;
+                    if (retryCount > 10)
+                    {
+                        throw new Exception($"Cannot create SerialConnection on port: {route}");
+                    }
+                    Thread.Sleep(500);
+                    goto get_serial_connection;
+                }
+
+                return meadowConnection;
+            }
+        }
+
         public static OutputLogger DeployOutputLogger = new OutputLogger();
 
         /// <summary>
@@ -37,7 +71,7 @@ namespace Meadow
 
         const string MeadowSDKVersion = "Sdk=\"Meadow.Sdk/1.1.0\"";
 
-        private SettingsManager settingsManager;
+        private static SettingsManager settingsManager = new SettingsManager();
 
         private bool isDeploySupported = true;
         private string osVersion;
@@ -46,8 +80,6 @@ namespace Meadow
         public DeployProvider(ConfiguredProject configuredProject)
         {
             this.configuredProject = configuredProject;
-
-            settingsManager = new CLI.SettingsManager();
 
             _ = Task.Run(async () => { isDeploySupported = await IsMeadowApp(); });
         }
@@ -131,32 +163,7 @@ namespace Meadow
 
         async Task DeployAppAsync(string folder, IOutputPaneWriter outputPaneWriter, CancellationToken cancellationToken)
         {
-            // TODO Meadow?.Dispose();
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-            var route = settingsManager.GetSetting(CLI.SettingsManager.PublicSettings.Route);
-
-            if (MeadowConnection == null)
-            {
-                var retryCount = 0;
-
-            get_serial_connection:
-                try
-                {
-                    MeadowConnection = new SerialConnection(route);
-                }
-                catch
-                {
-                    retryCount++;
-                    if (retryCount > 10)
-                    {
-                        throw new Exception($"Cannot find port {route}");
-                    }
-                    Thread.Sleep(500);
-                    goto get_serial_connection;
-                }
-
-            }
 
             MeadowConnection.FileWriteProgress += MeadowConnection_DeploymentProgress;
 

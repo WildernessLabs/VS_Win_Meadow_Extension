@@ -113,13 +113,21 @@
     <None Include="Key.snk" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Meadow.CLI\Source\v2\Meadow.CLI.Extension\Meadow.CLI.Extension.csproj">
-      <Project>{3e6191a9-2c04-45f5-af05-889cbb4327f4}</Project>
-      <Name>Meadow.CLI.Extension</Name>
+    <ProjectReference Include="..\..\..\Meadow.CLI\Source\v2\Meadow.Cloud.Client\Meadow.Cloud.Client.csproj">
+      <Project>{FB1DF5C8-039B-46F0-80B2-650DEDFCDF27}</Project>
+      <Name>Meadow.Cloud.Client</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\Meadow.CLI\Source\v2\Meadow.Hcom\Meadow.HCom.csproj">
       <Project>{10f00ed3-2dca-41fd-9bf8-23a9ce1510bd}</Project>
       <Name>Meadow.HCom</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Meadow.CLI\Source\v2\Meadow.SoftwareManager\Meadow.SoftwareManager.csproj">
+      <Project>{2CEDC952-4148-45BA-A6D7-F6997BFCAD86}</Project>
+      <Name>Meadow.SoftwareManager</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Meadow.CLI\Source\v2\Meadow.Tooling.Core\Meadow.Tooling.Core.csproj">
+      <Project>{a631d6cb-b93f-472f-8d3b-48fda054f164}</Project>
+      <Name>Meadow.Tooling.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="..\VS_Meadow_Extension.Shared\VS_Win_Meadow_Extension.Shared.projitems" Label="Shared" />
