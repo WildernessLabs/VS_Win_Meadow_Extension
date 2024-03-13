@@ -166,6 +166,7 @@ namespace Meadow
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
             MeadowConnection.FileWriteProgress += MeadowConnection_DeploymentProgress;
+            MeadowConnection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
 
             try
             {
@@ -237,6 +238,11 @@ namespace Meadow
             {
                 MeadowConnection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
             }
+        }
+
+        private void MeadowConnection_DeviceMessageReceived(object sender, (string message, string source) e)
+        {
+            DeployOutputLogger.Log(e.message);
         }
 
         private async void Firmware_DownloadProgress(object sender, long e)

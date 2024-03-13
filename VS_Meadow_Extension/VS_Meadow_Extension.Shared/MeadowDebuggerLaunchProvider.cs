@@ -62,12 +62,11 @@ namespace Meadow
                 && DeployProvider.MeadowConnection != null)
             {
                 MeadowPackage.DebugOrDeployInProgress = true;
-                // TODO DeployProvider.Meadow = new MeadowDeviceHelper(device, DeployProvider.DeployOutputLogger);
 
-                var meadowSession = new MeadowSoftDebuggerSession(DeployProvider.MeadowConnection);
+                var meadowSession = new MeadowSoftDebuggerSession(DeployProvider.MeadowConnection, DeployProvider.DeployOutputLogger);
 
                 var startArgs = new SoftDebuggerConnectArgs(profile.Name, IPAddress.Loopback, 55898);
-                await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 var startInfo = new StartInfo(startArgs, debuggingOptions, VsHierarchy.GetProject());
 
                 var sessionInfo = new SessionMarshalling(meadowSession, startInfo);
