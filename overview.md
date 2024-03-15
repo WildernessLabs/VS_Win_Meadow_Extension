@@ -4,6 +4,10 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+### 1.9.2
+
+- Bump to pick up UnauthorisedAccess Exception
+
 ### 1.9.0
 
 - Bump to protocol 8
