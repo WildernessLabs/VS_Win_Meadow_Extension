@@ -4,6 +4,10 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+### 1.9.4
+
+- Fix for VS2022 v17.9.4 so that debugging works again.
+
 ### 1.9.2
 
 - Bump to pick up UnauthorisedAccess Exception
