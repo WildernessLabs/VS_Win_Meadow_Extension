@@ -10,6 +10,7 @@ using Meadow.Helpers;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using Meadow.CLI.Commands.DeviceManagement;
+using Meadow.CLI;
 
 namespace Meadow
 {
@@ -40,12 +41,12 @@ namespace Meadow
 
         public static bool DebugOrDeployInProgress { get; set; } = false;
 
-        private MeadowSettings meadowSettings = new MeadowSettings(Globals.SettingsFilePath);
+		internal static SettingsManager SettingsManager { get; set; } = new SettingsManager();
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MeadowPackage"/> class.
-        /// </summary>
-        public MeadowPackage()
+		/// <summary>
+		/// Initializes a new instance of the <see cref="MeadowPackage"/> class.
+		/// </summary>
+		public MeadowPackage()
         {
             // Inside this method you can place any initialization code that does not require
             // any Visual Studio service because at this point the package object is created but
@@ -105,10 +106,11 @@ namespace Meadow
                         {
                             string deviceTarget = string.Empty;
 
-                            bool IsSavedValueInPortList = IsValueInPortList(portList, meadowSettings.DeviceTarget);
+                            var route = SettingsManager.GetSetting(SettingsManager.PublicSettings.Route);
+							bool IsSavedValueInPortList = IsValueInPortList(portList, route);
                             if (IsSavedValueInPortList)
                             {
-                                deviceTarget = meadowSettings.DeviceTarget;
+                                deviceTarget = route;
                             }
 
                             Marshal.GetNativeVariantForObject(deviceTarget, vOut);
@@ -194,8 +196,7 @@ namespace Meadow
 
         private void SaveDeviceChoiceToSettings(string newChoice)
         {
-            meadowSettings.DeviceTarget = newChoice;
-            meadowSettings.Save();
+			SettingsManager.SaveSetting(SettingsManager.PublicSettings.Route, newChoice);
         }
 
         private async Task InstallDependencies()

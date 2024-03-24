@@ -24,7 +24,7 @@ namespace Meadow
         {
             get
             {
-                var route = settingsManager.GetSetting(SettingsManager.PublicSettings.Route);
+                var route = MeadowPackage.SettingsManager.GetSetting(SettingsManager.PublicSettings.Route);
 
                 if (meadowConnection != null
                     && meadowConnection.Name == route)
@@ -70,8 +70,6 @@ namespace Meadow
         private ConfiguredProject configuredProject;
 
         const string MeadowSDKVersion = "Sdk=\"Meadow.Sdk/1.1.0\"";
-
-        private static SettingsManager settingsManager = new SettingsManager();
 
         private bool isDeploySupported = true;
         private string osVersion;
