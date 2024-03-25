@@ -238,21 +238,21 @@ namespace Meadow
             }
         }
 
-        private void MeadowConnection_DeviceMessageReceived(object sender, (string message, string source) e)
+        private async void MeadowConnection_DeviceMessageReceived(object sender, (string message, string source) e)
         {
-            DeployOutputLogger.Log(e.message);
+            await DeployOutputLogger?.ReportDeviceMessage(e.source, e.message);
         }
 
         private async void Firmware_DownloadProgress(object sender, long e)
         {
-            await DeployOutputLogger?.Report(osVersion, e);
+            await DeployOutputLogger?.ReportDownloadProgress(osVersion, e);
         }
 
         private async void MeadowConnection_DeploymentProgress(object sender, (string fileName, long completed, long total) e)
         {
             var p = (uint)((e.completed / (double)e.total) * 100d);
 
-            await DeployOutputLogger?.Report(e.fileName, p);
+            await DeployOutputLogger?.ReportFileProgress(e.fileName, p);
 
             if (p == 100)
             {

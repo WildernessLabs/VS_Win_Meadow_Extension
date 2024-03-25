@@ -26,7 +26,7 @@ namespace Meadow
 
         public OutputLogger()
         {
-            _= Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 if (meadowOutputPane == null)
@@ -119,16 +119,29 @@ namespace Meadow
             statusBar?.Progress(ref progressBarCookie, 0, string.Empty, 0, TOTAL_PROGRESS);
         }
 
-        internal async Task Report(string fileName, uint percentage)
+        internal async Task ReportFileProgress(string fileName, uint percentage)
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             statusBar?.Progress(ref progressBarCookie, 1, $"Transferring: {fileName}", percentage, TOTAL_PROGRESS);
         }
 
-        internal async Task Report(string osVersion, long byteReceived)
+        internal async Task ReportDownloadProgress(string osVersion, long byteReceived)
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             statusBar?.SetText($"Downloading OsVersion: {osVersion}; Bytes Received {(uint)byteReceived}");
+        }
+
+        internal async Task ReportDeviceMessage(string source, string message)
+        {
+            try
+            {
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                meadowOutputPane?.OutputStringThreadSafe(message + Environment.NewLine);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Let's not crash the IDE.{Environment.NewLine}Exception:{Environment.NewLine}{ex.Message}{Environment.NewLine}StackTrace:{Environment.NewLine}{ex.StackTrace}");
+            }
         }
     }
 }
