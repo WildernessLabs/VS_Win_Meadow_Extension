@@ -75,31 +75,31 @@ namespace Meadow
 
         public bool IsEnabled(LogLevel logLevel) => logLevel >= LogLevel.Information;
 
-        public async void Log(string msg)
+        public async void Log(string message)
         {
             try
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                if (msg.Contains("StdOut") || msg.Contains("StdInfo"))
-                {
-                    // This appears in the 
-                    meadowOutputPane?.OutputStringThreadSafe(msg.Substring(15) + Environment.NewLine);
-                }
+                statusBar?.Progress(ref progressBarCookie, 0, "", 0, 0);
+                await textWriter?.WriteAsync(message);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"A Disposed Object Exception may have occured. Let's not crash the IDE.{Environment.NewLine}Exception:{Environment.NewLine}{ex.Message}{Environment.NewLine}StackTrace:{Environment.NewLine}{ex.StackTrace}");
+                Debug.WriteLine($"Let's not crash the IDE.{Environment.NewLine}Exception:{Environment.NewLine}{ex.Message}{Environment.NewLine}StackTrace:{Environment.NewLine}{ex.StackTrace}");
             }
         }
 
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-            if (!IsEnabled(logLevel)) { return; }
+            if (!IsEnabled(logLevel))
+            {
+                return;
+            }
 
-            var msg = formatter(state, exception);
+            var message = formatter(state, exception);
 
-            Log(msg);
+            Log(message);
         }
 
         public void Report(string message)

@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Meadow.CLI;
 using Meadow.Hcom;
+using Meadow.Package;
 using Meadow.Software;
 using Meadow.Utility;
 using Microsoft.VisualStudio.ProjectSystem;
@@ -230,7 +231,9 @@ namespace Meadow
 
                 var includePdbs = configuredProject?.ProjectConfiguration?.Dimensions["Configuration"].Contains("Debug");
 
-                await AppManager.DeployApplication(null, MeadowConnection, folder, includePdbs.HasValue && includePdbs.Value, false, DeployOutputLogger, cancellationToken);
+                var packageManager = new PackageManager(fileManager);
+
+                await AppManager.DeployApplication(packageManager, MeadowConnection, folder, includePdbs.HasValue && includePdbs.Value, false, DeployOutputLogger, cancellationToken);
             }
             finally
             {
