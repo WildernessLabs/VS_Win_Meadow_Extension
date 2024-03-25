@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-
 using Meadow.Helpers;
-using Meadow.CLI.Core.DeviceManagement;
-using Meadow.CLI.Core.Devices;
 using Microsoft.Extensions.Logging;
 
 namespace Meadow
 {
     static class MeadowProvider
     {
-        public static Task<IMeadowDevice> GetMeadowSerialDeviceAsync(ILogger logger = null)
+        /*public static Task<IMeadowDevice> GetMeadowSerialDeviceAsync(ILogger logger = null)
         {
             var settings = new MeadowSettings(Globals.SettingsFilePath);
 
@@ -21,6 +18,6 @@ namespace Meadow
             }
 
             return MeadowDeviceManager.GetMeadowForSerialPort(settings.DeviceTarget, logger: logger);
-        }
+        }*/
     }
 }

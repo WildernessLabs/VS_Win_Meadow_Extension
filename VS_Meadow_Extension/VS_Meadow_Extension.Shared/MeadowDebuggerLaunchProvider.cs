@@ -13,8 +13,6 @@ using Microsoft.VisualStudio.ProjectSystem.VS.Debug;
 using Mono.Debugging.Soft;
 using Mono.Debugging.VisualStudio;
 
-using Meadow.CLI.Core.Devices;
-
 namespace Meadow
 {
     using DebuggerSession = Mono.Debugging.VisualStudio.DebuggerSession;
@@ -55,21 +53,20 @@ namespace Meadow
 
         public async Task<IReadOnlyList<IDebugLaunchSettings>> QueryDebugTargetsAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
         {
-            DeployProvider.Meadow?.Dispose();
+            // TODO DeployProvider.MeadowConnection?.Dispose();
 
-            var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger: DeployProvider.DeployOutputLogger);
+            //var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger: DeployProvider.DeployOutputLogger);
 
             if (!launchOptions.HasFlag(DebugLaunchOptions.NoDebug)
                 && await IsMeadowApp()
-                && device != null)
+                && DeployProvider.MeadowConnection != null)
             {
                 MeadowPackage.DebugOrDeployInProgress = true;
-                DeployProvider.Meadow = new MeadowDeviceHelper(device, DeployProvider.DeployOutputLogger);
 
-                var meadowSession = new MeadowSoftDebuggerSession(DeployProvider.Meadow);
+                var meadowSession = new MeadowSoftDebuggerSession(DeployProvider.MeadowConnection, DeployProvider.DeployOutputLogger);
 
                 var startArgs = new SoftDebuggerConnectArgs(profile.Name, IPAddress.Loopback, 55898);
-                await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 var startInfo = new StartInfo(startArgs, debuggingOptions, VsHierarchy.GetProject());
 
                 var sessionInfo = new SessionMarshalling(meadowSession, startInfo);
