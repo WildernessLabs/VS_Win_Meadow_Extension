@@ -20,9 +20,8 @@ namespace Meadow
         Guid meadowPaneGuid = new Guid("C2FCAB2F-BFEB-4B1A-B385-08D4C81107FE");
         private IVsStatusbar statusBar;
         private uint progressBarCookie = 0;
-        private uint nextProgress = 0;
-        private const uint PROGESS_INCREMENTS = 5;
         private const uint TOTAL_PROGRESS = 100;
+        private readonly object _lck = new object();
 
         public OutputLogger()
         {
@@ -67,8 +66,14 @@ namespace Meadow
 
         public void DisconnectTextWriter()
         {
-            textWriter?.Dispose();
-            textWriter = null;
+            lock (_lck)
+            {
+                if (textWriter != null)
+                {
+                    textWriter.Dispose();
+                    textWriter = null;
+                }
+            }
         }
 
         public IDisposable BeginScope<TState>(TState state) => default;
@@ -80,8 +85,13 @@ namespace Meadow
             try
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                statusBar?.Progress(ref progressBarCookie, 0, "", 0, 0);
-                await textWriter?.WriteAsync(message);
+                lock (_lck)
+                {
+                    if (textWriter != null)
+                    {
+                        textWriter.Write(message);
+                    }
+                }
             }
             catch (Exception ex)
             {
