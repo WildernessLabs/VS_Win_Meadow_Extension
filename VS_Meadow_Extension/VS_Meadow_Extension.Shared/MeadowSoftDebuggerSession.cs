@@ -32,14 +32,8 @@ namespace Meadow
             meadowDebugServer = await meadow.StartDebuggingSession(port, logger, meadowDebugCancelTokenSource.Token);
 
             meadow.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
-            meadow.DebuggerMessageReceived += MeadowConnection_DebuggerMessageReceived;
 
             base.OnRun(startInfo);
-        }
-
-        private void MeadowConnection_DebuggerMessageReceived(object sender, byte[] e)
-        {
-            logger.LogInformation($"Bytes Received: {e}");
         }
 
         private void MeadowConnection_DeviceMessageReceived(object sender, (string message, string source) e)
@@ -62,7 +56,6 @@ namespace Meadow
             if (meadow != null)
             {
                 meadow.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
-                meadow.DebuggerMessageReceived -= MeadowConnection_DebuggerMessageReceived;
                 meadow.Dispose();
                 meadow = null;
             }
