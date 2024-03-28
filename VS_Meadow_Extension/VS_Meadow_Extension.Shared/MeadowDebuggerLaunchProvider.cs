@@ -1,19 +1,16 @@
-﻿using System;
-using System.Net;
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.Threading.Tasks;
-
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
+﻿using Meadow.CLI.Core.Devices;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Debug;
 using Microsoft.VisualStudio.ProjectSystem.VS.Debug;
-
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using Mono.Debugging.Soft;
 using Mono.Debugging.VisualStudio;
-
-using Meadow.CLI.Core.Devices;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace Meadow
 {
@@ -24,7 +21,7 @@ namespace Meadow
     [Order(999)]
     public class MeadowDebuggerLaunchProvider : IDebugProfileLaunchTargetsProvider, IDebugLauncher
     {
-        static readonly DebuggingOptions debuggingOptions = new DebuggingOptions
+        private static readonly DebuggingOptions debuggingOptions = new DebuggingOptions
         {
             EvaluationTimeout = 10000,
             MemberEvaluationTimeout = 15000,
@@ -33,14 +30,14 @@ namespace Meadow
         };
 
         // FIXME: Find a nicer way than storing this
-        DebuggerSession vsSession;
+        private DebuggerSession vsSession;
         private ConfiguredProject configuredProject;
 
         // https://github.com/microsoft/VSProjectSystem/blob/master/doc/overview/mef.md
         [ImportMany(ExportContractNames.VsTypes.IVsHierarchy)]
-        OrderPrecedenceImportCollection<IVsHierarchy> vsHierarchies;
+        private OrderPrecedenceImportCollection<IVsHierarchy> vsHierarchies;
 
-        IVsHierarchy VsHierarchy => vsHierarchies.Single().Value;
+        private IVsHierarchy VsHierarchy => vsHierarchies.Single().Value;
 
         public bool SupportsProfile(ILaunchProfile profile) => true; // FIXME: Would we ever not?
 
@@ -55,12 +52,13 @@ namespace Meadow
 
         public async Task<IReadOnlyList<IDebugLaunchSettings>> QueryDebugTargetsAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
         {
+            if (!await IsMeadowApp()) { return Array.Empty<IDebugLaunchSettings>(); }
+
             DeployProvider.Meadow?.Dispose();
 
             var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger: DeployProvider.DeployOutputLogger);
 
             if (!launchOptions.HasFlag(DebugLaunchOptions.NoDebug)
-                && await IsMeadowApp()
                 && device != null)
             {
                 MeadowPackage.DebugOrDeployInProgress = true;
