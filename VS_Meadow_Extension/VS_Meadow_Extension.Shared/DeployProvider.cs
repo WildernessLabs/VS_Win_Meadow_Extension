@@ -57,12 +57,9 @@ namespace Meadow
             var projFileContent = File.ReadAllText(filename);
             if (projFileContent.Contains(MeadowSDKVersion))
             {
-                if (await IsMeadowApp())
-                {
-                    await DeployOutputLogger?.ConnectTextWriter(outputPaneWriter);
+                await DeployOutputLogger?.ConnectTextWriter(outputPaneWriter);
 
-                    return await DeployMeadowAppAsync(cts, outputPaneWriter, filename);
-                }
+                return await DeployMeadowAppAsync(cts, outputPaneWriter, filename);
             }
 
             return false;
@@ -109,7 +106,8 @@ namespace Meadow
 
         public async Task DeployAsync(CancellationToken cts, TextWriter outputPaneWriter)
         {
-            if (cts.IsCancellationRequested)
+            if (cts.IsCancellationRequested
+                || !await IsMeadowApp())
             {
                 return;
             }
@@ -186,10 +184,14 @@ namespace Meadow
             string assemblyName = await properties.GetEvaluatedPropertyValueAsync("AssemblyName");
             if (!string.IsNullOrEmpty(assemblyName) && assemblyName.Equals("App", StringComparison.OrdinalIgnoreCase))
             {
-                return true;
+                isDeploySupported = true;
+            }
+            else
+            {
+                isDeploySupported = false;
             }
 
-            return false;
+            return isDeploySupported;
         }
     }
 }
