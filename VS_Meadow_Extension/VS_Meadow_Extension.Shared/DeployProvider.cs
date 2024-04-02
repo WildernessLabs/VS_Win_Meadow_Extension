@@ -31,14 +31,13 @@ namespace Meadow
         private ConfiguredProject configuredProject;
 
         const string MeadowSDKVersion = "Sdk=\"Meadow.Sdk/1.1.0\"";
-        private bool isDeploySupported = true;
+        private bool isDeploySupported = false;
 
         [ImportingConstructor]
         public DeployProvider(ConfiguredProject configuredProject)
         {
             this.configuredProject = configuredProject;
-            _ = Task.Run(async () => { isDeploySupported = await IsMeadowApp(); });
-
+            IsMeadowApp();
         }
 
         public async Task<bool> DeployMeadowProjectsAsync(CancellationToken cts, TextWriter outputPaneWriter)
