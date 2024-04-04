@@ -4,6 +4,10 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+### 1.9.6
+
+- Do IsMeadowApp check earlier to avoid deployment of wrong project types
+
 ### 1.9.4
 
 - Fix for VS2022 v17.9.4 so that debugging works again.
