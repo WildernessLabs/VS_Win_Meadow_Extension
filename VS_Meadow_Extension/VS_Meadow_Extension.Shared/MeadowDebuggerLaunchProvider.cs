@@ -1,17 +1,15 @@
-﻿using System;
-using System.Net;
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.Threading.Tasks;
-
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
-using Microsoft.VisualStudio.ProjectSystem;
+﻿using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Debug;
 using Microsoft.VisualStudio.ProjectSystem.VS.Debug;
-
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using Mono.Debugging.Soft;
 using Mono.Debugging.VisualStudio;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace Meadow
 {
@@ -32,11 +30,11 @@ namespace Meadow
 
         // FIXME: Find a nicer way than storing this
         DebuggerSession vsSession;
-        private ConfiguredProject configuredProject;
+        private readonly ConfiguredProject configuredProject;
 
         // https://github.com/microsoft/VSProjectSystem/blob/master/doc/overview/mef.md
         [ImportMany(ExportContractNames.VsTypes.IVsHierarchy)]
-        OrderPrecedenceImportCollection<IVsHierarchy> vsHierarchies;
+        readonly OrderPrecedenceImportCollection<IVsHierarchy> vsHierarchies;
 
         IVsHierarchy VsHierarchy => vsHierarchies.Single().Value;
 
@@ -57,13 +55,15 @@ namespace Meadow
 
             //var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger: DeployProvider.DeployOutputLogger);
 
+            var connection = MeadowConnection.GetCurrentConnection();
+
             if (!launchOptions.HasFlag(DebugLaunchOptions.NoDebug)
                 && await IsMeadowApp()
-                && DeployProvider.MeadowConnection != null)
+                && connection != null)
             {
                 MeadowPackage.DebugOrDeployInProgress = true;
 
-                var meadowSession = new MeadowSoftDebuggerSession(DeployProvider.MeadowConnection, DeployProvider.DeployOutputLogger);
+                var meadowSession = new MeadowSoftDebuggerSession(connection, DeployProvider.DeployOutputLogger);
 
                 var startArgs = new SoftDebuggerConnectArgs(profile.Name, IPAddress.Loopback, 55898);
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();

@@ -1,11 +1,9 @@
 ﻿using Meadow.CLI;
-using Meadow.Hcom;
 using Meadow.Package;
 using Meadow.Software;
 using Meadow.Utility;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Build;
-using Microsoft.VisualStudio.Shell;
 using System;
 using System.ComponentModel.Composition;
 using System.IO;
@@ -19,46 +17,6 @@ namespace Meadow
     [AppliesTo(Globals.MeadowCapability)]
     internal class DeployProvider : IDeployProvider
     {
-        private static IMeadowConnection meadowConnection = null;
-        internal static IMeadowConnection MeadowConnection
-        {
-            get
-            {
-                var route = MeadowPackage.SettingsManager.GetSetting(SettingsManager.PublicSettings.Route);
-
-                if (meadowConnection != null
-                    && meadowConnection.Name == route)
-                {
-                    return meadowConnection;
-                }
-                else if (meadowConnection != null)
-                {
-                    meadowConnection.Dispose();
-                    meadowConnection = null;
-                }
-
-                var retryCount = 0;
-
-            get_serial_connection:
-                try
-                {
-                    meadowConnection = new SerialConnection(route);
-                }
-                catch
-                {
-                    retryCount++;
-                    if (retryCount > 10)
-                    {
-                        throw new Exception($"Cannot create SerialConnection on port: {route}");
-                    }
-                    Thread.Sleep(500);
-                    goto get_serial_connection;
-                }
-
-                return meadowConnection;
-            }
-        }
-
         public static OutputLogger DeployOutputLogger = new OutputLogger();
 
         /// <summary>
@@ -71,189 +29,123 @@ namespace Meadow
 
         const string MeadowSDKVersion = "Sdk=\"Meadow.Sdk/1.1.0\"";
 
-        private bool isDeploySupported = true;
-        private string osVersion;
+        public bool IsDeploySupported { get; private set; } = true;
+
+        private readonly string osVersion;
 
         [ImportingConstructor]
         public DeployProvider(ConfiguredProject configuredProject)
         {
             this.configuredProject = configuredProject;
 
-            _ = Task.Run(async () => { isDeploySupported = await IsMeadowApp(); });
+            //  _ = IsMeadowApp().ContinueWith(t => IsDeploySupported = t.Result);
         }
 
-        public async Task<bool> DeployMeadowProjectsAsync(CancellationToken cts, TextWriter outputPaneWriter)
+        public async Task DeployAsync(CancellationToken cts, TextWriter outputPaneWriter)
         {
-            if (cts.IsCancellationRequested)
+            if (await IsMeadowApp() == false)
             {
-                return false;
+                return;
             }
 
-            MeadowPackage.DebugOrDeployInProgress = false;
+            MeadowPackage.DebugOrDeployInProgress = true;
 
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-            var filename = this.configuredProject.UnconfiguredProject.FullPath;
+            var filename = configuredProject.UnconfiguredProject.FullPath;
 
             var projFileContent = File.ReadAllText(filename);
-            if (projFileContent.Contains(MeadowSDKVersion))
-            {
-                if (await IsMeadowApp())
-                {
-                    await DeployOutputLogger?.ConnectTextWriter(outputPaneWriter);
 
-                    return await DeployMeadowAppAsync(cts, outputPaneWriter, filename);
-                }
-            }
-
-            return false;
-        }
-
-        private async Task<bool> DeployMeadowAppAsync(CancellationToken cts, TextWriter outputPaneWriter, string filename)
-        {
-            try
-            {
-                var generalProperties = await Properties.GetConfigurationGeneralPropertiesAsync();
-
-                var projectFullPath = await generalProperties.Rule.GetPropertyValueAsync("MSBuildProjectFullPath");
-                if (projectFullPath.Contains(filename))
-                {
-                    var projectDir = await generalProperties.Rule.GetPropertyValueAsync("ProjectDir");
-                    var outputPath = Path.Combine(projectDir, await generalProperties.Rule.GetPropertyValueAsync("OutputPath"));
-
-                    MeadowPackage.DebugOrDeployInProgress = true;
-
-                    await DeployAppAsync(outputPath, new OutputPaneWriter(outputPaneWriter), cts);
-
-                    return true;
-                }
-                else
-                {
-                    DeployFailed();
-                }
-            }
-            catch (Exception ex)
+            if (projFileContent.Contains(MeadowSDKVersion) == false)
             {
                 DeployFailed();
-
-                throw ex;
+                return;
             }
 
-            return false;
+            await DeployOutputLogger?.ConnectTextWriter(outputPaneWriter);
+
+            var outputPath = await GetOutputPath(filename);
+
+            if (string.IsNullOrEmpty(outputPath))
+            {
+                DeployFailed();
+                return;
+            }
+
+            await DeployMeadowApp(outputPath, new OutputPaneWriter(outputPaneWriter), cts);
+        }
+
+        private bool eventSubscribed = false;
+
+        async Task DeployMeadowApp(string folder, IOutputPaneWriter outputPaneWriter, CancellationToken cancellationToken)
+        {
+            var meadowConnection = MeadowConnection.GetCurrentConnection();
+
+            meadowConnection.FileWriteProgress += MeadowConnection_DeploymentProgress;
+
+            if (eventSubscribed == false)
+            {
+                meadowConnection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
+                eventSubscribed = true;
+            }
+
+            try
+            {
+                await meadowConnection.WaitForMeadowAttach();
+
+                var fileManager = new FileManager(null);
+                await fileManager.Refresh();
+
+                bool includePdbs = configuredProject?.ProjectConfiguration?.Dimensions["Configuration"].Contains("Debug") ?? false;
+
+                var packageManager = new PackageManager(fileManager);
+
+                await packageManager.TrimApplication(new FileInfo(Path.Combine(folder, "App.dll")), includePdbs, cancellationToken: cancellationToken);
+
+                await AppManager.DeployApplication(packageManager, meadowConnection, folder, includePdbs, false, DeployOutputLogger, cancellationToken);
+            }
+            finally
+            {
+                meadowConnection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
+                //meadowConnection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
+            }
+        }
+
+        private async Task<string> GetOutputPath(string filename)
+        {
+            var generalProperties = await Properties.GetConfigurationGeneralPropertiesAsync();
+
+            var projectFullPath = await generalProperties.Rule.GetPropertyValueAsync("MSBuildProjectFullPath");
+
+            if (projectFullPath.Contains(filename) == false)
+            {
+                DeployFailed();
+                return string.Empty;
+            }
+
+            var projectDir = await generalProperties.Rule.GetPropertyValueAsync("ProjectDir");
+            var outputPath = Path.Combine(projectDir, await generalProperties.Rule.GetPropertyValueAsync("OutputPath"));
+
+            return outputPath;
         }
 
         private static void DeployFailed()
         {
             MeadowPackage.DebugOrDeployInProgress = false;
-
-            DeployOutputLogger?.Log("Deploy failed. If a Meadow device is attached, please Reset Meadow and try again.");
+            DeployOutputLogger?.Log("Deploy failed - please reset Meadow and try again");
         }
 
-        public async Task DeployAsync(CancellationToken cts, TextWriter outputPaneWriter)
+        private void MeadowConnection_DeviceMessageReceived(object sender, (string message, string source) e)
         {
-            if (cts.IsCancellationRequested)
-            {
-                return;
-            }
-
-            await DeployMeadowProjectsAsync(cts, outputPaneWriter);
+            _ = DeployOutputLogger.ReportDeviceMessage(e.source, e.message);
         }
 
-        async Task DeployAppAsync(string folder, IOutputPaneWriter outputPaneWriter, CancellationToken cancellationToken)
+        private void Firmware_DownloadProgress(object sender, long e)
         {
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-            MeadowConnection.FileWriteProgress += MeadowConnection_DeploymentProgress;
-            MeadowConnection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
-
-            try
-            {
-                await MeadowConnection.WaitForMeadowAttach();
-
-                /*  device = await MeadowProvider.GetMeadowSerialDeviceAsync(DeployOutputLogger);
-                if (MeadowConnection.Device == null)
-                {
-                    MeadowPackage.DebugOrDeployInProgress = false;
-                    throw new Exception("A device has not been selected. Please attach a device, then select it from the Device list.");
-                }*/
-
-                var deviceInfo = await MeadowConnection.GetDeviceInfo(cancellationToken);
-                osVersion = deviceInfo.OsVersion;
-
-                // TODO Pass in a proper MeadowCloudClient
-                var fileManager = new FileManager(null);
-                await fileManager.Refresh();
-
-                // for now we only support F7
-                // TODO: add switch and support for other platforms
-                var collection = fileManager.Firmware["Meadow F7"];
-
-                /* TODO Uncomment this once we have a property MeadowCloudClient above var isAvailable = await collection.IsVersionAvailableForDownload(osVersion);
-
-                if (!isAvailable)
-                {
-                    DeployOutputLogger?.Log($"Requested package version '{osVersion}' is not available");
-                }
-                else if (collection[osVersion] != null)
-                {
-                    DeployOutputLogger?.Log($"Firmware package '{osVersion}' already exists locally");
-                }
-                else
-                {
-                    DeployOutputLogger?.Log($"Downloading firmware package '{osVersion}'...");
-                }
-
-
-                collection.DownloadProgress += Firmware_DownloadProgress;
-                try
-                {
-                    var result = await collection.RetrievePackage(osVersion, false);
-
-                    if (!result)
-                    {
-                        DeployOutputLogger?.LogError($"Unable to download package '{osVersion}'");
-                    }
-                    else
-                    {
-                        DeployOutputLogger?.LogInformation($"Firmware package '{osVersion}' downloaded");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    DeployOutputLogger?.Log($"Unable to download package '{osVersion}': {ex.Message}{Environment.NewLine}Ensure you have an active internet connection.");
-                }
-                finally
-                {
-                    collection.DownloadProgress -= Firmware_DownloadProgress;
-                }
-                */
-
-                var includePdbs = configuredProject?.ProjectConfiguration?.Dimensions["Configuration"].Contains("Debug");
-
-                var packageManager = new PackageManager(fileManager);
-
-                await AppManager.DeployApplication(packageManager, MeadowConnection, folder, includePdbs.HasValue && includePdbs.Value, false, DeployOutputLogger, cancellationToken);
-            }
-            finally
-            {
-                MeadowConnection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
-                MeadowConnection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
-            }
-        }
-
-        private async void MeadowConnection_DeviceMessageReceived(object sender, (string message, string source) e)
-        {
-            await DeployOutputLogger?.ReportDeviceMessage(e.source, e.message);
-        }
-
-        private async void Firmware_DownloadProgress(object sender, long e)
-        {
-            await DeployOutputLogger?.ReportDownloadProgress(osVersion, e);
+            _ = DeployOutputLogger.ReportDownloadProgress(osVersion, e);
         }
 
         private async void MeadowConnection_DeploymentProgress(object sender, (string fileName, long completed, long total) e)
         {
-            var p = (uint)((e.completed / (double)e.total) * 100d);
+            var p = (uint)(e.completed / (double)e.total * 100d);
 
             await DeployOutputLogger?.ReportFileProgress(e.fileName, p);
 
@@ -263,18 +155,8 @@ namespace Meadow
             }
         }
 
-        public bool IsDeploySupported
-        {
-            get { return isDeploySupported; }
-        }
-
         public async void Commit()
         {
-            if (!MeadowPackage.DebugOrDeployInProgress)
-                return;
-
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
             await DeployOutputLogger?.ShowMeadowLogs();
             DeployOutputLogger?.Log("Launching application..." + Environment.NewLine);
 
@@ -291,19 +173,17 @@ namespace Meadow
 
         private async Task<bool> IsMeadowApp()
         {
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
             // Assume configuredProject is your ConfiguredProject object
             var properties = configuredProject.Services.ProjectPropertiesProvider.GetCommonProperties();
 
             // We unfortunately still need to retrieve the AssemblyName property because we need both
             // the configuredProject to be a start-up project, but also an App (not library)
             string assemblyName = await properties.GetEvaluatedPropertyValueAsync("AssemblyName");
+
             if (!string.IsNullOrEmpty(assemblyName) && assemblyName.Equals("App", StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
-
             return false;
         }
     }

@@ -1,14 +1,10 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
-
-using Microsoft.VisualStudio;
-using EnvDTE;
-using System.Net;
-using Microsoft.Extensions.Logging;
+using System;
+using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Meadow
@@ -87,10 +83,7 @@ namespace Meadow
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 lock (_lck)
                 {
-                    if (textWriter != null)
-                    {
-                        textWriter.Write(message);
-                    }
+                    textWriter?.Write(message);
                 }
             }
             catch (Exception ex)
@@ -117,7 +110,7 @@ namespace Meadow
             Log(message);
         }
 
-        internal async System.Threading.Tasks.Task ShowMeadowLogs()
+        internal async Task ShowMeadowLogs()
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             meadowOutputPane?.Activate();

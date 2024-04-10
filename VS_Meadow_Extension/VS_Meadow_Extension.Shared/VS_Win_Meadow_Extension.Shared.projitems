@@ -20,7 +20,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs">
     </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)MeadowProvider.cs">
+    <Compile Include="$(MSBuildThisFileDirectory)MeadowConnection.cs">
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MeadowSoftDebuggerSession.cs">
     </Compile>
