@@ -1,10 +1,4 @@
-﻿using System;
-using System.ComponentModel.Composition;
-using System.IO;
-using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
-using Meadow.CLI;
+﻿using Meadow.CLI;
 using Meadow.Hcom;
 using Meadow.Package;
 using Meadow.Software;
@@ -12,6 +6,11 @@ using Meadow.Utility;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Build;
 using Microsoft.VisualStudio.Shell;
+using System;
+using System.ComponentModel.Composition;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
 
 namespace Meadow
@@ -68,7 +67,7 @@ namespace Meadow
         [Import]
         private ProjectProperties Properties { get; set; }
 
-        private ConfiguredProject configuredProject;
+        private readonly ConfiguredProject configuredProject;
 
         const string MeadowSDKVersion = "Sdk=\"Meadow.Sdk/1.1.0\"";
 
@@ -238,6 +237,7 @@ namespace Meadow
             finally
             {
                 MeadowConnection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
+                MeadowConnection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
             }
         }
 
