@@ -4,6 +4,10 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+### 1.9.7
+
+- Add extra check to re-enable the runtime, if it isn't enabled after deployment.
+
 ### 1.9.6
 
 - Do IsMeadowApp check earlier to avoid deployment of wrong project types
