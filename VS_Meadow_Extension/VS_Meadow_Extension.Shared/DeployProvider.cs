@@ -92,6 +92,14 @@ namespace Meadow
 
                 throw ex;
             }
+            finally
+            {
+                var running = await Meadow.GetMonoRunState(cts);
+                if (!running)
+                {
+					await Meadow?.MonoEnable(true, cts);
+				}
+            }
 
             return false;
         }
