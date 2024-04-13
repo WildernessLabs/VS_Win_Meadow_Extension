@@ -12,7 +12,7 @@ namespace Meadow
 
         internal static IMeadowConnection GetCurrentConnection()
         {
-            var route = MeadowPackage.SettingsManager.GetSetting(SettingsManager.PublicSettings.Route);
+            var route = new SettingsManager().GetSetting(SettingsManager.PublicSettings.Route);
 
             if (meadowConnection != null &&
                 meadowConnection.Name == route)

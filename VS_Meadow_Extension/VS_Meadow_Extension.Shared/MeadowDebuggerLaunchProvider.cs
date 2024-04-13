@@ -58,7 +58,7 @@ namespace Meadow
             var connection = MeadowConnection.GetCurrentConnection();
 
             if (!launchOptions.HasFlag(DebugLaunchOptions.NoDebug)
-                && await IsMeadowApp()
+                && await IsProjectAMeadowApp()
                 && connection != null)
             {
                 MeadowPackage.DebugOrDeployInProgress = true;
@@ -85,21 +85,16 @@ namespace Meadow
 
         public Task OnBeforeLaunchAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile) => Task.CompletedTask;
 
-        public Task OnAfterLaunchAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
+        public async Task OnAfterLaunchAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
         {
             if (vsSession != null)
             {
                 vsSession.Start();
                 MeadowPackage.DebugOrDeployInProgress = false;
 
-                _ = Task.Run(async () =>
-                {
-                    await Task.Delay(10000);
-                    await DeployProvider.DeployOutputLogger?.ShowMeadowLogs();
-                });
+                await Task.Delay(10000);
+                await DeployProvider.DeployOutputLogger?.ShowMeadowLogs();
             }
-
-            return Task.CompletedTask;
         }
 
         bool IDebugLauncher.StartDebugger(SoftDebuggerSession session, StartInfo startInfo)
@@ -108,16 +103,17 @@ namespace Meadow
             return true;
         }
 
-        private async Task<bool> IsMeadowApp()
+        private async Task<bool> IsProjectAMeadowApp()
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
             // Assume configuredProject is your ConfiguredProject object
             var properties = configuredProject.Services.ProjectPropertiesProvider.GetCommonProperties();
 
-            // We unfortunately still need to retrieve the AssemblyName property because we need both
-            // the configuredProject to be a start-up project, but also an App (not library)
+            // We need to retrieve the AssemblyName property because we need both
+            // the configuredProject to be a start-up project, and also an App (not library)
             string assemblyName = await properties.GetEvaluatedPropertyValueAsync("AssemblyName");
+
             if (!string.IsNullOrEmpty(assemblyName) && assemblyName.Equals("App", StringComparison.OrdinalIgnoreCase))
             {
                 return true;

@@ -1,16 +1,14 @@
-﻿using System;
+﻿using Meadow.CLI;
+using Meadow.CLI.Commands.DeviceManagement;
+using Microsoft.VisualStudio.Shell;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
-using Microsoft.VisualStudio.Shell;
-
-using Meadow.Helpers;
-using System.Collections.Generic;
-using System.Net.NetworkInformation;
-using Meadow.CLI.Commands.DeviceManagement;
-using Meadow.CLI;
 
 namespace Meadow
 {
@@ -41,19 +39,18 @@ namespace Meadow
 
         public static bool DebugOrDeployInProgress { get; set; } = false;
 
-		internal static SettingsManager SettingsManager { get; set; } = new SettingsManager();
+        private static SettingsManager SettingsManager { get; set; } = new SettingsManager();
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="MeadowPackage"/> class.
-		/// </summary>
-		public MeadowPackage()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MeadowPackage"/> class.
+        /// </summary>
+        public MeadowPackage()
         {
             // Inside this method you can place any initialization code that does not require
             // any Visual Studio service because at this point the package object is created but
             // not sited yet inside Visual Studio environment. The place to do all the other
             // initialization is the Initialize method.
         }
-
 
         #region Package Members
 
@@ -107,7 +104,7 @@ namespace Meadow
                             string deviceTarget = string.Empty;
 
                             var route = SettingsManager.GetSetting(SettingsManager.PublicSettings.Route);
-							bool IsSavedValueInPortList = IsValueInPortList(portList, route);
+                            bool IsSavedValueInPortList = IsValueInPortList(portList, route);
                             if (IsSavedValueInPortList)
                             {
                                 deviceTarget = route;
@@ -196,7 +193,7 @@ namespace Meadow
 
         private void SaveDeviceChoiceToSettings(string newChoice)
         {
-			SettingsManager.SaveSetting(SettingsManager.PublicSettings.Route, newChoice);
+            SettingsManager.SaveSetting(SettingsManager.PublicSettings.Route, newChoice);
         }
 
         private async Task InstallDependencies()

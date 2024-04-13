@@ -20,7 +20,7 @@ namespace Meadow
         public static OutputLogger DeployOutputLogger = new OutputLogger();
 
         /// <summary>
-        /// Provides access to the project's properties.
+        /// Provides access to the project's properties
         /// </summary>
         [Import]
         private ProjectProperties Properties { get; set; }
@@ -29,7 +29,16 @@ namespace Meadow
 
         const string MeadowSDKVersion = "Sdk=\"Meadow.Sdk/1.1.0\"";
 
-        public bool IsDeploySupported { get; private set; } = true;
+        public bool IsDeploySupported
+        {
+            get
+            {
+                return true;
+
+                //  IsProjectAMeadowApp().ContinueWith(t => IsDeploySupported = t.Result);
+            }
+
+        }
 
         private readonly string osVersion;
 
@@ -37,13 +46,13 @@ namespace Meadow
         public DeployProvider(ConfiguredProject configuredProject)
         {
             this.configuredProject = configuredProject;
-
-            //  _ = IsMeadowApp().ContinueWith(t => IsDeploySupported = t.Result);
         }
 
-        public async Task DeployAsync(CancellationToken cts, TextWriter outputPaneWriter)
+        private bool eventSubscribed = false;
+
+        public async Task DeployAsync(CancellationToken cancellationToken, TextWriter textWriter)
         {
-            if (await IsMeadowApp() == false)
+            if (await IsProjectAMeadowApp() == false)
             {
                 return;
             }
@@ -60,7 +69,7 @@ namespace Meadow
                 return;
             }
 
-            await DeployOutputLogger?.ConnectTextWriter(outputPaneWriter);
+            await DeployOutputLogger?.ConnectTextWriter(textWriter);
 
             var outputPath = await GetOutputPath(filename);
 
@@ -70,13 +79,8 @@ namespace Meadow
                 return;
             }
 
-            await DeployMeadowApp(outputPath, new OutputPaneWriter(outputPaneWriter), cts);
-        }
+            var outputPaneWriter = new OutputPaneWriter(textWriter);
 
-        private bool eventSubscribed = false;
-
-        async Task DeployMeadowApp(string folder, IOutputPaneWriter outputPaneWriter, CancellationToken cancellationToken)
-        {
             var meadowConnection = MeadowConnection.GetCurrentConnection();
 
             meadowConnection.FileWriteProgress += MeadowConnection_DeploymentProgress;
@@ -98,9 +102,9 @@ namespace Meadow
 
                 var packageManager = new PackageManager(fileManager);
 
-                await packageManager.TrimApplication(new FileInfo(Path.Combine(folder, "App.dll")), includePdbs, cancellationToken: cancellationToken);
+                await packageManager.TrimApplication(new FileInfo(Path.Combine(outputPath, "App.dll")), includePdbs, cancellationToken: cancellationToken);
 
-                await AppManager.DeployApplication(packageManager, meadowConnection, folder, includePdbs, false, DeployOutputLogger, cancellationToken);
+                await AppManager.DeployApplication(packageManager, meadowConnection, outputPath, includePdbs, false, DeployOutputLogger, cancellationToken);
             }
             finally
             {
@@ -145,7 +149,7 @@ namespace Meadow
 
         private async void MeadowConnection_DeploymentProgress(object sender, (string fileName, long completed, long total) e)
         {
-            var p = (uint)(e.completed / (double)e.total * 100d);
+            var p = (uint)(e.completed / e.total * 100d);
 
             await DeployOutputLogger?.ReportFileProgress(e.fileName, p);
 
@@ -171,16 +175,17 @@ namespace Meadow
             Console.Write("Rolling Back");
         }
 
-        private async Task<bool> IsMeadowApp()
+        private async Task<bool> IsProjectAMeadowApp()
         {
             // Assume configuredProject is your ConfiguredProject object
             var properties = configuredProject.Services.ProjectPropertiesProvider.GetCommonProperties();
 
-            // We unfortunately still need to retrieve the AssemblyName property because we need both
-            // the configuredProject to be a start-up project, but also an App (not library)
+            // We need to retrieve the AssemblyName property because we need both
+            // the configuredProject to be a start-up project, and also an App (not library)
             string assemblyName = await properties.GetEvaluatedPropertyValueAsync("AssemblyName");
 
-            if (!string.IsNullOrEmpty(assemblyName) && assemblyName.Equals("App", StringComparison.OrdinalIgnoreCase))
+            if (!string.IsNullOrEmpty(assemblyName) &&
+                assemblyName.Equals("App", StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }

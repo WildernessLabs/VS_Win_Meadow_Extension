@@ -1,20 +1,17 @@
-﻿using System.Threading;
-
+﻿using Meadow.Hcom;
+using Microsoft.Extensions.Logging;
 using Mono.Debugging.Client;
 using Mono.Debugging.Soft;
-using Meadow.Hcom;
-using System;
-using Microsoft.Build.Utilities;
-using Microsoft.Extensions.Logging;
+using System.Threading;
 
 namespace Meadow
 {
     class MeadowSoftDebuggerSession : SoftDebuggerSession
     {
-        CancellationTokenSource meadowDebugCancelTokenSource;
+        readonly CancellationTokenSource meadowDebugCancelTokenSource;
         DebuggingServer meadowDebugServer;
         IMeadowConnection meadow;
-        private ILogger logger;
+        private readonly ILogger logger;
 
         public MeadowSoftDebuggerSession(IMeadowConnection meadow, ILogger deployOutputLogger)
         {
@@ -44,7 +41,9 @@ namespace Meadow
         protected override async void OnExit()
         {
             if (!meadowDebugCancelTokenSource.IsCancellationRequested)
+            {
                 meadowDebugCancelTokenSource?.Cancel();
+            }
 
             if (meadowDebugServer != null)
             {
