@@ -81,19 +81,28 @@ namespace Meadow
 
             var outputPaneWriter = new OutputPaneWriter(textWriter);
 
-            var meadowConnection = MeadowConnection.GetCurrentConnection();
+            var connection = MeadowConnection.GetCurrentConnection();
 
-            meadowConnection.FileWriteProgress += MeadowConnection_DeploymentProgress;
+            connection.FileWriteProgress += MeadowConnection_DeploymentProgress;
 
             if (eventSubscribed == false)
             {
-                meadowConnection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
+                connection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
                 eventSubscribed = true;
             }
 
             try
             {
-                await meadowConnection.WaitForMeadowAttach();
+                await connection.WaitForMeadowAttach();
+
+                if (await connection.IsRuntimeEnabled() == true)
+                {
+                    await connection.RuntimeDisable();
+                }
+
+                var deviceInfo = await connection.GetDeviceInfo();
+
+                string osVersion = deviceInfo.OsVersion;
 
                 var fileManager = new FileManager(null);
                 await fileManager.Refresh();
@@ -102,14 +111,16 @@ namespace Meadow
 
                 var packageManager = new PackageManager(fileManager);
 
-                await packageManager.TrimApplication(new FileInfo(Path.Combine(outputPath, "App.dll")), includePdbs, cancellationToken: cancellationToken);
+                await packageManager.TrimApplication(new FileInfo(Path.Combine(outputPath, "App.dll")), osVersion, includePdbs, cancellationToken: cancellationToken);
 
-                await AppManager.DeployApplication(packageManager, meadowConnection, outputPath, includePdbs, false, DeployOutputLogger, cancellationToken);
+                await Task.Run(async () => await AppManager.DeployApplication(packageManager, connection, osVersion, outputPath, includePdbs, false, DeployOutputLogger, cancellationToken));
+
+                await connection.RuntimeEnable();
             }
             finally
             {
-                meadowConnection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
-                //meadowConnection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
+                connection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
+                //connection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
             }
         }
 
@@ -142,13 +153,13 @@ namespace Meadow
             _ = DeployOutputLogger.ReportDeviceMessage(e.source, e.message);
         }
 
-        private void Firmware_DownloadProgress(object sender, long e)
-        {
-            _ = DeployOutputLogger.ReportDownloadProgress(osVersion, e);
-        }
-
         private async void MeadowConnection_DeploymentProgress(object sender, (string fileName, long completed, long total) e)
         {
+            if (e.total == 0)
+            {
+                return;
+            }
+
             var p = (uint)(e.completed / e.total * 100d);
 
             await DeployOutputLogger?.ReportFileProgress(e.fileName, p);
