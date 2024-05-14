@@ -26,7 +26,7 @@ namespace Meadow
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 if (meadowOutputPane == null)
                 {
-                    IVsOutputWindow outputWindow = Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
+                    IVsOutputWindow outputWindow = Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
                     if (outputWindow != null)
                     {
                         //check if the meadowOutputPane already exists, there can be only 1
@@ -47,7 +47,7 @@ namespace Meadow
                 // Activate the pane, it should have been created by now
                 await ShowMeadowLogs();
 
-                statusBar = Package.GetGlobalService(typeof(SVsStatusbar)) as IVsStatusbar;
+                statusBar = Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(SVsStatusbar)) as IVsStatusbar;
             });
         }
 
