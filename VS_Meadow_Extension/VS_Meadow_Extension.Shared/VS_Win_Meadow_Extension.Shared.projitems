@@ -30,7 +30,7 @@
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MeadowPackage.cs">
     </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)MeadowDeployProvider.cs">
+    <Compile Include="$(MSBuildThisFileDirectory)DeployProvider.cs">
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Globals.cs">
     </Compile>

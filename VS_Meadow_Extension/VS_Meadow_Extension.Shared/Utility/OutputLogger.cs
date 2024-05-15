@@ -136,12 +136,16 @@ namespace Meadow
             statusBar?.SetText($"Downloading OsVersion: {osVersion}; Bytes Received {byteReceived}");
         }
 
-        internal async Task ReportDeviceMessage(string source, string message)
+        internal async Task ReportDeviceMessage(string message)
         {
             try
             {
-                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                meadowOutputPane?.OutputStringThreadSafe(message + Environment.NewLine);
+                //check and see if the message ends with a newline, if not add one
+                if (!message.EndsWith("\n"))
+                {
+                    message += Environment.NewLine;
+                }
+                meadowOutputPane?.OutputStringThreadSafe(message);
             }
             catch (Exception ex)
             {

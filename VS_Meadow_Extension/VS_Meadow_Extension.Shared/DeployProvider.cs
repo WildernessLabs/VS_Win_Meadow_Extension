@@ -15,9 +15,9 @@ namespace Meadow
 {
     [Export(typeof(IDeployProvider))]
     [AppliesTo(Globals.MeadowCapability)]
-    internal class DeployProvider : IDeployProvider
+    internal class MeadowDeployProvider : IDeployProvider
     {
-        public static OutputLogger DeployOutputLogger = new OutputLogger();
+        static readonly OutputLogger outputLogger = OutputLogger.Instance;
 
         /// <summary>
         /// Provides access to the project's properties
@@ -43,7 +43,7 @@ namespace Meadow
         private readonly string osVersion;
 
         [ImportingConstructor]
-        public DeployProvider(ConfiguredProject configuredProject)
+        public MeadowDeployProvider(ConfiguredProject configuredProject)
         {
             this.configuredProject = configuredProject;
         }
@@ -69,7 +69,7 @@ namespace Meadow
                 return;
             }
 
-            await DeployOutputLogger?.ConnectTextWriter(textWriter);
+            await outputLogger?.ConnectTextWriter(textWriter);
 
             var outputPath = await GetOutputPath(filename);
 
@@ -113,14 +113,16 @@ namespace Meadow
 
                 await packageManager.TrimApplication(new FileInfo(Path.Combine(outputPath, "App.dll")), osVersion, includePdbs, cancellationToken: cancellationToken);
 
-                await Task.Run(async () => await AppManager.DeployApplication(packageManager, connection, osVersion, outputPath, includePdbs, false, DeployOutputLogger, cancellationToken));
+                await Task.Run(async () => await AppManager.DeployApplication(packageManager, connection, osVersion, outputPath, includePdbs, false, outputLogger, cancellationToken));
 
                 await connection.RuntimeEnable();
+
+                await Task.Delay(2000);
             }
             finally
             {
                 connection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
-                //connection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
+                //    connection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
             }
         }
 
@@ -145,12 +147,12 @@ namespace Meadow
         private static void DeployFailed()
         {
             MeadowPackage.DebugOrDeployInProgress = false;
-            DeployOutputLogger?.Log("Deploy failed - please reset Meadow and try again");
+            outputLogger?.Log("Deploy failed - please reset Meadow and try again");
         }
 
         private void MeadowConnection_DeviceMessageReceived(object sender, (string message, string source) e)
         {
-            _ = DeployOutputLogger.ReportDeviceMessage(e.source, e.message);
+            _ = outputLogger.ReportDeviceMessage(e.message);
         }
 
         private async void MeadowConnection_DeploymentProgress(object sender, (string fileName, long completed, long total) e)
@@ -162,20 +164,20 @@ namespace Meadow
 
             var p = (uint)(e.completed / e.total * 100d);
 
-            await DeployOutputLogger?.ReportFileProgress(e.fileName, p);
+            await outputLogger?.ReportFileProgress(e.fileName, p);
 
             if (p == 100)
             {
-                await DeployOutputLogger?.ResetProgressBar();
+                await outputLogger?.ResetProgressBar();
             }
         }
 
         public async void Commit()
         {
-            await DeployOutputLogger?.ShowMeadowLogs();
-            DeployOutputLogger?.Log("Launching application..." + Environment.NewLine);
+            await outputLogger?.ShowMeadowLogs();
+            outputLogger?.Log("Launching application..." + Environment.NewLine);
 
-            DeployOutputLogger?.DisconnectTextWriter();
+            outputLogger?.DisconnectTextWriter();
 
             MeadowPackage.DebugOrDeployInProgress = false;
         }
