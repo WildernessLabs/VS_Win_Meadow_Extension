@@ -17,9 +17,11 @@ namespace Meadow
         private IVsStatusbar statusBar;
         private uint progressBarCookie = 0;
         private const uint TOTAL_PROGRESS = 100;
-        private readonly object _lck = new object();
+        private readonly object _lock = new object();
 
-        public OutputLogger()
+        public static OutputLogger Instance { get; } = new OutputLogger();
+
+        private OutputLogger()
         {
             _ = Task.Run(async () =>
             {
@@ -51,7 +53,7 @@ namespace Meadow
             });
         }
 
-        public async System.Threading.Tasks.Task ConnectTextWriter(TextWriter writer)
+        public async Task ConnectTextWriter(TextWriter writer)
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             textWriter = writer;
@@ -62,7 +64,7 @@ namespace Meadow
 
         public void DisconnectTextWriter()
         {
-            lock (_lck)
+            lock (_lock)
             {
                 if (textWriter != null)
                 {
@@ -81,7 +83,7 @@ namespace Meadow
             try
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                lock (_lck)
+                lock (_lock)
                 {
                     textWriter?.Write(message);
                 }
