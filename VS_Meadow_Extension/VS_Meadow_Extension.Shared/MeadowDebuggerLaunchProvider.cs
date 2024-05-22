@@ -40,6 +40,10 @@ namespace Meadow
 
         public bool SupportsProfile(ILaunchProfile profile) => true; // FIXME: Would we ever not?
 
+        private readonly int DebugPort = 55898;
+
+        static readonly OutputLogger outputLogger = OutputLogger.Instance;
+
         [ImportingConstructor]
         public MeadowDebuggerLaunchProvider(ConfiguredProject configuredProj)
         {
@@ -53,7 +57,7 @@ namespace Meadow
         {
             // TODO DeployProvider.MeadowConnection?.Dispose();
 
-            //var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger: DeployProvider.DeployOutputLogger);
+            //var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger: DeployProvider.outputLogger);
 
             var connection = MeadowConnection.GetCurrentConnection();
 
@@ -63,16 +67,16 @@ namespace Meadow
             {
                 MeadowPackage.DebugOrDeployInProgress = true;
 
-                var meadowSession = new MeadowSoftDebuggerSession(connection, DeployProvider.DeployOutputLogger);
+                var meadowSession = new MeadowSoftDebuggerSession(connection, outputLogger);
 
-                var startArgs = new SoftDebuggerConnectArgs(profile.Name, IPAddress.Loopback, 55898);
+                var startArgs = new SoftDebuggerConnectArgs(profile.Name, IPAddress.Loopback, DebugPort);
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 var startInfo = new StartInfo(startArgs, debuggingOptions, VsHierarchy.GetProject());
 
                 var sessionInfo = new SessionMarshalling(meadowSession, startInfo);
-                vsSession = new DebuggerSession(startInfo, DeployProvider.DeployOutputLogger, meadowSession, this);
+                vsSession = new DebuggerSession(startInfo, outputLogger, meadowSession, this);
 
-                var settings = new MonoDebugLaunchSettings(launchOptions, sessionInfo);
+                var settings = new MeadowDebugLaunchSettings(launchOptions, sessionInfo);
 
                 return new[] { settings };
             }
@@ -92,11 +96,7 @@ namespace Meadow
                 vsSession.Start();
                 MeadowPackage.DebugOrDeployInProgress = false;
 
-                _ = Task.Run(async () =>
-                {
-                    await Task.Delay(10000);
-                    await DeployProvider.DeployOutputLogger?.ShowMeadowLogs();
-                });
+                await OutputLogger.Instance.ShowMeadowLogs();
             }
         }
 
