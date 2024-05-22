@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Meadow
 {
@@ -152,18 +149,18 @@ namespace Meadow
 
         IntPtr _handle = IntPtr.Zero;
         bool _isClosed = false;
-        ushort _blockTransferSize = 0;
+        readonly ushort _blockTransferSize = 0;
 
         // attributes
-        bool _isDownloadCapable = false;
-        bool _isUploadCapable = false;
-        bool _isWillDetach = false;
-        bool _isManifestationTolerant = false;
-        bool _isStCanAccelerate = false;
+        readonly bool _isDownloadCapable = false;
+        readonly bool _isUploadCapable = false;
+        readonly bool _isWillDetach = false;
+        readonly bool _isManifestationTolerant = false;
+        readonly bool _isStCanAccelerate = false;
 
-        byte _downloadCommandSetAddressPointer = 0x21;
-        byte _downloadCommandErase = 0x41;
-        byte _downloadCommandReadUnprotect = 0x92;
+        readonly byte _downloadCommandSetAddressPointer = 0x21;
+        readonly byte _downloadCommandErase = 0x41;
+        readonly byte _downloadCommandReadUnprotect = 0x92;
 
         // NOTE: STDFU_GetDFUDescriptor_Proxy handles the scenario where STDFU_GetDFUDescriptor never returns.
         uint STDFU_GetDFUDescriptor_Proxy(

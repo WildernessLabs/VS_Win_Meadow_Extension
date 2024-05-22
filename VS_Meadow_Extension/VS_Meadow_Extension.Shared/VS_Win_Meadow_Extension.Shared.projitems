@@ -40,8 +40,6 @@
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Utility\OutputLogger.cs">
     </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)SerialDevice.cs">
-    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)STDfuDevice.cs">
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Utility\OutputPaneWriter.cs">

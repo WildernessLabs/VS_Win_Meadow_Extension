@@ -13,6 +13,8 @@ namespace Meadow
         IMeadowConnection connection;
         private readonly ILogger logger;
 
+        private readonly OutputLogger outputLogger = OutputLogger.Instance;
+
         public MeadowSoftDebuggerSession(IMeadowConnection connection, ILogger deployOutputLogger)
         {
             this.connection = connection;
@@ -28,14 +30,14 @@ namespace Meadow
 
             meadowDebugServer = await connection.StartDebuggingSession(port, logger, meadowDebugCancelTokenSource.Token);
 
-            connection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
-
             base.OnRun(startInfo);
         }
 
         private void MeadowConnection_DeviceMessageReceived(object sender, (string message, string source) e)
         {
-            logger.LogInformation($"{e.message}");
+            //logger.LogInformation($"{e.message}");
+            //outputLogger.Log($"{e.message}");
+            _ = outputLogger.ReportDeviceMessage(e.message);
         }
 
         protected override async void OnExit()
