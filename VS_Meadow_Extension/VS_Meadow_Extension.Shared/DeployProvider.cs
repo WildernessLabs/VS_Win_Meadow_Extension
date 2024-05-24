@@ -83,10 +83,9 @@ namespace Meadow
 
             var connection = MeadowConnection.GetCurrentConnection();
 
-            connection.FileWriteProgress += MeadowConnection_DeploymentProgress;
-
             if (eventSubscribed == false)
             {
+                connection.FileWriteProgress += MeadowConnection_DeploymentProgress;
                 connection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
                 eventSubscribed = true;
             }
@@ -117,12 +116,12 @@ namespace Meadow
 
                 await connection.RuntimeEnable();
 
-                await Task.Delay(2000);
+                //   await Task.Delay(2000);
             }
             finally
             {
-                connection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
-                //    connection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
+                // connection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
+                // connection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
             }
         }
 
