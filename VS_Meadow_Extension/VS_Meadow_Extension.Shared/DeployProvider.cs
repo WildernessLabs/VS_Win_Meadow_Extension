@@ -1,7 +1,6 @@
 ﻿using Meadow.CLI;
 using Meadow.Package;
 using Meadow.Software;
-using Meadow.Utility;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Build;
 using System;
@@ -71,15 +70,13 @@ namespace Meadow
 
             await outputLogger?.ConnectTextWriter(textWriter);
 
-            var outputPath = await GetOutputPath(filename);
+            var outputPath = await GetOutputPathAsync(filename);
 
             if (string.IsNullOrEmpty(outputPath))
             {
                 DeployFailed();
                 return;
             }
-
-            var outputPaneWriter = new OutputPaneWriter(textWriter);
 
             var connection = MeadowConnection.GetCurrentConnection();
 
@@ -123,7 +120,7 @@ namespace Meadow
             }
         }
 
-        private async Task<string> GetOutputPath(string filename)
+        private async Task<string> GetOutputPathAsync(string filename)
         {
             var generalProperties = await Properties.GetConfigurationGeneralPropertiesAsync();
 
