@@ -102,7 +102,7 @@ namespace Meadow
 
         bool IDebugLauncher.StartDebugger(SoftDebuggerSession session, StartInfo startInfo)
         {
-            // nop here because VS is responseable for starting us and then calling On*LaunchAsync above
+            // nop here because VS is responseable for starting us and then calling OnLaunchAsync above
             return true;
         }
 

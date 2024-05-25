@@ -115,8 +115,6 @@ namespace Meadow
                 await Task.Run(async () => await AppManager.DeployApplication(packageManager, connection, osVersion, outputPath, includePdbs, false, outputLogger, cancellationToken));
 
                 await connection.RuntimeEnable();
-
-                //   await Task.Delay(2000);
             }
             finally
             {

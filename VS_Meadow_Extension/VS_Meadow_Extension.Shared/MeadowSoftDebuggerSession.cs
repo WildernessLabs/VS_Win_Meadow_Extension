@@ -10,7 +10,7 @@ namespace Meadow
     {
         readonly CancellationTokenSource meadowDebugCancelTokenSource;
         DebuggingServer meadowDebugServer;
-        IMeadowConnection connection;
+        readonly IMeadowConnection connection;
         private readonly ILogger logger;
 
         private readonly OutputLogger outputLogger = OutputLogger.Instance;
@@ -33,13 +33,6 @@ namespace Meadow
             base.OnRun(startInfo);
         }
 
-        private void MeadowConnection_DeviceMessageReceived(object sender, (string message, string source) e)
-        {
-            //logger.LogInformation($"{e.message}");
-            //outputLogger.Log($"{e.message}");
-            _ = outputLogger.ReportDeviceMessage(e.message);
-        }
-
         protected override async void OnExit()
         {
             if (!meadowDebugCancelTokenSource.IsCancellationRequested)
@@ -52,13 +45,6 @@ namespace Meadow
                 await meadowDebugServer.StopListening();
                 meadowDebugServer.Dispose();
                 meadowDebugServer = null;
-            }
-
-            if (connection != null)
-            {
-                connection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
-                connection.Dispose();
-                connection = null;
             }
 
             base.OnExit();
