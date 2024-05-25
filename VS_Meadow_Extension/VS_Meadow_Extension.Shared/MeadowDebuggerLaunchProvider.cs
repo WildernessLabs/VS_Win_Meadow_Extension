@@ -13,8 +13,6 @@ using System.Threading.Tasks;
 
 namespace Meadow
 {
-    using DebuggerSession = Mono.Debugging.VisualStudio.DebuggerSession;
-
     [Export(typeof(IDebugProfileLaunchTargetsProvider))]
     [AppliesTo(Globals.MeadowCapability)]
     [Order(999)]
@@ -45,20 +43,16 @@ namespace Meadow
         static readonly OutputLogger outputLogger = OutputLogger.Instance;
 
         [ImportingConstructor]
-        public MeadowDebuggerLaunchProvider(ConfiguredProject configuredProj)
+        public MeadowDebuggerLaunchProvider(ConfiguredProject configuredProject)
         {
-            this.configuredProject = configuredProj;
+            this.configuredProject = configuredProject;
 
             vsHierarchies = new OrderPrecedenceImportCollection<IVsHierarchy>(
-                projectCapabilityCheckProvider: configuredProj);
+                projectCapabilityCheckProvider: configuredProject);
         }
 
         public async Task<IReadOnlyList<IDebugLaunchSettings>> QueryDebugTargetsAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
         {
-            // TODO DeployProvider.MeadowConnection?.Dispose();
-
-            //var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger: DeployProvider.outputLogger);
-
             var connection = MeadowConnection.GetCurrentConnection();
 
             if (!launchOptions.HasFlag(DebugLaunchOptions.NoDebug)

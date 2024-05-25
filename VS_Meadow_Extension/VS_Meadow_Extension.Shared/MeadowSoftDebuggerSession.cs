@@ -2,18 +2,20 @@
 using Microsoft.Extensions.Logging;
 using Mono.Debugging.Client;
 using Mono.Debugging.Soft;
+using System;
 using System.Threading;
 
 namespace Meadow
 {
-    class MeadowSoftDebuggerSession : SoftDebuggerSession
+    class MeadowSoftDebuggerSession : SoftDebuggerSession, IDisposable
     {
-        readonly CancellationTokenSource meadowDebugCancelTokenSource;
-        DebuggingServer meadowDebugServer;
-        readonly IMeadowConnection connection;
+        private readonly CancellationTokenSource meadowDebugCancelTokenSource;
+        private DebuggingServer meadowDebugServer;
+        private readonly IMeadowConnection connection;
         private readonly ILogger logger;
 
         private readonly OutputLogger outputLogger = OutputLogger.Instance;
+        private bool disposed = false;
 
         public MeadowSoftDebuggerSession(IMeadowConnection connection, ILogger deployOutputLogger)
         {
@@ -24,30 +26,66 @@ namespace Meadow
 
         protected override async void OnRun(DebuggerStartInfo startInfo)
         {
-            var meadowStartInfo = startInfo as SoftDebuggerStartInfo;
-            var connectArgs = meadowStartInfo.StartArgs as SoftDebuggerConnectArgs;
-            var port = connectArgs?.DebugPort ?? 0;
+            try
+            {
+                var meadowStartInfo = startInfo as SoftDebuggerStartInfo;
+                var connectArgs = meadowStartInfo?.StartArgs as SoftDebuggerConnectArgs;
+                var port = connectArgs?.DebugPort ?? 0;
 
-            meadowDebugServer = await connection.StartDebuggingSession(port, logger, meadowDebugCancelTokenSource.Token);
+                meadowDebugServer = await connection.StartDebuggingSession(port, logger, meadowDebugCancelTokenSource.Token);
 
-            base.OnRun(startInfo);
+                base.OnRun(startInfo);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to start debugging session");
+                throw;
+            }
         }
 
         protected override async void OnExit()
         {
-            if (!meadowDebugCancelTokenSource.IsCancellationRequested)
+            try
             {
-                meadowDebugCancelTokenSource?.Cancel();
-            }
+                if (!meadowDebugCancelTokenSource.IsCancellationRequested)
+                {
+                    meadowDebugCancelTokenSource.Cancel();
+                }
 
-            if (meadowDebugServer != null)
+                if (meadowDebugServer != null)
+                {
+                    await meadowDebugServer.StopListening();
+                    meadowDebugServer.Dispose();
+                    meadowDebugServer = null;
+                }
+
+                base.OnExit();
+            }
+            catch (Exception ex)
             {
-                await meadowDebugServer.StopListening();
-                meadowDebugServer.Dispose();
-                meadowDebugServer = null;
+                logger.LogError(ex, "Failed to stop debugging session");
+                throw;
             }
+        }
 
-            base.OnExit();
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    meadowDebugCancelTokenSource?.Dispose();
+                    meadowDebugServer?.Dispose();
+                }
+
+                disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }
