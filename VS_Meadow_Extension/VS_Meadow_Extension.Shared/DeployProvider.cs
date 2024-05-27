@@ -36,8 +36,9 @@ namespace Meadow
 
                 //  IsProjectAMeadowApp().ContinueWith(t => IsDeploySupported = t.Result);
             }
-
         }
+
+        static Hcom.IMeadowConnection connection = null;
 
         private readonly string osVersion;
 
@@ -47,8 +48,6 @@ namespace Meadow
             this.configuredProject = configuredProject;
         }
 
-        private bool eventSubscribed = false;
-
         public async Task DeployAsync(CancellationToken cancellationToken, TextWriter textWriter)
         {
             if (await IsProjectAMeadowApp() == false)
@@ -56,7 +55,7 @@ namespace Meadow
                 return;
             }
 
-            MeadowPackage.DebugOrDeployInProgress = true;
+            Globals.DebugOrDeployInProgress = true;
 
             var filename = configuredProject.UnconfiguredProject.FullPath;
 
@@ -78,14 +77,16 @@ namespace Meadow
                 return;
             }
 
-            var connection = MeadowConnection.GetCurrentConnection();
-
-            if (eventSubscribed == false)
+            if (connection != null)
             {
-                connection.FileWriteProgress += MeadowConnection_DeploymentProgress;
-                connection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
-                eventSubscribed = true;
+                connection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
+                connection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
             }
+
+            connection = MeadowConnection.GetCurrentConnection();
+
+            connection.FileWriteProgress += MeadowConnection_DeploymentProgress;
+            connection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
 
             try
             {
@@ -115,8 +116,6 @@ namespace Meadow
             }
             finally
             {
-                // connection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
-                // connection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
             }
         }
 
@@ -140,16 +139,16 @@ namespace Meadow
 
         private static void DeployFailed()
         {
-            MeadowPackage.DebugOrDeployInProgress = false;
+            Globals.DebugOrDeployInProgress = false;
             outputLogger?.Log("Deploy failed - please reset Meadow and try again");
         }
 
-        private void MeadowConnection_DeviceMessageReceived(object sender, (string message, string source) e)
+        private static void MeadowConnection_DeviceMessageReceived(object sender, (string message, string source) e)
         {
             _ = outputLogger.ReportDeviceMessage(e.message);
         }
 
-        private async void MeadowConnection_DeploymentProgress(object sender, (string fileName, long completed, long total) e)
+        private static async void MeadowConnection_DeploymentProgress(object sender, (string fileName, long completed, long total) e)
         {
             if (e.total == 0)
             {
@@ -173,12 +172,12 @@ namespace Meadow
 
             outputLogger?.DisconnectTextWriter();
 
-            MeadowPackage.DebugOrDeployInProgress = false;
+            Globals.DebugOrDeployInProgress = false;
         }
 
         public void Rollback()
         {
-            MeadowPackage.DebugOrDeployInProgress = false;
+            Globals.DebugOrDeployInProgress = false;
             Console.Write("Rolling Back");
         }
 
