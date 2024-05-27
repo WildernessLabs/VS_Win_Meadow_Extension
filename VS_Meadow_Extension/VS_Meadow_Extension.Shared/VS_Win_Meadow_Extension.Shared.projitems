@@ -40,8 +40,6 @@
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Utility\OutputLogger.cs">
     </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)STDfuDevice.cs">
-    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Utility\OutputPaneWriter.cs">
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)VsixManifest.cs">
@@ -51,14 +49,6 @@
     <Content Include="$(MSBuildThisFileDirectory)Resources\MeadowPackage.ico">
     </Content>
     <Content Include="$(MSBuildThisFileDirectory)Resources\MeadowWindowCommand.png">
-    </Content>
-    <Content Include="$(MSBuildThisFileDirectory)STDFU.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="$(MSBuildThisFileDirectory)STTubeDevice30.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="$(MSBuildThisFileDirectory)wildernesslabs_icon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
