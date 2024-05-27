@@ -66,14 +66,6 @@ namespace Meadow
                 DeployFailed();
                 return;
             }
-            finally
-            {
-                var running = await Meadow.GetMonoRunState(cts);
-                if (!running)
-                {
-					await Meadow?.MonoEnable(true, cts);
-				}
-            }
 
             await outputLogger?.ConnectTextWriter(textWriter);
 
@@ -201,11 +193,7 @@ namespace Meadow
             if (!string.IsNullOrEmpty(assemblyName) &&
                 assemblyName.Equals("App", StringComparison.OrdinalIgnoreCase))
             {
-                isDeploySupported = true;
-            }
-            else
-            {
-                isDeploySupported = false;
+                return true;
             }
             return false;
         }
