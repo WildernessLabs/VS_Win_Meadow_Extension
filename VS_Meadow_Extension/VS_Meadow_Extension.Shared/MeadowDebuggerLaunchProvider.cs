@@ -59,7 +59,7 @@ namespace Meadow
                 && await IsProjectAMeadowApp()
                 && connection != null)
             {
-                MeadowPackage.DebugOrDeployInProgress = true;
+                Globals.DebugOrDeployInProgress = true;
 
                 var meadowSession = new MeadowSoftDebuggerSession(connection, outputLogger);
 
@@ -88,7 +88,7 @@ namespace Meadow
             if (vsSession != null)
             {
                 vsSession.Start();
-                MeadowPackage.DebugOrDeployInProgress = false;
+                Globals.DebugOrDeployInProgress = false;
 
                 await OutputLogger.Instance.ShowMeadowLogs();
             }
@@ -96,7 +96,7 @@ namespace Meadow
 
         bool IDebugLauncher.StartDebugger(SoftDebuggerSession session, StartInfo startInfo)
         {
-            // nop here because VS is responseable for starting us and then calling OnLaunchAsync above
+            // nop here because VS is responsible for starting us and then calling OnLaunchAsync above
             return true;
         }
 

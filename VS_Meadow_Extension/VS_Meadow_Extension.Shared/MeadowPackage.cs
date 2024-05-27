@@ -37,8 +37,6 @@ namespace Meadow
     {
         private const string NoDevicesFound = "No Devices Found";
 
-        public static bool DebugOrDeployInProgress { get; set; } = false;
-
         private static SettingsManager SettingsManager { get; set; } = new SettingsManager();
 
         /// <summary>
@@ -88,7 +86,7 @@ namespace Meadow
 
         private async void OnMeadowDeviceListCombo(object sender, EventArgs e)
         {
-            if (!DebugOrDeployInProgress)
+            if (!Globals.DebugOrDeployInProgress)
             {
                 if (e is OleMenuCmdEventArgs eventArgs)
                 {
@@ -137,15 +135,14 @@ namespace Meadow
                 }
                 else
                 {
-                    // We should never get here; EventArgs are required.
-                    throw (new ArgumentException("EventArgs Required")); // force an exception to be thrown
+                    throw new ArgumentException("EventArgs Required");
                 }
             }
         }
 
         private async void OnMeadowDeviceListComboGetList(object sender, EventArgs e)
         {
-            if (!DebugOrDeployInProgress)
+            if (!Globals.DebugOrDeployInProgress)
             {
                 if (e is OleMenuCmdEventArgs eventArgs)
                 {
@@ -154,7 +151,7 @@ namespace Meadow
 
                     if (inParam != null)
                     {
-                        throw (new ArgumentException("InParam Invalid")); // force an exception to be thrown
+                        throw new ArgumentException("InParam Invalid");
                     }
                     else if (vOut != IntPtr.Zero)
                     {
