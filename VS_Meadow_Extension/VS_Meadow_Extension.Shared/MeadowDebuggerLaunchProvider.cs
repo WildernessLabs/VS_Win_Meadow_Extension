@@ -90,7 +90,7 @@ namespace Meadow
                 vsSession.Start();
                 Globals.DebugOrDeployInProgress = false;
 
-                await OutputLogger.Instance.ShowMeadowLogs();
+                await OutputLogger.Instance.ShowMeadowOutputPane();
             }
         }
 

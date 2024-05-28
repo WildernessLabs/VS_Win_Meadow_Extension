@@ -46,8 +46,7 @@ namespace Meadow
                     }
                 }
 
-                // Activate the pane, it should have been created by now
-                await ShowMeadowLogs();
+                await ShowMeadowOutputPane();
 
                 statusBar = Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(SVsStatusbar)) as IVsStatusbar;
             });
@@ -58,7 +57,6 @@ namespace Meadow
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             textWriter = writer;
 
-            // It should exist now, so clear it for this run
             meadowOutputPane?.Clear();
         }
 
@@ -112,7 +110,7 @@ namespace Meadow
             Log(message);
         }
 
-        internal async Task ShowMeadowLogs()
+        internal async Task ShowMeadowOutputPane()
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             meadowOutputPane?.Activate();

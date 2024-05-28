@@ -30,7 +30,7 @@
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MeadowPackage.cs">
     </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)DeployProvider.cs">
+    <Compile Include="$(MSBuildThisFileDirectory)MeadowDeployProvider.cs">
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Globals.cs">
     </Compile>
@@ -39,8 +39,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)ProjectProperties.cs">
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Utility\OutputLogger.cs">
-    </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)Utility\OutputPaneWriter.cs">
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)VsixManifest.cs">
     </Compile>
