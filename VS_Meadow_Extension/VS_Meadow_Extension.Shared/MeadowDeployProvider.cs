@@ -58,7 +58,7 @@ namespace Meadow
             Globals.DebugOrDeployInProgress = true;
 
             await outputLogger?.ConnectTextWriter(textWriter);
-            await outputLogger.ShowMeadowOutputPane();
+            await outputLogger.ShowBuildOutputPane();
 
             var filename = configuredProject.UnconfiguredProject.FullPath;
 
@@ -114,6 +114,8 @@ namespace Meadow
                 await Task.Run(async () => await AppManager.DeployApplication(packageManager, connection, osVersion, outputPath, includePdbs, false, outputLogger, cancellationToken));
 
                 await connection.RuntimeEnable();
+
+                await outputLogger.ShowBuildOutputPane();
             }
             finally
             {

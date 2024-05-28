@@ -116,6 +116,17 @@ namespace Meadow
             meadowOutputPane?.Activate();
         }
 
+        internal async Task ShowBuildOutputPane()
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            IVsOutputWindow outputWindow = Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
+            Guid buildPaneGuid = VSConstants.GUID_BuildOutputWindowPane;
+            IVsOutputWindowPane buildOutputPane;
+
+            outputWindow.GetPane(ref buildPaneGuid, out buildOutputPane);
+            buildOutputPane?.Activate();
+        }
+
         internal async Task ResetProgressBar()
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
