@@ -109,6 +109,8 @@ namespace Meadow
 
                 var packageManager = new PackageManager(fileManager);
 
+                outputLogger.Log("Trimming application binaries...");
+
                 await packageManager.TrimApplication(new FileInfo(Path.Combine(outputPath, "App.dll")), osVersion, includePdbs, cancellationToken: cancellationToken);
 
                 await Task.Run(async () => await AppManager.DeployApplication(packageManager, connection, osVersion, outputPath, includePdbs, false, outputLogger, cancellationToken));
@@ -153,12 +155,16 @@ namespace Meadow
 
         private static async void MeadowConnection_DeploymentProgress(object sender, (string fileName, long completed, long total) e)
         {
-            if (e.total == 0)
-            {
-                return;
-            }
+            uint p = 0;
 
-            var p = (uint)(e.completed / e.total * 100d);
+            if (e.total != 0)
+            {
+                p = (uint)(e.completed * 100f / e.total);
+            }
+            else
+            {
+                await outputLogger?.ResetProgressBar();
+            }
 
             await outputLogger?.ReportFileProgress(e.fileName, p);
 

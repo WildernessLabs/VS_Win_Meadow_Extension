@@ -30,13 +30,12 @@ namespace Meadow
         DebuggerSession vsSession;
         private readonly ConfiguredProject configuredProject;
 
-        // https://github.com/microsoft/VSProjectSystem/blob/master/doc/overview/mef.md
         [ImportMany(ExportContractNames.VsTypes.IVsHierarchy)]
         readonly OrderPrecedenceImportCollection<IVsHierarchy> vsHierarchies;
 
         IVsHierarchy VsHierarchy => vsHierarchies.Single().Value;
 
-        public bool SupportsProfile(ILaunchProfile profile) => true; // FIXME: Would we ever not?
+        public bool SupportsProfile(ILaunchProfile profile) => true;
 
         private readonly int DebugPort = 55898;
 
@@ -104,11 +103,7 @@ namespace Meadow
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-            // Assume configuredProject is your ConfiguredProject object
             var properties = configuredProject.Services.ProjectPropertiesProvider.GetCommonProperties();
-
-            // We need to retrieve the AssemblyName property because we need both
-            // the configuredProject to be a start-up project, and also an App (not library)
             string assemblyName = await properties.GetEvaluatedPropertyValueAsync("AssemblyName");
 
             if (!string.IsNullOrEmpty(assemblyName) && assemblyName.Equals("App", StringComparison.OrdinalIgnoreCase))

@@ -60,14 +60,6 @@ namespace Meadow
         {
             await base.InitializeAsync(cancellationToken, progress);
 
-            await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-
-            // Initialize DTE2 and subscribe to debugger events
-            _dte = await GetServiceAsync(typeof(DTE)) as DTE2;
-            Assumes.Present(_dte);
-            _debuggerEvents = _dte.Events.DebuggerEvents;
-            _debuggerEvents.OnEnterDesignMode += OnEnterDesignMode;
-
             await InstallDependencies();
 
             if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService mcs)
@@ -80,6 +72,14 @@ namespace Meadow
                 MenuCommand menuMeadowDeviceListComboGetListCommand = new OleMenuCommand(new EventHandler(OnMeadowDeviceListComboGetList), menuMeadowDeviceListComboGetListCommandID);
                 mcs.AddCommand(menuMeadowDeviceListComboGetListCommand);
             }
+
+            await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+
+            // Initialize DTE2 and subscribe to debugger events
+            _dte = await GetServiceAsync(typeof(DTE)) as DTE2;
+            Assumes.Present(_dte);
+            _debuggerEvents = _dte.Events.DebuggerEvents;
+            _debuggerEvents.OnEnterDesignMode += OnEnterDesignMode;
         }
 
         /// <summary>
