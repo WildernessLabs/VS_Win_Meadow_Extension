@@ -40,8 +40,6 @@ namespace Meadow
 
         static Hcom.IMeadowConnection connection = null;
 
-        private readonly string osVersion;
-
         [ImportingConstructor]
         public MeadowDeployProvider(ConfiguredProject configuredProject)
         {
