@@ -60,13 +60,16 @@ namespace Meadow
             await outputLogger?.ConnectTextWriter(textWriter);
             await outputLogger.ShowBuildOutputPane();
 
+            outputLogger.Log("Preparing to deploy Meadow application...");
+
             var filename = configuredProject.UnconfiguredProject.FullPath;
 
             var projFileContent = File.ReadAllText(filename);
 
             if (projFileContent.Contains(MeadowSDKVersion) == false)
             {
-                DeployFailed();
+                Globals.DebugOrDeployInProgress = false;
+                outputLogger?.Log("Deploy failed - not a Meadow project");
                 return;
             }
 
@@ -74,7 +77,8 @@ namespace Meadow
 
             if (string.IsNullOrEmpty(outputPath))
             {
-                DeployFailed();
+                Globals.DebugOrDeployInProgress = false;
+                outputLogger?.Log("Deploy failed - could not locate Meadow app");
                 return;
             }
 
@@ -132,7 +136,6 @@ namespace Meadow
 
             if (projectFullPath.Contains(filename) == false)
             {
-                DeployFailed();
                 return string.Empty;
             }
 
@@ -140,12 +143,6 @@ namespace Meadow
             var outputPath = Path.Combine(projectDir, await generalProperties.Rule.GetPropertyValueAsync("OutputPath"));
 
             return outputPath;
-        }
-
-        private static void DeployFailed()
-        {
-            Globals.DebugOrDeployInProgress = false;
-            outputLogger?.Log("Deploy failed - please reset Meadow and try again");
         }
 
         private static void MeadowConnection_DeviceMessageReceived(object sender, (string message, string source) e)
