@@ -130,6 +130,7 @@ namespace Meadow
         internal async Task ResetProgressBar()
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
             statusBar?.Progress(ref progressBarCookie, 0, string.Empty, TOTAL_PROGRESS, TOTAL_PROGRESS);
         }
 

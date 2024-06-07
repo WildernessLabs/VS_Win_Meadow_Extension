@@ -167,11 +167,6 @@ namespace Meadow
             }
 
             await outputLogger?.ReportFileProgress(e.fileName, p);
-
-            if (p == 100)
-            {
-                await outputLogger?.ResetProgressBar();
-            }
         }
 
         public async void Commit()
