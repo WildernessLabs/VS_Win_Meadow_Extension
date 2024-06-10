@@ -169,8 +169,6 @@ namespace Meadow
             await outputLogger?.ShowMeadowOutputPane();
             outputLogger?.Log("Launching application..." + Environment.NewLine);
 
-            outputLogger?.DisconnectTextWriter();
-
             Globals.DebugOrDeployInProgress = false;
         }
 
