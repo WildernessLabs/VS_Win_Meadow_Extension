@@ -5,7 +5,7 @@ namespace Meadow
 {
     public static class Globals
     {
-        public const string AssemblyVersion = "2.0.0.5";
+        public const string AssemblyVersion = "2.0.0.6";
 
         public const string MeadowCapability = "Meadow";
 
