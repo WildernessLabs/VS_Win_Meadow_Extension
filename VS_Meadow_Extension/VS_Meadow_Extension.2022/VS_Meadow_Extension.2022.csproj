@@ -93,6 +93,8 @@
     <PackageReference Include="Microsoft.VisualStudio.ProjectSystem">
       <Version>17.9.380</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.ProjectSystem.Managed" Version="2.0.6142705" />
+    <PackageReference Include="Microsoft.VisualStudio.ProjectSystem.Managed.VS" Version="2.0.6142705" />
     <PackageReference Include="Microsoft.VisualStudio.ProjectSystem.VS">
       <Version>17.9.380</Version>
     </PackageReference>
