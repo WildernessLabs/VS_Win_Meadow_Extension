@@ -4,6 +4,10 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+### 1.9.8
+
+- Fix for right-click Deploy issue, which regressed in recent version
+
 ### 1.9.7
 
 - Add extra check to re-enable the runtime, if it isn't enabled after deployment.
