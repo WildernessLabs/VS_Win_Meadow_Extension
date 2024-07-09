@@ -60,18 +60,6 @@ namespace Meadow
             meadowOutputPane?.Clear();
         }
 
-        public void DisconnectTextWriter()
-        {
-            lock (_lock)
-            {
-                if (textWriter != null)
-                {
-                    textWriter.Dispose();
-                    textWriter = null;
-                }
-            }
-        }
-
         public IDisposable BeginScope<TState>(TState state) => default;
 
         public bool IsEnabled(LogLevel logLevel) => logLevel >= LogLevel.Information;
@@ -86,12 +74,12 @@ namespace Meadow
                     textWriter?.Write(message);
                 }
             }
-            catch (Exception ex)
+            catch (ObjectDisposedException ex)
             {
-                Debug.WriteLine($"Let's not crash the IDE.{Environment.NewLine}Exception:{Environment.NewLine}{ex.Message}{Environment.NewLine}StackTrace:{Environment.NewLine}{ex.StackTrace}");
+                Debug.WriteLine($"TextWriter has been disposed {ex}");
+                textWriter = null;
             }
         }
-
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
