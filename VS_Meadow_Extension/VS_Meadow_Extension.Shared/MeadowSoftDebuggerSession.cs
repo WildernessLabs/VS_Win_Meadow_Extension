@@ -52,12 +52,9 @@ namespace Meadow
                     meadowDebugCancelTokenSource.Cancel();
                 }
 
-                if (meadowDebugServer != null)
-                {
-                    await meadowDebugServer.StopListening();
-                    meadowDebugServer.Dispose();
-                    meadowDebugServer = null;
-                }
+                await meadowDebugServer?.StopListening();
+                meadowDebugServer?.Dispose();
+                meadowDebugServer = null;
 
                 base.OnExit();
             }
