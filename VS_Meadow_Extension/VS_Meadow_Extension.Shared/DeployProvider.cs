@@ -18,7 +18,7 @@ namespace Meadow
 {
     [Export(typeof(IDeployProvider))]
     [AppliesTo(Globals.MeadowCapability)]
-    internal class DeployProvider : IDeployProvider
+    internal class DeployProvider : IDeployProvider, IDisposable
     {
         private static IMeadowConnection meadowConnection = null;
         internal static IMeadowConnection MeadowConnection
@@ -32,11 +32,8 @@ namespace Meadow
                 {
                     return meadowConnection;
                 }
-                else if (meadowConnection != null)
-                {
-                    meadowConnection.Dispose();
-                    meadowConnection = null;
-                }
+
+                MeadowConnectionDispose();
 
                 var retryCount = 0;
 
@@ -74,6 +71,7 @@ namespace Meadow
 
         private bool isDeploySupported = true;
         private string osVersion;
+        private bool disposedValue;
 
         [ImportingConstructor]
         public DeployProvider(ConfiguredProject configuredProject)
@@ -328,6 +326,37 @@ namespace Meadow
             }
 
             return isDeploySupported;
+        }
+
+        private static void MeadowConnectionDispose()
+        {
+            if (meadowConnection != null)
+            {
+                meadowConnection.Dispose();
+                meadowConnection = null;
+            }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    MeadowConnectionDispose();
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }
