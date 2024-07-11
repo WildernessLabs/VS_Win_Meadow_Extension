@@ -4,6 +4,10 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+### 1.9.9
+
+- Include ProjectLab in NoLink list
+
 ### 1.9.8
 
 - Fix for right-click Deploy issue, which regressed in recent version
