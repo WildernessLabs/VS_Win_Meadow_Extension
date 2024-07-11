@@ -13,12 +13,12 @@ namespace Meadow
     {
         CancellationTokenSource meadowDebugCancelTokenSource;
         DebuggingServer meadowDebugServer;
-        IMeadowConnection meadow;
+        IMeadowConnection meadowConnection;
         private ILogger logger;
 
-        public MeadowSoftDebuggerSession(IMeadowConnection meadow, ILogger deployOutputLogger)
+        public MeadowSoftDebuggerSession(IMeadowConnection meadowConnection, ILogger deployOutputLogger)
         {
-            this.meadow = meadow;
+            this.meadowConnection = meadowConnection;
             this.logger = deployOutputLogger;
             meadowDebugCancelTokenSource = new CancellationTokenSource();
         }
@@ -29,9 +29,9 @@ namespace Meadow
             var connectArgs = meadowStartInfo.StartArgs as SoftDebuggerConnectArgs;
             var port = connectArgs?.DebugPort ?? 0;
 
-            meadowDebugServer = await meadow.StartDebuggingSession(port, logger, meadowDebugCancelTokenSource.Token);
+            meadowDebugServer = await meadowConnection.StartDebuggingSession(port, logger, meadowDebugCancelTokenSource.Token);
 
-            meadow.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
+            meadowConnection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
 
             base.OnRun(startInfo);
         }
@@ -53,11 +53,11 @@ namespace Meadow
                 meadowDebugServer = null;
             }
 
-            if (meadow != null)
+            if (meadowConnection != null)
             {
-                meadow.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
-                meadow.Dispose();
-                meadow = null;
+                meadowConnection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
+                meadowConnection.Dispose();
+                meadowConnection = null;
             }
 
             base.OnExit();

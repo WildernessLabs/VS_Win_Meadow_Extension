@@ -176,7 +176,10 @@ namespace Meadow
             {
                 await MeadowConnection.WaitForMeadowAttach();
 
-                await MeadowConnection.RuntimeDisable();
+                if (await MeadowConnection.IsRuntimeEnabled())
+                {
+                    await MeadowConnection.RuntimeDisable();
+                }
 
                 /*  device = await MeadowProvider.GetMeadowSerialDeviceAsync(DeployOutputLogger);
                 if (MeadowConnection.Device == null)
@@ -240,15 +243,20 @@ namespace Meadow
 
                 var packageManager = new PackageManager(fileManager);
 
+                DeployOutputLogger.Log("Trimming...");
                 await packageManager.TrimApplication(new FileInfo(Path.Combine(folder, "App.dll")), osVersion, includePdbs.HasValue && includePdbs.Value, cancellationToken: cancellationToken);
 
+                DeployOutputLogger.Log("Deploying...");
                 await AppManager.DeployApplication(packageManager, MeadowConnection, osVersion, folder, includePdbs.HasValue && includePdbs.Value, false, DeployOutputLogger, cancellationToken);
-
-                await MeadowConnection.RuntimeEnable();
             }
             finally
             {
                 MeadowConnection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
+
+                if (!await MeadowConnection.IsRuntimeEnabled())
+                {
+                    await MeadowConnection.RuntimeEnable();
+                }
             }
         }
 
