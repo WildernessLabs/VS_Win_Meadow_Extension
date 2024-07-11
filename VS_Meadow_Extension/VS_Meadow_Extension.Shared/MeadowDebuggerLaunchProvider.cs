@@ -33,6 +33,7 @@ namespace Meadow
         // FIXME: Find a nicer way than storing this
         DebuggerSession vsSession;
         private ConfiguredProject configuredProject;
+        private IMeadowAppService meadowAppService;
 
         // https://github.com/microsoft/VSProjectSystem/blob/master/doc/overview/mef.md
         [ImportMany(ExportContractNames.VsTypes.IVsHierarchy)]
@@ -43,12 +44,13 @@ namespace Meadow
         public bool SupportsProfile(ILaunchProfile profile) => true; // FIXME: Would we ever not?
 
         [ImportingConstructor]
-        public MeadowDebuggerLaunchProvider(ConfiguredProject configuredProj)
+        public MeadowDebuggerLaunchProvider(ConfiguredProject configuredProject, IMeadowAppService meadowAppService)
         {
-            this.configuredProject = configuredProj;
+            this.configuredProject = configuredProject;
+            this.meadowAppService = meadowAppService;
 
             vsHierarchies = new OrderPrecedenceImportCollection<IVsHierarchy>(
-                projectCapabilityCheckProvider: configuredProj);
+                projectCapabilityCheckProvider: this.configuredProject);
         }
 
         public async Task<IReadOnlyList<IDebugLaunchSettings>> QueryDebugTargetsAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
@@ -58,7 +60,7 @@ namespace Meadow
             //var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger: DeployProvider.DeployOutputLogger);
 
             if (!launchOptions.HasFlag(DebugLaunchOptions.NoDebug)
-                && await IsMeadowApp()
+                && await meadowAppService.IsMeadowApp(configuredProject)
                 && DeployProvider.MeadowConnection != null)
             {
                 MeadowPackage.DebugOrDeployInProgress = true;
@@ -104,26 +106,8 @@ namespace Meadow
 
         bool IDebugLauncher.StartDebugger(SoftDebuggerSession session, StartInfo startInfo)
         {
-            // nop here because VS is responseable for starting us and then calling On*LaunchAsync above
+            // nop here because VS is responsible for starting us and then calling On*LaunchAsync above
             return true;
-        }
-
-        private async Task<bool> IsMeadowApp()
-        {
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-            // Assume configuredProject is your ConfiguredProject object
-            var properties = configuredProject.Services.ProjectPropertiesProvider.GetCommonProperties();
-
-            // We unfortunately still need to retrieve the AssemblyName property because we need both
-            // the configuredProject to be a start-up project, but also an App (not library)
-            string assemblyName = await properties.GetEvaluatedPropertyValueAsync("AssemblyName");
-            if (!string.IsNullOrEmpty(assemblyName) && assemblyName.Equals("App", StringComparison.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-
-            return false;
         }
     }
 }

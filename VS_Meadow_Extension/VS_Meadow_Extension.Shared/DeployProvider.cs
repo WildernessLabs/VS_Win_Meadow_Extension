@@ -66,7 +66,7 @@ namespace Meadow
         private ProjectProperties Properties { get; set; }
 
         private ConfiguredProject configuredProject;
-
+        private IMeadowAppService meadowAppService;
         const string MeadowSDKVersion = "Sdk=\"Meadow.Sdk/1.1.0\"";
 
         private bool isDeploySupported = true;
@@ -74,11 +74,10 @@ namespace Meadow
         private bool disposedValue;
 
         [ImportingConstructor]
-        public DeployProvider(ConfiguredProject configuredProject)
+        public DeployProvider(ConfiguredProject configuredProject, IMeadowAppService meadowAppService)
         {
             this.configuredProject = configuredProject;
-
-            IsMeadowApp();
+            this.meadowAppService = meadowAppService;
         }
 
         public async Task<bool> DeployMeadowProjectsAsync(CancellationToken cts, TextWriter outputPaneWriter)
@@ -154,8 +153,10 @@ namespace Meadow
 
         public async Task DeployAsync(CancellationToken cts, TextWriter outputPaneWriter)
         {
+            isDeploySupported = await meadowAppService.IsMeadowApp(configuredProject);
+
             if (cts.IsCancellationRequested
-                || !await IsMeadowApp())
+                || !isDeploySupported)
             {
                 return;
             }
@@ -304,28 +305,6 @@ namespace Meadow
         {
             MeadowPackage.DebugOrDeployInProgress = false;
             Console.Write("Rolling Back");
-        }
-
-        private async Task<bool> IsMeadowApp()
-        {
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
-            // Assume configuredProject is your ConfiguredProject object
-            var properties = configuredProject.Services.ProjectPropertiesProvider.GetCommonProperties();
-
-            // We unfortunately still need to retrieve the AssemblyName property because we need both
-            // the configuredProject to be a start-up project, but also an App (not library)
-            string assemblyName = await properties.GetEvaluatedPropertyValueAsync("AssemblyName");
-            if (!string.IsNullOrEmpty(assemblyName) && assemblyName.Equals("App", StringComparison.OrdinalIgnoreCase))
-            {
-                isDeploySupported = true;
-            }
-            else
-            {
-                isDeploySupported = false;
-            }
-
-            return isDeploySupported;
         }
 
         private static void MeadowConnectionDispose()
