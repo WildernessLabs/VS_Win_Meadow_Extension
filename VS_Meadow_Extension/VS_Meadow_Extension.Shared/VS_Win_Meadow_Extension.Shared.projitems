@@ -22,8 +22,6 @@
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)IMeadowAppService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MeadowAppService.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)MeadowProvider.cs">
-    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MeadowSoftDebuggerSession.cs">
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MonoDebugLaunchSettings.cs">
