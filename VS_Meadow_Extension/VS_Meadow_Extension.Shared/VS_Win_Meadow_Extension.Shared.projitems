@@ -38,6 +38,7 @@
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)ProjectProperties.cs">
     </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)SimpleFileLogger.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utility\OutputLogger.cs">
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)VsixManifest.cs">
@@ -70,6 +71,7 @@
     <None Include="$(MSBuildThisFileDirectory)BuildSystem\DeployedBuildSystem\VS_Meadow_Extension.targets">
       <SubType>Designer</SubType>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Directory.Build.props" />
   </ItemGroup>
   <!--
   The XAML files provide buth compile-time implementations for CPS rules as well as
