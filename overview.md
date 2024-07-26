@@ -8,6 +8,14 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 - Use Meadow.CLI v2 under the hood
 
+### 1.9.9
+
+- Include ProjectLab in NoLink list
+
+### 1.9.8
+
+- Fix for right-click Deploy issue, which regressed in recent version
+
 ### 1.9.7
 
 - Add extra check to re-enable the runtime, if it isn't enabled after deployment.
