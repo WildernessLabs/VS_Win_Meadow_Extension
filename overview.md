@@ -4,6 +4,10 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+### 2.0.0
+
+- Use Meadow.CLI v2 under the hood
+
 ### 1.9.9
 
 - Include ProjectLab in NoLink list

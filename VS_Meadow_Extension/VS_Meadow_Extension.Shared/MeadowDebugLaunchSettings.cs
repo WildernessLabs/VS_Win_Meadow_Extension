@@ -1,21 +1,19 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.ProjectSystem.Debug;
+using Microsoft.VisualStudio.ProjectSystem.VS.Debug;
+using Mono.Debugging.VisualStudio;
+using System;
 using System.IO;
 using System.Runtime.Remoting;
 using System.Runtime.Serialization.Formatters.Binary;
 
-using Microsoft.VisualStudio.ProjectSystem.Debug;
-using Microsoft.VisualStudio.ProjectSystem.VS.Debug;
-using Mono.Debugging.Soft;
-using Mono.Debugging.VisualStudio;
-
 namespace Meadow
 {
-    public class MonoDebugLaunchSettings : DebugLaunchSettings
+    public class MeadowDebugLaunchSettings : DebugLaunchSettings
     {
         // hold this as a field to ensure the object stays alive
-        SessionMarshalling sessionInfo;
+        readonly SessionMarshalling sessionInfo;
 
-        public MonoDebugLaunchSettings(DebugLaunchOptions options, SessionMarshalling sessionInfo) : base(options)
+        public MeadowDebugLaunchSettings(DebugLaunchOptions options, SessionMarshalling sessionInfo) : base(options)
         {
             this.sessionInfo = sessionInfo;
 
