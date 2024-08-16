@@ -112,10 +112,10 @@ namespace Meadow
                 var packageManager = new PackageManager(fileManager);
 
                 outputLogger.Log("Trimming application binaries...");
-
                 await packageManager.TrimApplication(new FileInfo(Path.Combine(outputPath, "App.dll")), osVersion, includePdbs, cancellationToken: cancellationToken);
 
-                await Task.Run(async () => await AppManager.DeployApplication(packageManager, connection, osVersion, outputPath, includePdbs, false, outputLogger, cancellationToken));
+                outputLogger.Log("Deploying application...");
+                await AppManager.DeployApplication(packageManager, connection, osVersion, outputPath, includePdbs, false, outputLogger, cancellationToken);
 
                 await connection.RuntimeEnable();
 
@@ -123,6 +123,7 @@ namespace Meadow
             }
             finally
             {
+                connection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
             }
         }
 

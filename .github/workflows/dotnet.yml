@@ -35,7 +35,7 @@ jobs:
       with:
         repository: WildernessLabs/Meadow.CLI
         path: Meadow.CLI
-        ref: dominique-V2022ToV2
+        ref: dominique-TestDebugging
 
     - name: Checkout Meadow.Contracts side-by-side
       uses: actions/checkout@v4
