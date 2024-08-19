@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Meadow.CLI;
+using Meadow.CLI.Commands.DeviceManagement;
 using Meadow.Hcom;
 using Meadow.Package;
 using Meadow.Software;
@@ -21,43 +22,9 @@ namespace Meadow
     internal class DeployProvider : IDeployProvider, IDisposable
     {
         private static IMeadowConnection meadowConnection = null;
-        internal static IMeadowConnection MeadowConnection
-        {
-            get
-            {
-                var route = MeadowPackage.SettingsManager.GetSetting(SettingsManager.PublicSettings.Route);
+        public static IMeadowConnection MeadowConnection => meadowConnection;
 
-                if (meadowConnection != null
-                    && meadowConnection.Name == route)
-                {
-                    return meadowConnection;
-                }
-
-                MeadowConnectionDispose();
-
-                var retryCount = 0;
-
-            get_serial_connection:
-                try
-                {
-                    meadowConnection = new SerialConnection(route);
-                }
-                catch
-                {
-                    retryCount++;
-                    if (retryCount > 10)
-                    {
-                        throw new Exception($"Cannot create SerialConnection on port: {route}");
-                    }
-                    Thread.Sleep(500);
-                    goto get_serial_connection;
-                }
-
-                return meadowConnection;
-            }
-        }
-
-        public static OutputLogger DeployOutputLogger = new OutputLogger();
+		public static OutputLogger DeployOutputLogger = new OutputLogger();
 
         /// <summary>
         /// Provides access to the project's properties.
@@ -135,9 +102,9 @@ namespace Meadow
             }
             finally
             {
-                if (!await MeadowConnection.IsRuntimeEnabled())
+                if (!await meadowConnection.IsRuntimeEnabled())
                 {
-                    await MeadowConnection.RuntimeEnable();
+                    await meadowConnection.RuntimeEnable();
                 }
             }
 
@@ -168,23 +135,33 @@ namespace Meadow
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-            MeadowConnection.FileWriteProgress += MeadowConnection_DeploymentProgress;
-            MeadowConnection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
+			if (meadowConnection != null)
+			{
+				meadowConnection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
+				meadowConnection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
+			}
 
-            try
+			var route = MeadowPackage.SettingsManager.GetSetting(SettingsManager.PublicSettings.Route);
+
+			meadowConnection = await MeadowConnectionManager.GetConnectionForRoute(route);
+
+			meadowConnection.FileWriteProgress += MeadowConnection_DeploymentProgress;
+			meadowConnection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
+
+			try
             {
-                await MeadowConnection.WaitForMeadowAttach();
+                await meadowConnection.WaitForMeadowAttach();
 
-                await MeadowConnection.RuntimeDisable();
+                await meadowConnection.RuntimeDisable();
 
-                /*  device = await MeadowProvider.GetMeadowSerialDeviceAsync(DeployOutputLogger);
-                if (MeadowConnection.Device == null)
+				/*  device = await MeadowProvider.GetMeadowSerialDeviceAsync(DeployOutputLogger);
+                if (meadowConnection.Device == null)
                 {
                     MeadowPackage.DebugOrDeployInProgress = false;
                     throw new Exception("A device has not been selected. Please attach a device, then select it from the Device list.");
                 }*/
 
-                var deviceInfo = await MeadowConnection.GetDeviceInfo(cancellationToken);
+				var deviceInfo = await meadowConnection.GetDeviceInfo(cancellationToken);
                 osVersion = deviceInfo.OsVersion;
 
                 // TODO Pass in a proper MeadowCloudClient
@@ -243,13 +220,13 @@ namespace Meadow
                 await packageManager.TrimApplication(new FileInfo(Path.Combine(folder, "App.dll")), osVersion, includePdbs.HasValue && includePdbs.Value, cancellationToken: cancellationToken);
 
                 DeployOutputLogger.Log("Deploying...");
-                await AppManager.DeployApplication(packageManager, MeadowConnection, osVersion, folder, includePdbs.HasValue && includePdbs.Value, false, DeployOutputLogger, cancellationToken);
+                await AppManager.DeployApplication(packageManager, meadowConnection, osVersion, folder, includePdbs.HasValue && includePdbs.Value, false, DeployOutputLogger, cancellationToken);
 
-                await MeadowConnection.RuntimeEnable();
+                await meadowConnection.RuntimeEnable();
             }
             finally
             {
-                MeadowConnection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
+				meadowConnection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
             }
         }
 
@@ -280,7 +257,7 @@ namespace Meadow
             get { return isDeploySupported; }
         }
 
-        public async void Commit()
+		public async void Commit()
         {
             if (!MeadowPackage.DebugOrDeployInProgress)
                 return;
