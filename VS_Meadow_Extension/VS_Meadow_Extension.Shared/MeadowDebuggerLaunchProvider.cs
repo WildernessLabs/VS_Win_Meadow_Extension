@@ -1,4 +1,6 @@
-﻿using Microsoft.VisualStudio.ProjectSystem;
+﻿using Meadow.CLI;
+using Meadow.CLI.Commands.DeviceManagement;
+using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Debug;
 using Microsoft.VisualStudio.ProjectSystem.VS.Debug;
 using Microsoft.VisualStudio.Shell;
@@ -52,7 +54,8 @@ namespace Meadow
 
         public async Task<IReadOnlyList<IDebugLaunchSettings>> QueryDebugTargetsAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
         {
-            var connection = MeadowConnection.GetCurrentConnection();
+            var route = new SettingsManager().GetSetting(SettingsManager.PublicSettings.Route);
+            var connection = await MeadowConnectionManager.GetConnectionForRoute(route);
 
             if (!launchOptions.HasFlag(DebugLaunchOptions.NoDebug)
                 && await IsProjectAMeadowApp()
