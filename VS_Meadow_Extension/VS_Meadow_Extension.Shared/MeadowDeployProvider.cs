@@ -1,4 +1,5 @@
 ﻿using Meadow.CLI;
+using Meadow.CLI.Commands.DeviceManagement;
 using Meadow.Package;
 using Meadow.Software;
 using Microsoft.VisualStudio.ProjectSystem;
@@ -86,7 +87,8 @@ namespace Meadow
                 connection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
             }
 
-            connection = MeadowConnection.GetCurrentConnection();
+            var route = new SettingsManager().GetSetting(SettingsManager.PublicSettings.Route);
+            connection = await MeadowConnectionManager.GetConnectionForRoute(route);
 
             connection.FileWriteProgress += MeadowConnection_DeploymentProgress;
             connection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
@@ -123,7 +125,7 @@ namespace Meadow
             }
             finally
             {
-                connection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
+                connection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
             }
         }
 
