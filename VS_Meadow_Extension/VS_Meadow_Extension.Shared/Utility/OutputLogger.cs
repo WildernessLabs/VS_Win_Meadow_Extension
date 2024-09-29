@@ -125,12 +125,14 @@ namespace Meadow
         internal async Task ReportFileProgress(string fileName, uint percentage)
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
             statusBar?.Progress(ref progressBarCookie, 1, $"Transferring: {fileName}", percentage, TOTAL_PROGRESS);
         }
 
         internal async Task ReportDownloadProgress(string osVersion, long byteReceived)
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
             statusBar?.SetText($"Downloading OsVersion: {osVersion}; Bytes Received {byteReceived}");
         }
 
@@ -138,6 +140,8 @@ namespace Meadow
         {
             try
             {
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
                 //check and see if the message ends with a newline, if not add one
                 if (!message.EndsWith("\n"))
                 {
