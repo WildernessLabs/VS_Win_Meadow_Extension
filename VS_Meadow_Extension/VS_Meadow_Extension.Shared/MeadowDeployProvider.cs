@@ -152,29 +152,23 @@ namespace Meadow
 
         private static async void MeadowConnection_DeviceMessageReceived(object sender, (string message, string source) e)
         {
-            await ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
-            {
-                await outputLogger.ReportDeviceMessage(e.message);
-            });
+            await outputLogger.ReportDeviceMessage(e.message);
         }
 
         private static async void MeadowConnection_DeploymentProgress(object sender, (string fileName, long completed, long total) e)
         {
-            await ThreadHelper.JoinableTaskFactory.RunAsync(async () =>
+            uint p = 0;
+
+            if (e.total != 0)
             {
-                uint p = 0;
+                p = (uint)(e.completed * 100f / e.total);
+            }
+            else
+            {
+                await outputLogger?.ResetProgressBar();
+            }
 
-                if (e.total != 0)
-                {
-                    p = (uint)(e.completed * 100f / e.total);
-                }
-                else
-                {
-                    await outputLogger?.ResetProgressBar();
-                }
-
-                await outputLogger?.ReportFileProgress(e.fileName, p);
-            });
+            await outputLogger?.ReportFileProgress(e.fileName, p);
         }
 
         public async void Commit()
