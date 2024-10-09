@@ -4,6 +4,10 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+### 1.9.9.1
+
+- Lazy load settings and ensure Template installation happens in a background thread.
+
 ### 1.9.9
 
 - Include ProjectLab in NoLink list
