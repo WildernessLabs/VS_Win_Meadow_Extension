@@ -40,7 +40,8 @@ namespace Meadow
 
         public static bool DebugOrDeployInProgress { get; set; } = false;
 
-        private MeadowSettings meadowSettings = new MeadowSettings(Globals.SettingsFilePath);
+        private Lazy<MeadowSettings> meadowSettingsLazy;
+        private MeadowSettings MeadowSettings => meadowSettingsLazy.Value;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MeadowPackage"/> class.
@@ -52,7 +53,6 @@ namespace Meadow
             // not sited yet inside Visual Studio environment. The place to do all the other
             // initialization is the Initialize method.
         }
-
 
         #region Package Members
 
@@ -67,12 +67,15 @@ namespace Meadow
         {
             await base.InitializeAsync(cancellationToken, progress);
 
+            // Make settings loading lazy
+            meadowSettingsLazy = new Lazy<MeadowSettings>(() => new MeadowSettings(Globals.SettingsFilePath));
+
+            // Ensure Install dependencies is off loaded to a background thread
+            await Task.Run(() => InstallDependencies(cancellationToken), cancellationToken);
+
             // When initialized asynchronously, the current thread may be a background thread at this point.
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-
-            // Install dependencies
-            await InstallDependencies();
 
             // Add our command handlers for menu (commands must be declared in the .vsct file)
             if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService mcs)
@@ -105,10 +108,10 @@ namespace Meadow
                         {
                             string deviceTarget = string.Empty;
 
-                            bool IsSavedValueInPortList = IsValueInPortList(portList, meadowSettings.DeviceTarget);
+                            bool IsSavedValueInPortList = IsValueInPortList(portList, MeadowSettings.DeviceTarget);
                             if (IsSavedValueInPortList)
                             {
-                                deviceTarget = meadowSettings.DeviceTarget;
+                                deviceTarget = MeadowSettings.DeviceTarget;
                             }
 
                             Marshal.GetNativeVariantForObject(deviceTarget, vOut);
@@ -194,59 +197,88 @@ namespace Meadow
 
         private void SaveDeviceChoiceToSettings(string newChoice)
         {
-            meadowSettings.DeviceTarget = newChoice;
-            meadowSettings.Save();
+            MeadowSettings.DeviceTarget = newChoice;
+            MeadowSettings.Save();
         }
 
-        private async Task InstallDependencies()
+        private async Task InstallDependencies(CancellationToken cancellationToken)
         {
             // No point installing if we don't have an internet connection
-            if (NetworkInterface.GetIsNetworkAvailable())
+            if (!NetworkInterface.GetIsNetworkAvailable())
             {
-                //string templateName = "Meadow";
-                // Check if the package is installed
-                //if (!await IsTemplateInstalled(templateName))
-                {
-                    string packageName = "WildernessLabs.Meadow.Template";
+                return;
+            }
 
-                    // Install the package.
-                    // If an update is available it should update it automagically.
-                    if (!await InstallPackage(packageName))
-                    {
-                        // Unable to install ProjectTemplates Throw Up a Message??
-                    }
+            //string templateName = "Meadow";
+            // Check if the package is installed
+            //if (!await IsTemplateInstalled(templateName))
+            {
+                string packageName = "WildernessLabs.Meadow.Template";
+
+                // Install the package.
+                // If an update is available it should update it automagically.
+                if (!await InstallPackage(packageName, cancellationToken))
+                {
+                    // Unable to install ProjectTemplates Throw Up a Message??
                 }
             }
+
         }
 
-        private async Task<bool> InstallPackage(string packageName)
+        private async Task<bool> InstallPackage(string packageName, CancellationToken cancellationToken)
         {
-            return await StartDotNetProcess("new install", packageName);
+            return await StartDotNetProcess("new install", packageName, cancellationToken);
         }
 
-        private async Task<bool> IsTemplateInstalled(string templateName)
+        private async Task<bool> IsTemplateInstalled(string templateName, CancellationToken cancellationToken)
         {
-            return await StartDotNetProcess("new list", templateName);
+            return await StartDotNetProcess("new list", templateName, cancellationToken);
         }
 
-        private async Task<bool> StartDotNetProcess(string command, string parameters)
+        private async Task<bool> StartDotNetProcess(string command, string parameters, CancellationToken cancellationToken)
         {
-            return await Task.Run(async () =>
+            using (var process = new System.Diagnostics.Process())
             {
-                System.Diagnostics.Process process = new System.Diagnostics.Process();
                 process.StartInfo.FileName = "dotnet";
                 process.StartInfo.Arguments = $"{command} {parameters}";
                 process.StartInfo.RedirectStandardOutput = true;
+                process.StartInfo.RedirectStandardError = true;
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.CreateNoWindow = true;
+
+                var outputBuilder = string.Empty;
+                var errorBuilder = string.Empty;
+
+                // Event handlers for async output reading
+                process.OutputDataReceived += (sender, args) => outputBuilder += Environment.NewLine + args.Data;
+                process.ErrorDataReceived += (sender, args) => errorBuilder += Environment.NewLine + args.Data;
+
                 process.Start();
 
-                string output = await process.StandardOutput.ReadToEndAsync();
-                process.WaitForExit();
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
 
-                // Check if the package name exists in the output
-                return output.Contains(parameters);
-            });
+                // Wait for the process to complete asynchronously
+                await Task.Run(() =>
+                {
+                    process.WaitForExit();
+                }, cancellationToken);
+
+                /* TODO Maybe we should log the output and error to a file 
+                var output = outputBuilder.ToString();
+                var errorOutput = errorBuilder.ToString(); */
+
+                if (process.ExitCode == 0)
+                {
+                    // Process completed successfully
+                    return true;
+                }
+                else
+                {
+                    // Process failed
+                    return false;
+                }
+            }
         }
     }
 
