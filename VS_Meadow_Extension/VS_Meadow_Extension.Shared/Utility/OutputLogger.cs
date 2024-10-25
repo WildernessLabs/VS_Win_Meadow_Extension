@@ -143,6 +143,7 @@ namespace Meadow
                 {
                     message += Environment.NewLine;
                 }
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 meadowOutputPane?.OutputStringThreadSafe(message);
             }
             catch (Exception ex)
