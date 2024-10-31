@@ -4,7 +4,6 @@ using Meadow.Package;
 using Meadow.Software;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Build;
-using Microsoft.VisualStudio.Shell;
 using System;
 using System.ComponentModel.Composition;
 using System.IO;
@@ -41,11 +40,14 @@ namespace Meadow
         }
 
         static Hcom.IMeadowConnection connection = null;
+        private readonly CLI.SettingsManager settingsManager = new CLI.SettingsManager();
+        private readonly MeadowConnectionManager connectionManager = null;
 
         [ImportingConstructor]
         public MeadowDeployProvider(ConfiguredProject configuredProject)
         {
             this.configuredProject = configuredProject;
+            this.connectionManager = new MeadowConnectionManager(settingsManager);
         }
 
         public async Task DeployAsync(CancellationToken cancellationToken, TextWriter textWriter)
@@ -55,82 +57,81 @@ namespace Meadow
                 return;
             }
 
-            await Task.Run(async () =>
+
+            Globals.DebugOrDeployInProgress = true;
+
+            await outputLogger?.ConnectTextWriter(textWriter);
+            await outputLogger.ShowBuildOutputPane();
+
+            outputLogger.Log("Preparing to deploy Meadow application...");
+
+            var filename = configuredProject.UnconfiguredProject.FullPath;
+
+            var projFileContent = File.ReadAllText(filename);
+
+            if (projFileContent.Contains(MeadowSDKVersion) == false)
             {
-                Globals.DebugOrDeployInProgress = true;
+                Globals.DebugOrDeployInProgress = false;
+                outputLogger?.Log("Deploy failed - not a Meadow project");
+                return;
+            }
 
-                await outputLogger?.ConnectTextWriter(textWriter);
+            var outputPath = await GetOutputPathAsync(filename);
+
+            if (string.IsNullOrEmpty(outputPath))
+            {
+                Globals.DebugOrDeployInProgress = false;
+                outputLogger?.Log("Deploy failed - could not locate Meadow app");
+                return;
+            }
+
+            if (connection != null)
+            {
+                connection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
+                connection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
+                connection = null;
+            }
+
+            var route = settingsManager.GetSetting(CLI.SettingsManager.PublicSettings.Route);
+            connection = connectionManager.GetConnectionForRoute(route);
+
+            connection.FileWriteProgress += MeadowConnection_DeploymentProgress;
+            connection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
+
+            try
+            {
+                await connection.WaitForMeadowAttach();
+
+                if (await connection.IsRuntimeEnabled() == true)
+                {
+                    await connection.RuntimeDisable();
+                }
+
+                var deviceInfo = await connection.GetDeviceInfo();
+
+                string osVersion = deviceInfo.OsVersion;
+
+                var fileManager = new FileManager(null);
+                await fileManager.Refresh();
+
+                bool includePdbs = configuredProject?.ProjectConfiguration?.Dimensions["Configuration"].Contains("Debug") ?? false;
+
+                var packageManager = new PackageManager(fileManager);
+
+                outputLogger.Log("Trimming application binaries...");
+                await packageManager.TrimApplication(new FileInfo(Path.Combine(outputPath, "App.dll")), osVersion, includePdbs, cancellationToken: cancellationToken);
+
+                outputLogger.Log("Deploying application...");
+                await AppManager.DeployApplication(packageManager, connection, osVersion, outputPath, includePdbs, false, outputLogger, cancellationToken);
+
+                await connection.RuntimeEnable();
+
                 await outputLogger.ShowBuildOutputPane();
-
-                outputLogger.Log("Preparing to deploy Meadow application...");
-
-                var filename = configuredProject.UnconfiguredProject.FullPath;
-
-                var projFileContent = File.ReadAllText(filename);
-
-                if (projFileContent.Contains(MeadowSDKVersion) == false)
-                {
-                    Globals.DebugOrDeployInProgress = false;
-                    outputLogger?.Log("Deploy failed - not a Meadow project");
-                    return;
-                }
-
-                var outputPath = await GetOutputPathAsync(filename);
-
-                if (string.IsNullOrEmpty(outputPath))
-                {
-                    Globals.DebugOrDeployInProgress = false;
-                    outputLogger?.Log("Deploy failed - could not locate Meadow app");
-                    return;
-                }
-
-                if (connection != null)
-                {
-                    connection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
-                    connection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
-                }
-
-                var route = new SettingsManager().GetSetting(SettingsManager.PublicSettings.Route);
-                connection = await MeadowConnectionManager.GetConnectionForRoute(route);
-
-                connection.FileWriteProgress += MeadowConnection_DeploymentProgress;
-                connection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
-
-                try
-                {
-                    await connection.WaitForMeadowAttach();
-
-                    if (await connection.IsRuntimeEnabled() == true)
-                    {
-                        await connection.RuntimeDisable();
-                    }
-
-                    var deviceInfo = await connection.GetDeviceInfo();
-
-                    string osVersion = deviceInfo.OsVersion;
-
-                    var fileManager = new FileManager(null);
-                    await fileManager.Refresh();
-
-                    bool includePdbs = configuredProject?.ProjectConfiguration?.Dimensions["Configuration"].Contains("Debug") ?? false;
-
-                    var packageManager = new PackageManager(fileManager);
-
-                    outputLogger.Log("Trimming application binaries...");
-                    await packageManager.TrimApplication(new FileInfo(Path.Combine(outputPath, "App.dll")), osVersion, includePdbs, cancellationToken: cancellationToken);
-
-                    outputLogger.Log("Deploying application...");
-                    await AppManager.DeployApplication(packageManager, connection, osVersion, outputPath, includePdbs, false, outputLogger, cancellationToken);
-
-                    await connection.RuntimeEnable();
-
-                    await outputLogger.ShowBuildOutputPane();
-                }
-                finally
-                {
-                    connection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
-                }
-            });
+            }
+            finally
+            {
+                connection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
+            }
         }
 
         private async Task<string> GetOutputPathAsync(string filename)
