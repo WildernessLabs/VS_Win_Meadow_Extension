@@ -1,4 +1,5 @@
 ﻿using Meadow.CLI;
+using Meadow.CLI.Commands.DeviceManagement;
 using Meadow.Package;
 using Meadow.Software;
 using Microsoft.VisualStudio.ProjectSystem;
@@ -39,19 +40,23 @@ namespace Meadow
         }
 
         static Hcom.IMeadowConnection connection = null;
+        private readonly CLI.SettingsManager settingsManager = new CLI.SettingsManager();
+        private readonly MeadowConnectionManager connectionManager = null;
 
         [ImportingConstructor]
         public MeadowDeployProvider(ConfiguredProject configuredProject)
         {
             this.configuredProject = configuredProject;
+            this.connectionManager = new MeadowConnectionManager(settingsManager);
         }
 
         public async Task DeployAsync(CancellationToken cancellationToken, TextWriter textWriter)
         {
-            if (await IsProjectAMeadowApp() == false)
+            if (cancellationToken.IsCancellationRequested || !await IsProjectAMeadowApp())
             {
                 return;
             }
+
 
             Globals.DebugOrDeployInProgress = true;
 
@@ -84,9 +89,11 @@ namespace Meadow
             {
                 connection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
                 connection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
+                connection = null;
             }
 
-            connection = MeadowConnection.GetCurrentConnection();
+            var route = settingsManager.GetSetting(CLI.SettingsManager.PublicSettings.Route);
+            connection = connectionManager.GetConnectionForRoute(route);
 
             connection.FileWriteProgress += MeadowConnection_DeploymentProgress;
             connection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
@@ -112,10 +119,10 @@ namespace Meadow
                 var packageManager = new PackageManager(fileManager);
 
                 outputLogger.Log("Trimming application binaries...");
-
                 await packageManager.TrimApplication(new FileInfo(Path.Combine(outputPath, "App.dll")), osVersion, includePdbs, cancellationToken: cancellationToken);
 
-                await Task.Run(async () => await AppManager.DeployApplication(packageManager, connection, osVersion, outputPath, includePdbs, false, outputLogger, cancellationToken));
+                outputLogger.Log("Deploying application...");
+                await AppManager.DeployApplication(packageManager, connection, osVersion, outputPath, includePdbs, false, outputLogger, cancellationToken);
 
                 await connection.RuntimeEnable();
 
@@ -123,6 +130,7 @@ namespace Meadow
             }
             finally
             {
+                connection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
             }
         }
 
@@ -143,9 +151,9 @@ namespace Meadow
             return outputPath;
         }
 
-        private static void MeadowConnection_DeviceMessageReceived(object sender, (string message, string source) e)
+        private static async void MeadowConnection_DeviceMessageReceived(object sender, (string message, string source) e)
         {
-            _ = outputLogger.ReportDeviceMessage(e.message);
+            await outputLogger.ReportDeviceMessage(e.message);
         }
 
         private static async void MeadowConnection_DeploymentProgress(object sender, (string fileName, long completed, long total) e)

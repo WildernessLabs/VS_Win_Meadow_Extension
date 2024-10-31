@@ -1,6 +1,9 @@
-﻿using Microsoft.VisualStudio.ProjectSystem;
+﻿using Meadow.CLI;
+using Meadow.CLI.Commands.DeviceManagement;
+using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Debug;
 using Microsoft.VisualStudio.ProjectSystem.VS.Debug;
+using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Mono.Debugging.Soft;
@@ -41,10 +44,14 @@ namespace Meadow
 
         static readonly OutputLogger outputLogger = OutputLogger.Instance;
 
+        private readonly CLI.SettingsManager settingsManager = new CLI.SettingsManager();
+        private readonly MeadowConnectionManager connectionManager = null;
+
         [ImportingConstructor]
         public MeadowDebuggerLaunchProvider(ConfiguredProject configuredProject)
         {
             this.configuredProject = configuredProject;
+            this.connectionManager = new MeadowConnectionManager(settingsManager);
 
             vsHierarchies = new OrderPrecedenceImportCollection<IVsHierarchy>(
                 projectCapabilityCheckProvider: configuredProject);
@@ -52,7 +59,8 @@ namespace Meadow
 
         public async Task<IReadOnlyList<IDebugLaunchSettings>> QueryDebugTargetsAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
         {
-            var connection = MeadowConnection.GetCurrentConnection();
+            var route = settingsManager.GetSetting(CLI.SettingsManager.PublicSettings.Route);
+            var connection = connectionManager.GetConnectionForRoute(route);
 
             if (!launchOptions.HasFlag(DebugLaunchOptions.NoDebug)
                 && await IsProjectAMeadowApp()
