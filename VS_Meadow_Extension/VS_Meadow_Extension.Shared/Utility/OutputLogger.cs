@@ -140,8 +140,6 @@ namespace Meadow
         {
             try
             {
-                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-
                 //check and see if the message ends with a newline, if not add one
                 if (!message.EndsWith("\n"))
                 {
