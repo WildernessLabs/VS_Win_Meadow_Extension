@@ -32,6 +32,9 @@ namespace Meadow
                 var connectArgs = meadowStartInfo?.StartArgs as SoftDebuggerConnectArgs;
                 var port = connectArgs?.DebugPort ?? 0;
 
+                //get device
+                await connection.Attach(meadowDebugCancelTokenSource.Token);
+
                 var debugSessionTask = connection.StartDebuggingSession(port, logger, meadowDebugCancelTokenSource.Token);
 
                 base.OnRun(startInfo);
