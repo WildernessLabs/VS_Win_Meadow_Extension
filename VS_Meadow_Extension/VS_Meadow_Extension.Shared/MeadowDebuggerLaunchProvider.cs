@@ -59,16 +59,15 @@ namespace Meadow
 
         public async Task<IReadOnlyList<IDebugLaunchSettings>> QueryDebugTargetsAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
         {
-            var route = settingsManager.GetSetting(CLI.SettingsManager.PublicSettings.Route);
-            var connection = connectionManager.GetConnectionForRoute(route);
+            var meadowConnection = MeadowDeployProvider.MeadowConnection;
 
             if (!launchOptions.HasFlag(DebugLaunchOptions.NoDebug)
                 && await IsProjectAMeadowApp()
-                && connection != null)
+                && meadowConnection != null)
             {
                 Globals.DebugOrDeployInProgress = true;
 
-                var meadowSession = new MeadowSoftDebuggerSession(connection, outputLogger);
+                var meadowSession = new MeadowSoftDebuggerSession(meadowConnection, outputLogger);
 
                 var startArgs = new SoftDebuggerConnectArgs(profile.Name, IPAddress.Loopback, DebugPort);
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();

@@ -1,5 +1,6 @@
 ﻿using Meadow.CLI;
 using Meadow.CLI.Commands.DeviceManagement;
+using Meadow.Hcom;
 using Meadow.Package;
 using Meadow.Software;
 using Microsoft.VisualStudio.ProjectSystem;
@@ -39,8 +40,10 @@ namespace Meadow
             }
         }
 
-        static Hcom.IMeadowConnection connection = null;
-        private readonly CLI.SettingsManager settingsManager = new CLI.SettingsManager();
+        public static IMeadowConnection MeadowConnection => meadowConnection;
+
+        static IMeadowConnection meadowConnection = null;
+        private readonly SettingsManager settingsManager = new SettingsManager();
         private readonly MeadowConnectionManager connectionManager = null;
 
         [ImportingConstructor]
@@ -56,7 +59,6 @@ namespace Meadow
             {
                 return;
             }
-
 
             Globals.DebugOrDeployInProgress = true;
 
@@ -85,52 +87,54 @@ namespace Meadow
                 return;
             }
 
-            if (connection != null)
+            if (meadowConnection != null)
             {
-                connection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
-                connection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
-                connection = null;
+                meadowConnection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
+                meadowConnection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
+                meadowConnection = null;
             }
 
             var route = settingsManager.GetSetting(CLI.SettingsManager.PublicSettings.Route);
-            connection = connectionManager.GetConnectionForRoute(route);
+            meadowConnection = connectionManager.GetConnectionForRoute(route);
 
-            connection.FileWriteProgress += MeadowConnection_DeploymentProgress;
-            connection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
+            meadowConnection.FileWriteProgress += MeadowConnection_DeploymentProgress;
+            meadowConnection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
 
+
+            await meadowConnection.WaitForMeadowAttach();
+
+            if (await meadowConnection.IsRuntimeEnabled() == true)
+            {
+                await meadowConnection.RuntimeDisable();
+            }
+
+            var deviceInfo = await meadowConnection.GetDeviceInfo();
+
+            string osVersion = deviceInfo.OsVersion;
+
+            var fileManager = new FileManager(null);
+            await fileManager.Refresh();
+
+            bool includePdbs = configuredProject?.ProjectConfiguration?.Dimensions["Configuration"].Contains("Debug") ?? false;
             try
             {
-                await connection.WaitForMeadowAttach();
-
-                if (await connection.IsRuntimeEnabled() == true)
-                {
-                    await connection.RuntimeDisable();
-                }
-
-                var deviceInfo = await connection.GetDeviceInfo();
-
-                string osVersion = deviceInfo.OsVersion;
-
-                var fileManager = new FileManager(null);
-                await fileManager.Refresh();
-
-                bool includePdbs = configuredProject?.ProjectConfiguration?.Dimensions["Configuration"].Contains("Debug") ?? false;
-
                 var packageManager = new PackageManager(fileManager);
 
                 outputLogger.Log("Trimming application binaries...");
                 await packageManager.TrimApplication(new FileInfo(Path.Combine(outputPath, "App.dll")), osVersion, includePdbs, cancellationToken: cancellationToken);
 
                 outputLogger.Log("Deploying application...");
-                await AppManager.DeployApplication(packageManager, connection, osVersion, outputPath, includePdbs, false, outputLogger, cancellationToken);
+                await AppManager.DeployApplication(packageManager, meadowConnection, osVersion, outputPath, includePdbs, false, outputLogger, cancellationToken);
 
-                await connection.RuntimeEnable();
+                await Task.Delay(1500);
+
+                await meadowConnection.RuntimeEnable();
 
                 await outputLogger.ShowBuildOutputPane();
             }
             finally
             {
-                connection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
+                meadowConnection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
             }
         }
 
