@@ -9,42 +9,41 @@ namespace Meadow
 {
     class MeadowSoftDebuggerSession : SoftDebuggerSession, IDisposable
     {
-        private readonly CancellationTokenSource meadowDebugCancelTokenSource;
+        private readonly CancellationTokenSource meadowDebugCancelTokenSource = new CancellationTokenSource();
         private DebuggingServer meadowDebugServer;
-        private readonly IMeadowConnection connection;
+        private readonly IMeadowConnection meadowConnection;
         private readonly ILogger logger;
 
-        private readonly OutputLogger outputLogger = OutputLogger.Instance;
         private bool disposed = false;
 
         public MeadowSoftDebuggerSession(IMeadowConnection connection, ILogger deployOutputLogger)
         {
-            this.connection = connection;
-            this.logger = deployOutputLogger;
-            meadowDebugCancelTokenSource = new CancellationTokenSource();
+            this.meadowConnection = connection ?? throw new ArgumentNullException(nameof(connection));
+            this.logger = deployOutputLogger ?? throw new ArgumentNullException(nameof(deployOutputLogger));
+
         }
 
         protected override async void OnRun(DebuggerStartInfo startInfo)
         {
             try
             {
-                var meadowStartInfo = startInfo as SoftDebuggerStartInfo;
-                var connectArgs = meadowStartInfo?.StartArgs as SoftDebuggerConnectArgs;
-                var port = connectArgs?.DebugPort ?? 0;
+                if (!(startInfo is SoftDebuggerStartInfo meadowStartInfo)
+                || !(meadowStartInfo.StartArgs is SoftDebuggerConnectArgs connectArgs))
+                {
+                    throw new ArgumentException("Invalid DebuggerStartInfo or DebuggerConnectArgs.");
+                }
 
-                //get device
-                await connection.Attach(meadowDebugCancelTokenSource.Token);
+                var port = connectArgs.DebugPort;
 
-                var debugSessionTask = connection.StartDebuggingSession(port, logger, meadowDebugCancelTokenSource.Token);
-
-                base.OnRun(startInfo);
-
-                meadowDebugServer = await debugSessionTask;
+                meadowDebugServer = await meadowConnection.StartDebuggingSession(port, logger, meadowDebugCancelTokenSource.Token);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to start debugging session");
-                throw;
+                throw new DebuggerException("Failed to start debugging session", ex);
+            }
+            finally
+            {
+                base.OnRun(startInfo);
             }
         }
 
@@ -52,21 +51,20 @@ namespace Meadow
         {
             try
             {
-                if (!meadowDebugCancelTokenSource.IsCancellationRequested)
-                {
-                    meadowDebugCancelTokenSource.Cancel();
-                }
+                meadowDebugCancelTokenSource.Cancel();
 
                 await meadowDebugServer?.StopListening();
                 meadowDebugServer?.Dispose();
                 meadowDebugServer = null;
-
-                base.OnExit();
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Failed to stop debugging session");
                 throw;
+            }
+            finally
+            {
+                base.OnExit();
             }
         }
 
@@ -76,7 +74,8 @@ namespace Meadow
             {
                 if (disposing)
                 {
-                    meadowDebugCancelTokenSource?.Dispose();
+                    meadowDebugCancelTokenSource.Cancel();
+                    meadowDebugCancelTokenSource.Dispose();
                     meadowDebugServer?.Dispose();
                 }
 
