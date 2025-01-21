@@ -90,20 +90,23 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.ProjectSystem">
-      <Version>16.2.133-pre</Version>
+      <Version>17.9.380</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.ProjectSystem.Managed" Version="2.0.6142705" />
     <PackageReference Include="Microsoft.VisualStudio.ProjectSystem.Managed.VS" Version="2.0.6142705" />
+    <PackageReference Include="Microsoft.VisualStudio.ProjectSystem.VS">
+      <Version>17.9.380</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.SDK">
-      <Version>17.10.40171</Version>
+      <Version>17.12.40392</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VSSDK.BuildTools">
-      <Version>17.10.2185</Version>
+      <Version>17.12.2069</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="System.IO.Ports">
-      <Version>7.0.0</Version>
+      <Version>8.*</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
