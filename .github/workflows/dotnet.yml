@@ -35,7 +35,7 @@ jobs:
       with:
         repository: WildernessLabs/Meadow.CLI
         path: Meadow.CLI
-        ref: dominique-TestDebugging
+        ref: develop
 
     - name: Checkout Meadow.Contracts side-by-side
       uses: actions/checkout@v4
@@ -44,12 +44,10 @@ jobs:
         path: Meadow.Contracts
         ref: main
 
-    - name: Setup .NET Core SDK 6.0.x, 7.0.x & 8.0.x
+    - name: Setup .NET Core SDK 8.0.x
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: |
-          6.0.x
-          7.0.x
           8.0.x
 
     - name: Setup NuGet
