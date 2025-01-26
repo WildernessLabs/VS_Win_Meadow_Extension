@@ -9,15 +9,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{D11E57
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "VS_Win_Meadow_Extension.Shared", "VS_Meadow_Extension\VS_Meadow_Extension.Shared\VS_Win_Meadow_Extension.Shared.shproj", "{6BD8A462-77A3-442D-97C8-36CBDA794DC9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.HCom", "..\Meadow.CLI\Source\v2\Meadow.Hcom\Meadow.HCom.csproj", "{10F00ED3-2DCA-41FD-9BF8-23A9CE1510BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.HCom", "..\Meadow.CLI\Source\Meadow.Hcom\Meadow.HCom.csproj", "{10F00ED3-2DCA-41FD-9BF8-23A9CE1510BD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Tooling.Core", "..\Meadow.CLI\Source\v2\Meadow.Tooling.Core\Meadow.Tooling.Core.csproj", "{A631D6CB-B93F-472F-8D3B-48FDA054F164}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Tooling.Core", "..\Meadow.CLI\Source\Meadow.Tooling.Core\Meadow.Tooling.Core.csproj", "{A631D6CB-B93F-472F-8D3B-48FDA054F164}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.SoftwareManager", "..\Meadow.CLI\Source\v2\Meadow.SoftwareManager\Meadow.SoftwareManager.csproj", "{2CEDC952-4148-45BA-A6D7-F6997BFCAD86}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.SoftwareManager", "..\Meadow.CLI\Source\Meadow.SoftwareManager\Meadow.SoftwareManager.csproj", "{2CEDC952-4148-45BA-A6D7-F6997BFCAD86}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Linker", "..\Meadow.CLI\Source\v2\Meadow.Linker\Meadow.Linker.csproj", "{AD03F2D4-5341-414B-9F61-03C111AEF765}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Linker", "..\Meadow.CLI\Source\Meadow.Linker\Meadow.Linker.csproj", "{AD03F2D4-5341-414B-9F61-03C111AEF765}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Cloud.Client", "..\Meadow.CLI\Source\v2\Meadow.Cloud.Client\Meadow.Cloud.Client.csproj", "{FB1DF5C8-039B-46F0-80B2-650DEDFCDF27}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Cloud.Client", "..\Meadow.CLI\Source\Meadow.Cloud.Client\Meadow.Cloud.Client.csproj", "{FB1DF5C8-039B-46F0-80B2-650DEDFCDF27}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
