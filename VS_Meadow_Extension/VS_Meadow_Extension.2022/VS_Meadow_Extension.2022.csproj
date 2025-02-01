@@ -116,19 +116,19 @@
     <None Include="Key.snk" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Meadow.CLI\Source\v2\Meadow.Cloud.Client\Meadow.Cloud.Client.csproj">
+    <ProjectReference Include="..\..\..\Meadow.CLI\Source\Meadow.Cloud.Client\Meadow.Cloud.Client.csproj">
       <Project>{FB1DF5C8-039B-46F0-80B2-650DEDFCDF27}</Project>
       <Name>Meadow.Cloud.Client</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Meadow.CLI\Source\v2\Meadow.Hcom\Meadow.HCom.csproj">
+    <ProjectReference Include="..\..\..\Meadow.CLI\Source\Meadow.Hcom\Meadow.HCom.csproj">
       <Project>{10f00ed3-2dca-41fd-9bf8-23a9ce1510bd}</Project>
       <Name>Meadow.HCom</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Meadow.CLI\Source\v2\Meadow.SoftwareManager\Meadow.SoftwareManager.csproj">
+    <ProjectReference Include="..\..\..\Meadow.CLI\Source\Meadow.SoftwareManager\Meadow.SoftwareManager.csproj">
       <Project>{2CEDC952-4148-45BA-A6D7-F6997BFCAD86}</Project>
       <Name>Meadow.SoftwareManager</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\Meadow.CLI\Source\v2\Meadow.Tooling.Core\Meadow.Tooling.Core.csproj">
+    <ProjectReference Include="..\..\..\Meadow.CLI\Source\Meadow.Tooling.Core\Meadow.Tooling.Core.csproj">
       <Project>{a631d6cb-b93f-472f-8d3b-48fda054f164}</Project>
       <Name>Meadow.Tooling.Core</Name>
     </ProjectReference>
