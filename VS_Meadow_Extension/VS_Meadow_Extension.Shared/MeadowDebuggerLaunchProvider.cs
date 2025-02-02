@@ -1,9 +1,7 @@
-﻿using Meadow.CLI;
-using Meadow.CLI.Commands.DeviceManagement;
+﻿using Meadow.CLI.Commands.DeviceManagement;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Debug;
 using Microsoft.VisualStudio.ProjectSystem.VS.Debug;
-using Microsoft.VisualStudio.Settings;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 using Mono.Debugging.Soft;
