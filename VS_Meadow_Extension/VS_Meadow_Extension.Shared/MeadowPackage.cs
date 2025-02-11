@@ -112,6 +112,7 @@ namespace Meadow
                         if (portList.Count > 0)
                         {
                             string deviceTarget = string.Empty;
+
                             var route = SettingsManager.GetSetting(SettingsManager.PublicSettings.Route);
                             bool IsSavedValueInPortList = IsValueInPortList(portList, route);
                             if (IsSavedValueInPortList)
@@ -232,6 +233,7 @@ namespace Meadow
                     // Handle installation failure
                 }
             }
+
         }
 
         /// <summary>
@@ -241,7 +243,7 @@ namespace Meadow
         /// <returns><c>true</c> if the package is installed successfully; otherwise, <c>false</c>.</returns>
         private async Task<bool> InstallPackage(string packageName)
         {
-            return await StartDotNetProcess("new install", packageName);
+            return await StartDotNetProcess("new install", packageName, cancellationToken);
         }
 
         /// <summary>
@@ -251,7 +253,7 @@ namespace Meadow
         /// <returns><c>true</c> if the template is installed; otherwise, <c>false</c>.</returns>
         private async Task<bool> IsTemplateInstalled(string templateName)
         {
-            return await StartDotNetProcess("new list", templateName);
+            return await StartDotNetProcess("new list", templateName, cancellationToken);
         }
 
         /// <summary>
@@ -262,18 +264,26 @@ namespace Meadow
         /// <returns><c>true</c> if the process completes successfully; otherwise, <c>false</c>.</returns>
         private async Task<bool> StartDotNetProcess(string command, string parameters)
         {
-            return await Task.Run(async () =>
+            using (var process = new System.Diagnostics.Process())
             {
-                System.Diagnostics.Process process = new System.Diagnostics.Process();
                 process.StartInfo.FileName = "dotnet";
                 process.StartInfo.Arguments = $"{command} {parameters}";
                 process.StartInfo.RedirectStandardOutput = true;
+                process.StartInfo.RedirectStandardError = true;
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.CreateNoWindow = true;
+
+                var outputBuilder = string.Empty;
+                var errorBuilder = string.Empty;
+
+                // Event handlers for async output reading
+                process.OutputDataReceived += (sender, args) => outputBuilder += Environment.NewLine + args.Data;
+                process.ErrorDataReceived += (sender, args) => errorBuilder += Environment.NewLine + args.Data;
+
                 process.Start();
 
-                string output = await process.StandardOutput.ReadToEndAsync();
-                process.WaitForExit();
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
 
                 return output.Contains(parameters);
             });
