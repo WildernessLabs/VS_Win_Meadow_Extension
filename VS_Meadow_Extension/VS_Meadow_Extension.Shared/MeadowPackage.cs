@@ -1,15 +1,17 @@
-﻿using System;
+﻿using EnvDTE;
+using EnvDTE80;
+using Meadow.CLI;
+using Meadow.CLI.Commands.DeviceManagement;
+using Microsoft;
+using Microsoft.VisualStudio.Shell;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
-using Microsoft.VisualStudio.Shell;
-
-using Meadow.CLI.Core.DeviceManagement;
-using Meadow.Helpers;
-using System.Collections.Generic;
-using System.Net.NetworkInformation;
 
 namespace Meadow
 {
@@ -31,34 +33,25 @@ namespace Meadow
     /// </para>
     /// </remarks>
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
-    [InstalledProductRegistration("#1110", "#1112", Globals.AssemblyVersion, IconResourceID = 1400)] // Info on this package for Help/About
+    [InstalledProductRegistration("#1110", "#1112", Globals.AssemblyVersion, IconResourceID = 1400)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [Guid(GuidList.guidMeadowPackageString)]
     public sealed class MeadowPackage : AsyncPackage
     {
         private const string NoDevicesFound = "No Devices Found";
+        private static SettingsManager SettingsManager { get; set; } = new SettingsManager();
 
-        public static bool DebugOrDeployInProgress { get; set; } = false;
-
-        private MeadowSettings meadowSettings = new MeadowSettings(Globals.SettingsFilePath);
+        private DTE2 _dte;
+        private DebuggerEvents _debuggerEvents;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MeadowPackage"/> class.
         /// </summary>
-        public MeadowPackage()
-        {
-            // Inside this method you can place any initialization code that does not require
-            // any Visual Studio service because at this point the package object is created but
-            // not sited yet inside Visual Studio environment. The place to do all the other
-            // initialization is the Initialize method.
-        }
-
-
-        #region Package Members
+        public MeadowPackage() { }
 
         /// <summary>
         /// Initialization of the package; this method is called right after the package is sited, so this is the place
-        /// where you can put all the initialization code that rely on services provided by VisualStudio.
+        /// where you can put all the initialization code that relies on services provided by VisualStudio.
         /// </summary>
         /// <param name="cancellationToken">A cancellation token to monitor for initialization cancellation, which can occur when VS is shutting down.</param>
         /// <param name="progress">A provider for progress updates.</param>
@@ -67,14 +60,8 @@ namespace Meadow
         {
             await base.InitializeAsync(cancellationToken, progress);
 
-            // When initialized asynchronously, the current thread may be a background thread at this point.
-            // Do any initialization that requires the UI thread after switching to the UI thread.
-            await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-
-            // Install dependencies
             await InstallDependencies();
 
-            // Add our command handlers for menu (commands must be declared in the .vsct file)
             if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService mcs)
             {
                 CommandID menuMeadowDeviceListComboCommandID = new CommandID(GuidList.guidMeadowPackageCmdSet, (int)PkgCmdIDList.cmdidMeadowDeviceListCombo);
@@ -85,30 +72,52 @@ namespace Meadow
                 MenuCommand menuMeadowDeviceListComboGetListCommand = new OleMenuCommand(new EventHandler(OnMeadowDeviceListComboGetList), menuMeadowDeviceListComboGetListCommandID);
                 mcs.AddCommand(menuMeadowDeviceListComboGetListCommand);
             }
-        }
-        #endregion
 
+            await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+
+            // Initialize DTE2 and subscribe to debugger events
+            _dte = await GetServiceAsync(typeof(DTE)) as DTE2;
+            Assumes.Present(_dte);
+            _debuggerEvents = _dte.Events.DebuggerEvents;
+            _debuggerEvents.OnEnterDesignMode += OnEnterDesignMode;
+        }
+
+        /// <summary>
+        /// Event handler called when the debugger enters design mode (i.e., when the debugging session stops).
+        /// </summary>
+        /// <param name="reason">The reason the debugger entered design mode.</param>
+        private void OnEnterDesignMode(dbgEventReason reason)
+        {
+            System.Diagnostics.Debug.WriteLine("Debugging session stopped.");
+            // Add your custom logic here
+        }
+
+        /// <summary>
+        /// Event handler for the Meadow device list combo box.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
         private async void OnMeadowDeviceListCombo(object sender, EventArgs e)
         {
-            if (!DebugOrDeployInProgress)
+            if (!Globals.DebugOrDeployInProgress)
             {
                 if (e is OleMenuCmdEventArgs eventArgs)
                 {
-                    var portList = await MeadowDeviceManager.GetSerialPorts();
+                    var portList = await MeadowConnectionManager.GetSerialPorts();
 
                     IntPtr vOut = eventArgs.OutValue;
 
-                    // when vOut is non-NULL, the IDE is requesting the current value for the combo
                     if (vOut != IntPtr.Zero)
                     {
                         if (portList.Count > 0)
                         {
                             string deviceTarget = string.Empty;
 
-                            bool IsSavedValueInPortList = IsValueInPortList(portList, meadowSettings.DeviceTarget);
+                            var route = SettingsManager.GetSetting(SettingsManager.PublicSettings.Route);
+                            bool IsSavedValueInPortList = IsValueInPortList(portList, route);
                             if (IsSavedValueInPortList)
                             {
-                                deviceTarget = meadowSettings.DeviceTarget;
+                                deviceTarget = route;
                             }
 
                             Marshal.GetNativeVariantForObject(deviceTarget, vOut);
@@ -120,7 +129,6 @@ namespace Meadow
                     }
                     else if (eventArgs.InValue is string newChoice)
                     {
-                        // new value was selected check if it is in our list
                         bool valueInPortList = IsValueInPortList(portList, newChoice);
 
                         if (valueInPortList)
@@ -138,15 +146,19 @@ namespace Meadow
                 }
                 else
                 {
-                    // We should never get here; EventArgs are required.
-                    throw (new ArgumentException("EventArgs Required")); // force an exception to be thrown
+                    throw new ArgumentException("EventArgs Required");
                 }
             }
         }
 
+        /// <summary>
+        /// Event handler to get the list of Meadow devices for the combo box.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
         private async void OnMeadowDeviceListComboGetList(object sender, EventArgs e)
         {
-            if (!DebugOrDeployInProgress)
+            if (!Globals.DebugOrDeployInProgress)
             {
                 if (e is OleMenuCmdEventArgs eventArgs)
                 {
@@ -155,11 +167,11 @@ namespace Meadow
 
                     if (inParam != null)
                     {
-                        throw (new ArgumentException("InParam Invalid")); // force an exception to be thrown
+                        throw new ArgumentException("InParam Invalid");
                     }
                     else if (vOut != IntPtr.Zero)
                     {
-                        var portList = await MeadowDeviceManager.GetSerialPorts();
+                        var portList = await MeadowConnectionManager.GetSerialPorts();
                         if (portList.Count > 0)
                         {
                             Marshal.GetNativeVariantForObject(portList, vOut);
@@ -171,12 +183,18 @@ namespace Meadow
                     }
                     else
                     {
-                        throw (new ArgumentException("OutParam Required")); // force an exception to be thrown
+                        throw (new ArgumentException("OutParam Required"));
                     }
                 }
             }
         }
 
+        /// <summary>
+        /// Checks if a given value is in the port list.
+        /// </summary>
+        /// <param name="portList">The list of ports.</param>
+        /// <param name="newChoice">The new choice to check.</param>
+        /// <returns><c>true</c> if the value is in the port list; otherwise, <c>false</c>.</returns>
         private static bool IsValueInPortList(IList<string> portList, string newChoice)
         {
             bool validInput = false;
@@ -192,43 +210,57 @@ namespace Meadow
             return validInput;
         }
 
+        /// <summary>
+        /// Saves the selected device choice to settings.
+        /// </summary>
+        /// <param name="newChoice">The new choice to save.</param>
         private void SaveDeviceChoiceToSettings(string newChoice)
         {
-            meadowSettings.DeviceTarget = newChoice;
-            meadowSettings.Save();
+            SettingsManager.SaveSetting(SettingsManager.PublicSettings.Route, newChoice);
         }
 
+        /// <summary>
+        /// Installs necessary dependencies.
+        /// </summary>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         private async Task InstallDependencies()
         {
-            // No point installing if we don't have an internet connection
             if (NetworkInterface.GetIsNetworkAvailable())
             {
-                //string templateName = "Meadow";
-                // Check if the package is installed
-                //if (!await IsTemplateInstalled(templateName))
+                string packageName = "WildernessLabs.Meadow.Template";
+                if (!await InstallPackage(packageName))
                 {
-                    string packageName = "WildernessLabs.Meadow.Template";
-
-                    // Install the package.
-                    // If an update is available it should update it automagically.
-                    if (!await InstallPackage(packageName))
-                    {
-                        // Unable to install ProjectTemplates Throw Up a Message??
-                    }
+                    // Handle installation failure
                 }
             }
         }
 
+        /// <summary>
+        /// Installs the specified package.
+        /// </summary>
+        /// <param name="packageName">The name of the package to install.</param>
+        /// <returns><c>true</c> if the package is installed successfully; otherwise, <c>false</c>.</returns>
         private async Task<bool> InstallPackage(string packageName)
         {
             return await StartDotNetProcess("new install", packageName);
         }
 
+        /// <summary>
+        /// Checks if the specified template is installed.
+        /// </summary>
+        /// <param name="templateName">The name of the template to check.</param>
+        /// <returns><c>true</c> if the template is installed; otherwise, <c>false</c>.</returns>
         private async Task<bool> IsTemplateInstalled(string templateName)
         {
             return await StartDotNetProcess("new list", templateName);
         }
 
+        /// <summary>
+        /// Starts a .NET process with the specified command and parameters.
+        /// </summary>
+        /// <param name="command">The command to execute.</param>
+        /// <param name="parameters">The parameters for the command.</param>
+        /// <returns><c>true</c> if the process completes successfully; otherwise, <c>false</c>.</returns>
         private async Task<bool> StartDotNetProcess(string command, string parameters)
         {
             return await Task.Run(async () =>
@@ -244,12 +276,14 @@ namespace Meadow
                 string output = await process.StandardOutput.ReadToEndAsync();
                 process.WaitForExit();
 
-                // Check if the package name exists in the output
                 return output.Contains(parameters);
             });
         }
     }
 
+    /// <summary>
+    /// Contains GUID constants for the Meadow package.
+    /// </summary>
     static class GuidList
     {
         /// <summary>
@@ -263,9 +297,18 @@ namespace Meadow
         public static readonly Guid guidMeadowPackageCmdSet = new Guid(guidMeadowPackageCmdSetString);
     }
 
+    /// <summary>
+    /// Contains command ID constants for the Meadow package.
+    /// </summary>
     static class PkgCmdIDList
     {
+        /// <summary>
+        /// Command ID for the Meadow device list combo box.
+        /// </summary>
         public const uint cmdidMeadowDeviceListCombo = 0x101;
+        /// <summary>
+        /// Command ID for getting the list of Meadow devices.
+        /// </summary>
         public const uint cmdidMeadowDeviceListComboGetList = 0x102;
     }
 }

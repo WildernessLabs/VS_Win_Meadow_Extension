@@ -20,17 +20,15 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Extensions.cs">
     </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)MeadowProvider.cs">
-    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MeadowSoftDebuggerSession.cs">
     </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)MonoDebugLaunchSettings.cs">
+    <Compile Include="$(MSBuildThisFileDirectory)MeadowDebugLaunchSettings.cs">
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MeadowDebuggerLaunchProvider.cs">
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MeadowPackage.cs">
     </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)DeployProvider.cs">
+    <Compile Include="$(MSBuildThisFileDirectory)MeadowDeployProvider.cs">
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Globals.cs">
     </Compile>
@@ -38,13 +36,8 @@
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)ProjectProperties.cs">
     </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)SimpleFileLogger.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utility\OutputLogger.cs">
-    </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)SerialDevice.cs">
-    </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)STDfuDevice.cs">
-    </Compile>
-    <Compile Include="$(MSBuildThisFileDirectory)Utility\OutputPaneWriter.cs">
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)VsixManifest.cs">
     </Compile>
@@ -53,14 +46,6 @@
     <Content Include="$(MSBuildThisFileDirectory)Resources\MeadowPackage.ico">
     </Content>
     <Content Include="$(MSBuildThisFileDirectory)Resources\MeadowWindowCommand.png">
-    </Content>
-    <Content Include="$(MSBuildThisFileDirectory)STDFU.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
-    </Content>
-    <Content Include="$(MSBuildThisFileDirectory)STTubeDevice30.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="$(MSBuildThisFileDirectory)wildernesslabs_icon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -84,6 +69,7 @@
     <None Include="$(MSBuildThisFileDirectory)BuildSystem\DeployedBuildSystem\VS_Meadow_Extension.targets">
       <SubType>Designer</SubType>
     </None>
+    <None Include="$(MSBuildThisFileDirectory)Directory.Build.props" />
   </ItemGroup>
   <!--
   The XAML files provide buth compile-time implementations for CPS rules as well as

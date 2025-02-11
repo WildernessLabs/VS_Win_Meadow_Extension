@@ -1,51 +1,93 @@
-﻿using System;
-using System.Net;
-using System.Diagnostics;
-using System.Threading;
-
+﻿using Meadow.Hcom;
+using Microsoft.Extensions.Logging;
 using Mono.Debugging.Client;
 using Mono.Debugging.Soft;
-
-using Meadow.CLI.Core.DeviceManagement;
-using Meadow.CLI.Core.Devices;
-using Meadow.CLI.Core.Internals.MeadowCommunication.ReceiveClasses;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Meadow
 {
-    class MeadowSoftDebuggerSession : SoftDebuggerSession
+    class MeadowSoftDebuggerSession : SoftDebuggerSession, IDisposable
     {
-		CancellationTokenSource meadowDebugCancelTokenSource;
-		DebuggingServer meadowDebugServer;
-        MeadowDeviceHelper meadow;
+        private readonly CancellationTokenSource meadowDebugCancelTokenSource;
+        private DebuggingServer meadowDebugServer;
+        private readonly IMeadowConnection connection;
+        private readonly ILogger logger;
 
-        public MeadowSoftDebuggerSession(MeadowDeviceHelper meadow)
+        private readonly OutputLogger outputLogger = OutputLogger.Instance;
+        private bool disposed = false;
+
+        public MeadowSoftDebuggerSession(IMeadowConnection connection, ILogger deployOutputLogger)
         {
-            this.meadow = meadow;
+            this.connection = connection;
+            this.logger = deployOutputLogger;
             meadowDebugCancelTokenSource = new CancellationTokenSource();
         }
 
         protected override async void OnRun(DebuggerStartInfo startInfo)
         {
-            var meadowStartInfo = startInfo as SoftDebuggerStartInfo;
-            var connectArgs = meadowStartInfo.StartArgs as SoftDebuggerConnectArgs;
-            var port = connectArgs?.DebugPort ?? 0;
+            try
+            {
+                var meadowStartInfo = startInfo as SoftDebuggerStartInfo;
+                var connectArgs = meadowStartInfo?.StartArgs as SoftDebuggerConnectArgs;
+                var port = connectArgs?.DebugPort ?? 0;
 
-            meadowDebugServer = await meadow.StartDebuggingSession(port, meadowDebugCancelTokenSource.Token);
+                var debugSessionTask = connection.StartDebuggingSession(port, logger, meadowDebugCancelTokenSource.Token);
 
-            base.OnRun(startInfo);
+                Task.WaitAll(Task.Run(() => base.OnRun(startInfo)), debugSessionTask);
+
+                meadowDebugServer = debugSessionTask.Result;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to start debugging session");
+                throw;
+            }
         }
 
         protected override async void OnExit()
         {
-            if (!meadowDebugCancelTokenSource.IsCancellationRequested)
-                meadowDebugCancelTokenSource?.Cancel();
+            try
+            {
+                if (!meadowDebugCancelTokenSource.IsCancellationRequested)
+                {
+                    meadowDebugCancelTokenSource.Cancel();
+                }
 
-            await meadowDebugServer?.StopListening();
-            meadowDebugServer?.Dispose();
-            meadowDebugServer = null;
-            meadow?.Dispose();
+                await meadowDebugServer?.StopListening();
+                meadowDebugServer?.Dispose();
+                meadowDebugServer = null;
 
-            base.OnExit();
+                base.OnExit();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to stop debugging session");
+                throw;
+            }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposed)
+            {
+                if (disposing)
+                {
+                    meadowDebugCancelTokenSource?.Dispose();
+                    meadowDebugServer?.Dispose();
+                }
+
+                disposed = true;
+            }
+        }
+
+        public override void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+
+            base.Dispose();
         }
     }
 }

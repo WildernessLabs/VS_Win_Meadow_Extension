@@ -4,6 +4,18 @@ For step by step instructions on using this extension, [check out the tutorial](
 
 ## Release Notes
 
+### 2.0.0
+
+- Use Meadow.CLI v2 under the hood
+
+### 1.9.9.2
+
+- Lazy load settings and ensure Template installation happens in a background thread.
+
+### 1.9.9.1
+
+- Update NoLink list
+
 ### 1.9.9
 
 - Include ProjectLab in NoLink list

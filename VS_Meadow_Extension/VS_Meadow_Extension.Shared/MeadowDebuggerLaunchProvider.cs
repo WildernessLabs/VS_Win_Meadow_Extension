@@ -1,24 +1,19 @@
-﻿using System;
-using System.Net;
-using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.Threading.Tasks;
-
-using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
+﻿using Meadow.CLI.Commands.DeviceManagement;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Debug;
 using Microsoft.VisualStudio.ProjectSystem.VS.Debug;
-
+using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Interop;
 using Mono.Debugging.Soft;
 using Mono.Debugging.VisualStudio;
-
-using Meadow.CLI.Core.Devices;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.Composition;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace Meadow
 {
-    using DebuggerSession = Mono.Debugging.VisualStudio.DebuggerSession;
-
     [Export(typeof(IDebugProfileLaunchTargetsProvider))]
     [AppliesTo(Globals.MeadowCapability)]
     [Order(999)]
@@ -34,48 +29,61 @@ namespace Meadow
 
         // FIXME: Find a nicer way than storing this
         DebuggerSession vsSession;
-        private ConfiguredProject configuredProject;
+        private readonly ConfiguredProject configuredProject;
 
-        // https://github.com/microsoft/VSProjectSystem/blob/master/doc/overview/mef.md
         [ImportMany(ExportContractNames.VsTypes.IVsHierarchy)]
-        OrderPrecedenceImportCollection<IVsHierarchy> vsHierarchies;
+        readonly OrderPrecedenceImportCollection<IVsHierarchy> vsHierarchies;
 
         IVsHierarchy VsHierarchy => vsHierarchies.Single().Value;
 
-        public bool SupportsProfile(ILaunchProfile profile) => true; // FIXME: Would we ever not?
+        public bool SupportsProfile(ILaunchProfile profile) => true;
+
+        private readonly int DebugPort = 55898;
+
+        static readonly OutputLogger outputLogger = OutputLogger.Instance;
+
+        private readonly CLI.SettingsManager settingsManager = new CLI.SettingsManager();
+        private readonly MeadowConnectionManager connectionManager = null;
 
         [ImportingConstructor]
-        public MeadowDebuggerLaunchProvider(ConfiguredProject configuredProj)
+        public MeadowDebuggerLaunchProvider(ConfiguredProject configuredProject)
         {
-            this.configuredProject = configuredProj;
+            this.configuredProject = configuredProject;
+            this.connectionManager = new MeadowConnectionManager(settingsManager);
 
             vsHierarchies = new OrderPrecedenceImportCollection<IVsHierarchy>(
-                projectCapabilityCheckProvider: configuredProj);
+                projectCapabilityCheckProvider: configuredProject);
         }
 
         public async Task<IReadOnlyList<IDebugLaunchSettings>> QueryDebugTargetsAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
         {
-            DeployProvider.Meadow?.Dispose();
+            // If debugging is requested, warn the user and cancel launching.
+            if (!launchOptions.HasFlag(DebugLaunchOptions.NoDebug))
+            {
+                outputLogger.Log("Debugging isn't supported from Visual Visual Studio 2022 - deploying app");
 
-            var device = await MeadowProvider.GetMeadowSerialDeviceAsync(logger: DeployProvider.DeployOutputLogger);
+                // Return no debug launch settings so that nothing happens.
+                return Array.Empty<IDebugLaunchSettings>();
+            }
+
+            var meadowConnection = MeadowDeployProvider.MeadowConnection;
 
             if (!launchOptions.HasFlag(DebugLaunchOptions.NoDebug)
-                && await IsMeadowApp()
-                && device != null)
+                && await IsProjectAMeadowApp()
+                && meadowConnection != null)
             {
-                MeadowPackage.DebugOrDeployInProgress = true;
-                DeployProvider.Meadow = new MeadowDeviceHelper(device, DeployProvider.DeployOutputLogger);
+                Globals.DebugOrDeployInProgress = true;
 
-                var meadowSession = new MeadowSoftDebuggerSession(DeployProvider.Meadow);
+                var meadowSession = new MeadowSoftDebuggerSession(meadowConnection, outputLogger);
 
-                var startArgs = new SoftDebuggerConnectArgs(profile.Name, IPAddress.Loopback, 55898);
-                await Microsoft.VisualStudio.Shell.ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                var startArgs = new SoftDebuggerConnectArgs(profile.Name, IPAddress.Loopback, DebugPort);
+                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
                 var startInfo = new StartInfo(startArgs, debuggingOptions, VsHierarchy.GetProject());
 
                 var sessionInfo = new SessionMarshalling(meadowSession, startInfo);
-                vsSession = new DebuggerSession(startInfo, DeployProvider.DeployOutputLogger, meadowSession, this);
+                vsSession = new DebuggerSession(startInfo, outputLogger, meadowSession, this);
 
-                var settings = new MonoDebugLaunchSettings(launchOptions, sessionInfo);
+                var settings = new MeadowDebugLaunchSettings(launchOptions, sessionInfo);
 
                 return new[] { settings };
             }
@@ -88,39 +96,30 @@ namespace Meadow
 
         public Task OnBeforeLaunchAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile) => Task.CompletedTask;
 
-        public Task OnAfterLaunchAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
+        public async Task OnAfterLaunchAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
         {
             if (vsSession != null)
             {
                 vsSession.Start();
-                MeadowPackage.DebugOrDeployInProgress = false;
+                Globals.DebugOrDeployInProgress = false;
 
-                _ = Task.Run(async () =>
-                {
-                    await Task.Delay(10000);
-                    await DeployProvider.DeployOutputLogger?.ShowMeadowLogs();
-                });
+                await OutputLogger.Instance.ShowMeadowOutputPane();
             }
-
-            return Task.CompletedTask;
         }
 
         bool IDebugLauncher.StartDebugger(SoftDebuggerSession session, StartInfo startInfo)
         {
-            // nop here because VS is responseable for starting us and then calling On*LaunchAsync above
+            // nop here because VS is responsible for starting us and then calling OnLaunchAsync above
             return true;
         }
 
-        private async Task<bool> IsMeadowApp()
+        private async Task<bool> IsProjectAMeadowApp()
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-            // Assume configuredProject is your ConfiguredProject object
             var properties = configuredProject.Services.ProjectPropertiesProvider.GetCommonProperties();
-
-            // We unfortunately still need to retrieve the AssemblyName property because we need both
-            // the configuredProject to be a start-up project, but also an App (not library)
             string assemblyName = await properties.GetEvaluatedPropertyValueAsync("AssemblyName");
+
             if (!string.IsNullOrEmpty(assemblyName) && assemblyName.Equals("App", StringComparison.OrdinalIgnoreCase))
             {
                 return true;
