@@ -3,6 +3,7 @@
   <PropertyGroup>
     <MinimumVisualStudioVersion>17.0</MinimumVisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>true</SignAssembly>
@@ -19,7 +20,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Meadow</RootNamespace>
     <AssemblyName>Meadow.2022</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <GeneratePkgDefFile>true</GeneratePkgDefFile>
     <UseCodebase>true</UseCodebase>
     <IncludeAssemblyInVSIXContainer>true</IncludeAssemblyInVSIXContainer>
@@ -89,18 +90,30 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.ProjectSystem">
-      <Version>16.2.133-pre</Version>
+    <PackageReference Include="MessagePack">
+      <Version>2.5.187</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.VisualStudio.ProjectSystem.Managed" Version="2.0.1.0" />
-    <PackageReference Include="Microsoft.VisualStudio.ProjectSystem.Managed.VS" Version="2.0.1.0" />
+    <PackageReference Include="Microsoft.IO.Redist">
+      <Version>6.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.ProjectSystem">
+      <Version>17.9.380</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.ProjectSystem.Managed" Version="2.0.6142705" />
+    <PackageReference Include="Microsoft.VisualStudio.ProjectSystem.Managed.VS" Version="2.0.6142705" />
+    <PackageReference Include="Microsoft.VisualStudio.ProjectSystem.VS">
+      <Version>17.9.380</Version>
+    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.SDK">
-      <Version>17.8.37222</Version>
+      <Version>17.11.40262</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.VSSDK.BuildTools">
-      <Version>17.8.2365</Version>
+      <Version>17.12.2069</Version>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="System.IO.Ports">
+      <Version>8.*</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
@@ -110,10 +123,25 @@
     <None Include="Key.snk" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Meadow.CLI\Meadow.CLI.Core\Meadow.CLI.Core.VS2019.csproj">
-      <Project>{a48fc00c-9ba3-43e3-ba1d-55fd6128d425}</Project>
-      <Name>Meadow.CLI.Core.VS2019</Name>
+    <ProjectReference Include="..\..\..\Meadow.CLI\Source\Meadow.Cloud.Client\Meadow.Cloud.Client.csproj">
+      <Project>{FB1DF5C8-039B-46F0-80B2-650DEDFCDF27}</Project>
+      <Name>Meadow.Cloud.Client</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\Meadow.CLI\Source\Meadow.Hcom\Meadow.HCom.csproj">
+      <Project>{10f00ed3-2dca-41fd-9bf8-23a9ce1510bd}</Project>
+      <Name>Meadow.HCom</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Meadow.CLI\Source\Meadow.SoftwareManager\Meadow.SoftwareManager.csproj">
+      <Project>{2CEDC952-4148-45BA-A6D7-F6997BFCAD86}</Project>
+      <Name>Meadow.SoftwareManager</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Meadow.CLI\Source\Meadow.Tooling.Core\Meadow.Tooling.Core.csproj">
+      <Project>{a631d6cb-b93f-472f-8d3b-48fda054f164}</Project>
+      <Name>Meadow.Tooling.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="GlobalSuppressions.cs" />
   </ItemGroup>
   <Import Project="..\VS_Meadow_Extension.Shared\VS_Win_Meadow_Extension.Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

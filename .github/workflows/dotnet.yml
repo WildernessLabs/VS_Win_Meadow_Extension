@@ -1,6 +1,6 @@
 name: VS4Win Extension
 env:
-  IDE_TOOLS_RELEASE_VERSION: 1.9.9.2
+  IDE_TOOLS_RELEASE_VERSION: 2.0.0
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
         path: main
 
     - if: ${{ github.ref == 'refs/heads/main' }}
-      name: Checkout Meadow.CLI.Core side-by-side
+      name: Checkout Meadow.CLI side-by-side
       uses: actions/checkout@v4
       with:
         repository: WildernessLabs/Meadow.CLI
@@ -30,19 +30,24 @@ jobs:
         ref: main
 
     - if: ${{ github.ref != 'refs/heads/main' }}
-      name: Checkout Meadow.CLI.Core side-by-side
+      name: Checkout Meadow.CLI side-by-side
       uses: actions/checkout@v4
       with:
         repository: WildernessLabs/Meadow.CLI
         path: Meadow.CLI
         ref: develop
 
-    - name: Setup .NET Core SDK
+    - name: Checkout Meadow.Contracts side-by-side
+      uses: actions/checkout@v4
+      with:
+        repository: WildernessLabs/Meadow.Contracts
+        path: Meadow.Contracts
+        ref: main
+
+    - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: |
-          6.0.x
-          7.0.x
           8.0.x
 
     - name: Setup NuGet
