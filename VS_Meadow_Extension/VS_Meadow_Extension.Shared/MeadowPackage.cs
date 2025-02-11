@@ -233,7 +233,6 @@ namespace Meadow
                     // Handle installation failure
                 }
             }
-
         }
 
         /// <summary>
@@ -264,26 +263,18 @@ namespace Meadow
         /// <returns><c>true</c> if the process completes successfully; otherwise, <c>false</c>.</returns>
         private async Task<bool> StartDotNetProcess(string command, string parameters)
         {
-            using (var process = new System.Diagnostics.Process())
+            return await Task.Run(async () =>
             {
+                System.Diagnostics.Process process = new System.Diagnostics.Process();
                 process.StartInfo.FileName = "dotnet";
                 process.StartInfo.Arguments = $"{command} {parameters}";
                 process.StartInfo.RedirectStandardOutput = true;
-                process.StartInfo.RedirectStandardError = true;
                 process.StartInfo.UseShellExecute = false;
                 process.StartInfo.CreateNoWindow = true;
-
-                var outputBuilder = string.Empty;
-                var errorBuilder = string.Empty;
-
-                // Event handlers for async output reading
-                process.OutputDataReceived += (sender, args) => outputBuilder += Environment.NewLine + args.Data;
-                process.ErrorDataReceived += (sender, args) => errorBuilder += Environment.NewLine + args.Data;
-
                 process.Start();
 
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
+                string output = await process.StandardOutput.ReadToEndAsync();
+                process.WaitForExit();
 
                 return output.Contains(parameters);
             });
