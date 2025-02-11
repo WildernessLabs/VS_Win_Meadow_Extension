@@ -242,7 +242,7 @@ namespace Meadow
         /// <returns><c>true</c> if the package is installed successfully; otherwise, <c>false</c>.</returns>
         private async Task<bool> InstallPackage(string packageName)
         {
-            return await StartDotNetProcess("new install", packageName, cancellationToken);
+            return await StartDotNetProcess("new install", packageName);
         }
 
         /// <summary>
@@ -252,7 +252,7 @@ namespace Meadow
         /// <returns><c>true</c> if the template is installed; otherwise, <c>false</c>.</returns>
         private async Task<bool> IsTemplateInstalled(string templateName)
         {
-            return await StartDotNetProcess("new list", templateName, cancellationToken);
+            return await StartDotNetProcess("new list", templateName);
         }
 
         /// <summary>
