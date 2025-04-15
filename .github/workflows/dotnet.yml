@@ -27,7 +27,7 @@ jobs:
       with:
         repository: WildernessLabs/Meadow.CLI
         path: Meadow.CLI
-        ref: main
+        ref: develop
 
     - if: ${{ github.ref != 'refs/heads/main' }}
       name: Checkout Meadow.CLI side-by-side
@@ -42,7 +42,7 @@ jobs:
       with:
         repository: WildernessLabs/Meadow.Contracts
         path: Meadow.Contracts
-        ref: main
+        ref: develop
 
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
