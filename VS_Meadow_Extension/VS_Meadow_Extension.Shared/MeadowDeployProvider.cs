@@ -80,6 +80,8 @@ namespace Meadow
 
             var outputPath = await GetOutputPathAsync(filename);
 
+            outputLogger.Log($"Deploying from {outputPath}...");
+
             if (string.IsNullOrEmpty(outputPath))
             {
                 Globals.DebugOrDeployInProgress = false;
@@ -94,23 +96,27 @@ namespace Meadow
                 meadowConnection = null;
             }
 
-            var route = settingsManager.GetSetting(CLI.SettingsManager.PublicSettings.Route);
+            var route = settingsManager.GetSetting(SettingsManager.PublicSettings.Route);
+
+            outputLogger.Log("Connecting to Meadow...");
             meadowConnection = connectionManager.GetConnectionForRoute(route);
 
             meadowConnection.FileWriteProgress += MeadowConnection_DeploymentProgress;
             meadowConnection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
 
-
             await meadowConnection.WaitForMeadowAttach(cancellationToken);
 
-            if (await meadowConnection.IsRuntimeEnabled(cancellationToken))
+            outputLogger.Log("Checking runtime state...");
+            if (await meadowConnection.IsRuntimeEnabled(cancellationToken) )
             {
+                outputLogger.Log("Disabling runtime...");
                 await meadowConnection.RuntimeDisable(cancellationToken);
             }
 
             var deviceInfo = await meadowConnection.GetDeviceInfo(cancellationToken);
 
             string osVersion = deviceInfo.OsVersion;
+            outputLogger.Log($"Found Meadow with OS v{osVersion}");
 
             var fileManager = new FileManager(null);
             await fileManager.Refresh();
