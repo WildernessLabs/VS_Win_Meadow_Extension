@@ -101,14 +101,14 @@ namespace Meadow
             meadowConnection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
 
 
-            await meadowConnection.WaitForMeadowAttach();
+            await meadowConnection.WaitForMeadowAttach(cancellationToken);
 
-            if (await meadowConnection.IsRuntimeEnabled() == true)
+            if (await meadowConnection.IsRuntimeEnabled(cancellationToken))
             {
-                await meadowConnection.RuntimeDisable();
+                await meadowConnection.RuntimeDisable(cancellationToken);
             }
 
-            var deviceInfo = await meadowConnection.GetDeviceInfo();
+            var deviceInfo = await meadowConnection.GetDeviceInfo(cancellationToken);
 
             string osVersion = deviceInfo.OsVersion;
 
@@ -128,7 +128,7 @@ namespace Meadow
 
                 await Task.Delay(1500);
 
-                await meadowConnection.RuntimeEnable();
+                await meadowConnection.RuntimeEnable(cancellationToken);
 
                 await outputLogger.ShowBuildOutputPane();
             }
