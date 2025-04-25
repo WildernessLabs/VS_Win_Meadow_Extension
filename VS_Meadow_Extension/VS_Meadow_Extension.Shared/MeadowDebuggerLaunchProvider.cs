@@ -57,15 +57,6 @@ namespace Meadow
 
         public async Task<IReadOnlyList<IDebugLaunchSettings>> QueryDebugTargetsAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
         {
-            // If debugging is requested, warn the user and cancel launching.
-            if (!launchOptions.HasFlag(DebugLaunchOptions.NoDebug))
-            {
-                outputLogger.Log("Debugging isn't supported from Visual Visual Studio 2022 - deploying app");
-
-                // Return no debug launch settings so that nothing happens.
-                return Array.Empty<IDebugLaunchSettings>();
-            }
-
             var meadowConnection = MeadowDeployProvider.MeadowConnection;
 
             if (!launchOptions.HasFlag(DebugLaunchOptions.NoDebug)
