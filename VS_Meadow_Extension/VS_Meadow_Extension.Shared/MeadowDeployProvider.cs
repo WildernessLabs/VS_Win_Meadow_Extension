@@ -107,13 +107,13 @@ namespace Meadow
             await meadowConnection.WaitForMeadowAttach(cancellationToken);
 
             outputLogger.Log("Checking runtime state...");
-            if (await meadowConnection.IsRuntimeEnabled() == true)
+            if (await meadowConnection.IsRuntimeEnabled(cancellationToken))
             {
                 outputLogger.Log("Disabling runtime...");
                 await meadowConnection.RuntimeDisable(cancellationToken);
             }
 
-            var deviceInfo = await meadowConnection.GetDeviceInfo();
+            var deviceInfo = await meadowConnection.GetDeviceInfo(cancellationToken);
 
             string osVersion = deviceInfo.OsVersion;
             outputLogger.Log($"Found Meadow with OS v{osVersion}");
@@ -134,7 +134,7 @@ namespace Meadow
 
                 await Task.Delay(1500);
 
-                await meadowConnection.RuntimeEnable();
+                await meadowConnection.RuntimeEnable(cancellationToken);
 
                 await outputLogger.ShowBuildOutputPane();
             }
