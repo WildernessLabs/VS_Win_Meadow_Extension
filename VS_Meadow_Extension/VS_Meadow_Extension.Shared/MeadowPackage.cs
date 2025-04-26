@@ -71,6 +71,9 @@ namespace Meadow
                 CommandID menuMeadowDeviceListComboGetListCommandID = new CommandID(GuidList.guidMeadowPackageCmdSet, (int)PkgCmdIDList.cmdidMeadowDeviceListComboGetList);
                 MenuCommand menuMeadowDeviceListComboGetListCommand = new OleMenuCommand(new EventHandler(OnMeadowDeviceListComboGetList), menuMeadowDeviceListComboGetListCommandID);
                 mcs.AddCommand(menuMeadowDeviceListComboGetListCommand);
+
+                // Hook up event to dynamically enable and disable the device comboBox 
+                menuMeadowDeviceListComboCommand.BeforeQueryStatus += UpdateDeviceListComboBoxState;
             }
 
             await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
@@ -278,6 +281,24 @@ namespace Meadow
 
                 return output.Contains(parameters);
             });
+        }
+
+        /// <summary>
+        /// Dynamically updates the enabled state of the Meadow device list combo box.
+        /// </summary>
+        /// <param name="sender">The source of the event, expected to be an <see cref="OleMenuCommand"/>.</param>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
+        /// <remarks>
+        /// This method is triggered by the <see cref="OleMenuCommand.BeforeQueryStatus"/> event.
+        /// It disables the combo box when <see cref="Globals.DebugOrDeployInProgress"/> is <c>true</c>,
+        /// preventing user interaction during debugging or deployment operations.
+        /// </remarks>
+        private void UpdateDeviceListComboBoxState(object sender, EventArgs e)
+        {
+            if (sender is OleMenuCommand command)
+            {
+                command.Enabled = !Globals.DebugOrDeployInProgress;
+            }
         }
     }
 
