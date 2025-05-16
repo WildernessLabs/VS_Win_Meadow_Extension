@@ -127,7 +127,7 @@ namespace Meadow
                 var packageManager = new PackageManager(fileManager);
 
                 outputLogger.Log("Trimming application binaries...");
-                await packageManager.TrimApplication(new FileInfo(Path.Combine(outputPath, "App.dll")), osVersion, includePdbs, cancellationToken: cancellationToken);
+                await packageManager.TrimApplication(new FileInfo(Path.Combine(outputPath, "App.dll")), osVersion, includePdbs, null, outputLogger, cancellationToken: cancellationToken);
 
                 outputLogger.Log("Deploying application...");
                 await AppManager.DeployApplication(packageManager, meadowConnection, osVersion, outputPath, includePdbs, false, outputLogger, cancellationToken);
