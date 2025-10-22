@@ -101,6 +101,13 @@ namespace Meadow
             outputLogger.Log("Connecting to Meadow...");
             meadowConnection = connectionManager.GetConnection(route);
 
+            if (meadowConnection == null)
+            {
+                Globals.DebugOrDeployInProgress = false;
+                outputLogger?.Log("ERROR: No Meadow Connection available.");
+                return;
+            }
+
             meadowConnection.FileWriteProgress += MeadowConnection_DeploymentProgress;
             meadowConnection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
 
@@ -126,17 +133,15 @@ namespace Meadow
             {
                 var packageManager = new PackageManager(fileManager);
 
-                outputLogger.Log("Trimming application binaries...");
                 await packageManager.TrimApplication(new FileInfo(Path.Combine(outputPath, "App.dll")), osVersion, includePdbs, null, outputLogger, cancellationToken: cancellationToken);
 
-                outputLogger.Log("Deploying application...");
                 await AppManager.DeployApplication(packageManager, meadowConnection, osVersion, outputPath, includePdbs, false, outputLogger, cancellationToken);
 
-                await Task.Delay(1500);
+                await Task.Delay(1500, cancellationToken);
 
                 await meadowConnection.RuntimeEnable(cancellationToken);
 
-                await outputLogger.ShowBuildOutputPane();
+                await outputLogger.ShowMeadowOutputPane();
             }
             finally
             {

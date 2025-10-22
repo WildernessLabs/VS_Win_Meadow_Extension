@@ -2,11 +2,13 @@
 using EnvDTE80;
 using Meadow.CLI;
 using Meadow.CLI.Commands.DeviceManagement;
+using Meadow.Hcom;
 using Microsoft;
 using Microsoft.VisualStudio.Shell;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -43,6 +45,10 @@ namespace Meadow
 
         private DTE2 _dte;
         private DebuggerEvents _debuggerEvents;
+
+        // Tracking debugging state
+        private bool _debuggingInProgress = false;
+        private bool _debugSessionStarted = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MeadowPackage"/> class.
@@ -82,7 +88,33 @@ namespace Meadow
             _dte = await GetServiceAsync(typeof(DTE)) as DTE2;
             Assumes.Present(_dte);
             _debuggerEvents = _dte.Events.DebuggerEvents;
+
             _debuggerEvents.OnEnterDesignMode += OnEnterDesignMode;
+            _debuggerEvents.OnEnterRunMode += OnEnterRunMode;
+            _debuggerEvents.OnEnterBreakMode += OnEnterBreakMode;
+        }
+
+        /// <summary>
+        /// Event handler called when the debugger enters run mode (debugging starts).
+        /// </summary>
+        /// <param name="reason">The reason the debugger entered run mode.</param>
+        private void OnEnterRunMode(dbgEventReason reason)
+        {
+            _debugSessionStarted = true;
+            _debuggingInProgress = true;
+            Debug.WriteLine($"Debugging session started. Reason: {reason}");
+        }
+
+        /// <summary>
+        /// Event handler called when the debugger enters break mode (hit breakpoint, etc.).
+        /// </summary>
+        /// <param name="reason">The reason the debugger entered break mode.</param>
+        /// <param name="executionAction">The execution action.</param>
+        private void OnEnterBreakMode(dbgEventReason reason, ref dbgExecutionAction executionAction)
+        {
+            // We're still debugging, just paused
+            _debuggingInProgress = true;
+            Debug.WriteLine($"Debugging session paused. Reason: {reason}");
         }
 
         /// <summary>
@@ -91,8 +123,28 @@ namespace Meadow
         /// <param name="reason">The reason the debugger entered design mode.</param>
         private void OnEnterDesignMode(dbgEventReason reason)
         {
-            System.Diagnostics.Debug.WriteLine("Debugging session stopped.");
-            // Add your custom logic here
+            // Only disable aggressive reconnect if we had an actual debugging session that's now ending
+            bool shouldDisableReconnect = _debugSessionStarted && (
+                reason == dbgEventReason.dbgEventReasonStopDebugging ||
+                reason == dbgEventReason.dbgEventReasonDetachProgram ||
+                reason == dbgEventReason.dbgEventReasonEndProgram
+            );
+
+            if (shouldDisableReconnect)
+            {
+                if (MeadowDeployProvider.MeadowConnection is SerialConnection meadowConnection)
+                {
+                    meadowConnection.Detach();
+
+                    _debugSessionStarted = false;
+                    _debuggingInProgress = false;
+                    Debug.WriteLine("Debugging session stopped. AggressiveReconnectEnabled set to false");
+                }
+            }
+            else
+            {
+                Debug.WriteLine($"Design mode entered but not disabling reconnect. Reason: {reason}");
+            }
         }
 
         /// <summary>

@@ -55,12 +55,6 @@ namespace Meadow
                     meadowDebugCancelTokenSource.Cancel();
                 }
 
-                if (connection != null)
-                {
-                    connection.Detach();
-                    await connection.RuntimeDisable(CancellationToken.None);
-                }
-
                 await meadowDebugServer?.StopListening();
                 meadowDebugServer?.Dispose();
                 meadowDebugServer = null;

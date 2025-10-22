@@ -1,0 +1,44 @@
+using Microsoft.VisualStudio.ProjectSystem;
+using Microsoft.VisualStudio.Shell;
+using System.Threading.Tasks;
+using System;
+using System.ComponentModel.Composition;
+using System.IO;
+
+namespace Meadow
+{
+	[Export(typeof(IMeadowAppService))]
+	public class MeadowAppService : IMeadowAppService
+	{
+		const string MeadowSDKVersion = "Sdk=\"Meadow.Sdk/1.1.0\"";
+		private string filename;
+
+		public string Filename => filename;
+
+		public async Task<bool> IsMeadowApp(ConfiguredProject configuredProject)
+		{
+			await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+			// Assume configuredProject is your ConfiguredProject object
+			var properties = configuredProject.Services.ProjectPropertiesProvider.GetCommonProperties();
+
+			// We unfortunately still need to retrieve the AssemblyName property because we need both
+			// the configuredProject to be a start-up project, but also an App (not library)
+			string assemblyName = await properties.GetEvaluatedPropertyValueAsync("AssemblyName");
+
+			// Now we need to check if the project file contains the Meadow SDK version
+			filename = configuredProject.UnconfiguredProject.FullPath;
+
+			if (!File.Exists(filename))
+			{
+				return false;
+			}
+
+			var projFileContent = File.ReadAllText(filename);
+
+			return !string.IsNullOrEmpty(assemblyName) 
+				&& assemblyName.Equals("App", StringComparison.OrdinalIgnoreCase)
+				&& projFileContent.Contains(MeadowSDKVersion);
+		}
+	}
+}

@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "name": "COM11",
+            "type": "meadow",
+            "request": "launch",
+            "preLaunchTask": "meadow: Build",
+            "deviceInfo": {
+                "name": "COM11",
+                "serial": "COM11"
+            }
+        }
+    ]
+}
