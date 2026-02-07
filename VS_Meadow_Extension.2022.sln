@@ -19,6 +19,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Linker", "..\Meadow.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Cloud.Client", "..\Meadow.CLI\Source\Meadow.Cloud.Client\Meadow.Cloud.Client.csproj", "{FB1DF5C8-039B-46F0-80B2-650DEDFCDF27}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSCodeMeadow", "..\VSCode_Meadow_Extension\src\csharp\VSCodeMeadow.csproj", "{EF689E37-948C-1351-2EC2-28170634968A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.Debugging.DAP", "..\VSCode_Meadow_Extension\src\csharp\Meadow.Debugging.DAP\Meadow.Debugging.DAP.csproj", "{564386F8-42C5-0B78-3FB6-9975B808F079}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +53,14 @@ Global
 		{FB1DF5C8-039B-46F0-80B2-650DEDFCDF27}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FB1DF5C8-039B-46F0-80B2-650DEDFCDF27}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FB1DF5C8-039B-46F0-80B2-650DEDFCDF27}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF689E37-948C-1351-2EC2-28170634968A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF689E37-948C-1351-2EC2-28170634968A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF689E37-948C-1351-2EC2-28170634968A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF689E37-948C-1351-2EC2-28170634968A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{564386F8-42C5-0B78-3FB6-9975B808F079}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{564386F8-42C5-0B78-3FB6-9975B808F079}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{564386F8-42C5-0B78-3FB6-9975B808F079}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{564386F8-42C5-0B78-3FB6-9975B808F079}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
