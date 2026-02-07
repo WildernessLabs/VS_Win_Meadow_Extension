@@ -18,6 +18,12 @@ namespace Meadow
     [AppliesTo(Globals.MeadowCapability)]
     internal class MeadowDeployProvider : IDeployProvider
     {
+        /// <summary>
+        /// When true, the DAP adapter will handle deployment during debug sessions.
+        /// Set by MeadowDebuggerLaunchProvider.SupportsProfile() before DeployAsync is called.
+        /// </summary>
+        public static bool DapDebugPending { get; set; } = false;
+
         static readonly OutputLogger outputLogger = OutputLogger.Instance;
 
         /// <summary>
@@ -40,8 +46,6 @@ namespace Meadow
             }
         }
 
-        public static IMeadowConnection MeadowConnection => meadowConnection;
-
         static IMeadowConnection meadowConnection = null;
         private readonly SettingsManager settingsManager = new SettingsManager();
         private readonly MeadowConnectionManager connectionManager = null;
@@ -55,6 +59,14 @@ namespace Meadow
 
         public async Task DeployAsync(CancellationToken cancellationToken, TextWriter textWriter)
         {
+            // When a DAP debug launch is pending, the adapter handles deployment
+            // in its own process (it needs exclusive serial port access).
+            if (DapDebugPending)
+            {
+                DapDebugPending = false;
+                return;
+            }
+
             if (cancellationToken.IsCancellationRequested || !await IsProjectAMeadowApp())
             {
                 return;
@@ -99,7 +111,7 @@ namespace Meadow
             var route = settingsManager.GetSetting(SettingsManager.PublicSettings.Route);
 
             outputLogger.Log("Connecting to Meadow...");
-            meadowConnection = connectionManager.GetConnectionForRoute(route);
+            meadowConnection = connectionManager.GetConnection(route);
 
             meadowConnection.FileWriteProgress += MeadowConnection_DeploymentProgress;
             meadowConnection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
@@ -140,7 +152,15 @@ namespace Meadow
             }
             finally
             {
-                meadowConnection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
+                // Clean up the connection — for standalone deploy we don't need it anymore.
+                // For DAP debug launches, the adapter creates its own connection.
+                if (meadowConnection != null)
+                {
+                    meadowConnection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
+                    meadowConnection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
+                    meadowConnection.Dispose();
+                    meadowConnection = null;
+                }
             }
         }
 
