@@ -166,7 +166,7 @@ namespace Meadow
         public async Task OnAfterLaunchAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
         {
             Globals.DebugOrDeployInProgress = false;
-            await OutputLogger.Instance.ShowMeadowOutputPane();
+            await OutputLogger.Instance.ShowDebugOutputPane();
         }
 
         private string GenerateMSBuildPropertyFile(string outputPath, string assemblyName)

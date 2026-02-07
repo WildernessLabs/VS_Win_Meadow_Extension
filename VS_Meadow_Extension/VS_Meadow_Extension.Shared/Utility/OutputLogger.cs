@@ -12,7 +12,6 @@ namespace Meadow
     public class OutputLogger : IProgress<string>, ILogger
     {
         private TextWriter textWriter;
-        private IVsOutputWindowPane meadowOutputPane;
         Guid meadowPaneGuid = new Guid("C2FCAB2F-BFEB-4B1A-B385-08D4C81107FE");
         private IVsStatusbar statusBar;
         private uint progressBarCookie = 0;
@@ -26,27 +25,6 @@ namespace Meadow
             _ = Task.Run(async () =>
             {
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                if (meadowOutputPane == null)
-                {
-                    IVsOutputWindow outputWindow = Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
-                    if (outputWindow != null)
-                    {
-                        //check if the meadowOutputPane already exists, there can be only 1
-                        outputWindow.GetPane(ref meadowPaneGuid, out meadowOutputPane);
-
-                        if (meadowOutputPane == null)
-                        {
-                            var returnStatus = outputWindow.CreatePane(ref meadowPaneGuid, "Meadow", Convert.ToInt32(true), Convert.ToInt32(true));
-                            if (returnStatus == VSConstants.S_OK)
-                            {
-                                //Retrieve newly created Pane
-                                outputWindow.GetPane(ref meadowPaneGuid, out meadowOutputPane);
-                            }
-                        }
-                    }
-                }
-
-                await ShowMeadowOutputPane();
 
                 statusBar = Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(SVsStatusbar)) as IVsStatusbar;
             });
@@ -56,8 +34,6 @@ namespace Meadow
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             textWriter = writer;
-
-            meadowOutputPane?.Clear();
         }
 
         public IDisposable BeginScope<TState>(TState state) => default;
@@ -98,21 +74,24 @@ namespace Meadow
             Log(message);
         }
 
-        internal async Task ShowMeadowOutputPane()
-        {
-            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-            meadowOutputPane?.Activate();
-        }
-
         internal async Task ShowBuildOutputPane()
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             IVsOutputWindow outputWindow = Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
             Guid buildPaneGuid = VSConstants.GUID_BuildOutputWindowPane;
-            IVsOutputWindowPane buildOutputPane;
 
-            outputWindow.GetPane(ref buildPaneGuid, out buildOutputPane);
+            outputWindow.GetPane(ref buildPaneGuid, out IVsOutputWindowPane buildOutputPane);
             buildOutputPane?.Activate();
+        }
+
+        internal async Task ShowDebugOutputPane()
+        {
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            IVsOutputWindow outputWindow = Microsoft.VisualStudio.Shell.Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
+            Guid debugPaneGuid = VSConstants.GUID_OutWindowDebugPane;
+
+            outputWindow.GetPane(ref debugPaneGuid, out IVsOutputWindowPane debugOutputPane);
+            debugOutputPane?.Activate();
         }
 
         internal async Task ResetProgressBar()
@@ -146,7 +125,6 @@ namespace Meadow
                     message += Environment.NewLine;
                 }
                 await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
-                meadowOutputPane?.OutputStringThreadSafe(message);
             }
             catch (Exception ex)
             {
