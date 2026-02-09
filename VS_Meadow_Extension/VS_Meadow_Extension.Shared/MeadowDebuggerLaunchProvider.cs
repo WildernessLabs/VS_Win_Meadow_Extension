@@ -21,7 +21,7 @@ namespace Meadow
         /// <summary>
         /// Custom Meadow Debug Engine GUID registered in MeadowDebugAdapter.pkgdef.
         /// Maps to VS2022's built-in Debug Adapter Host (CLSID DAB324E9...) which
-        /// launches vscode-meadow.exe and communicates via DAP over stdin/stdout.
+        /// launches meadow-debugging.exe and communicates via DAP over stdin/stdout.
         /// </summary>
         private static readonly Guid DapEngineGuid =
             new Guid("17F23ACB-E784-4F24-B961-A43A06C5E5D8");

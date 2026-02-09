@@ -1,11 +1,11 @@
 // Register the Meadow Debug Adapter with VS2022's Debug Adapter Host.
 // {17F23ACB-E784-4F24-B961-A43A06C5E5D8} is a custom engine GUID for Meadow.
 // CLSID {DAB324E9-7B35-454C-ACA8-F6BB0D5C8673} is the built-in Debug Adapter Host,
-// which will launch vscode-meadow.exe and communicate via DAP over stdin/stdout.
+// which will launch meadow-debugging.exe and communicate via DAP over stdin/stdout.
 
 [$RootKey$\AD7Metrics\Engine\{17F23ACB-E784-4F24-B961-A43A06C5E5D8}]
 "CLSID"="{DAB324E9-7B35-454C-ACA8-F6BB0D5C8673}"
 "Name"="Meadow Debug Adapter"
-"Adapter"="$PackageFolder$\DapAdapter\vscode-meadow.exe"
+"Adapter"="$PackageFolder$\DapAdapter\meadow-debugging.exe"
 "AdapterArgs"="--trace --log-file=C:\temp\meadow_dap.log"
 "AlwaysLoadLocal"=dword:00000001

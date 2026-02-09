@@ -204,7 +204,7 @@ namespace Meadow
 
         public async void Commit()
         {
-            await outputLogger?.ShowMeadowDebugPane();
+			await outputLogger?.ShowDebugOutputPane();
 
             outputLogger?.Log("Launching application..." + Environment.NewLine);
 

@@ -152,8 +152,8 @@
        The MSBuild task ensures the adapter (and its Meadow.Debugging.DAP dependency) is compiled
        before we copy, so changes to adapter code are always picked up by the VS2022 extension. -->
   <PropertyGroup>
-    <DapAdapterProject Condition="'$(DapAdapterProject)' == ''">$(MSBuildProjectDirectory)\..\..\..\VSCode_Meadow_Extension\src\csharp\VSCodeMeadow.csproj</DapAdapterProject>
-    <DapAdapterSourceDir Condition="'$(DapAdapterSourceDir)' == ''">$(MSBuildProjectDirectory)\..\..\..\VSCode_Meadow_Extension\src\csharp\bin\$(Configuration)\net8.0\</DapAdapterSourceDir>
+    <DapAdapterProject Condition="'$(DapAdapterProject)' == ''">$(MSBuildProjectDirectory)\..\..\Meadow.Debugging\Meadow.Debugging.Host\Meadow.Debugging.Host.csproj</DapAdapterProject>
+    <DapAdapterSourceDir Condition="'$(DapAdapterSourceDir)' == ''">$(MSBuildProjectDirectory)\..\..\Meadow.Debugging\Meadow.Debugging.Host\bin\$(Configuration)\net8.0\</DapAdapterSourceDir>
   </PropertyGroup>
   <Target Name="BuildDapAdapter" BeforeTargets="CopyDapAdapter" Condition="Exists('$(DapAdapterProject)')">
     <Message Text="Building DAP adapter from: $(DapAdapterProject)" Importance="high" />
