@@ -19,9 +19,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Linker", "..\Meadow.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Cloud.Client", "..\Meadow.CLI\Source\Meadow.Cloud.Client\Meadow.Cloud.Client.csproj", "{FB1DF5C8-039B-46F0-80B2-650DEDFCDF27}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Debugging.Host", "..\Meadow.Debugging\Meadow.Debugging.Host\Meadow.Debugging.Host.csproj", "{C3D4E5F6-7890-1234-CDEF-123456789012}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Debugging.Host", "..\Meadow.Debugging.Host\Meadow.Debugging.Host.csproj", "{C3D4E5F6-7890-1234-CDEF-123456789012}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Debugging.DAP", "..\Meadow.Debugging\Meadow.Debugging.DAP\Meadow.Debugging.DAP.csproj", "{564386F8-42C5-0B78-3FB6-9975B808F079}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Debugging.DAP", "..\Meadow.Debugging.DAP\Meadow.Debugging.DAP.csproj", "{564386F8-42C5-0B78-3FB6-9975B808F079}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
