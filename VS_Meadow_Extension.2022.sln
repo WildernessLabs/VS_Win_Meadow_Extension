@@ -19,9 +19,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Linker", "..\Meadow.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Cloud.Client", "..\Meadow.CLI\Source\Meadow.Cloud.Client\Meadow.Cloud.Client.csproj", "{FB1DF5C8-039B-46F0-80B2-650DEDFCDF27}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VSCodeMeadow", "..\VSCode_Meadow_Extension\src\csharp\VSCodeMeadow.csproj", "{EF689E37-948C-1351-2EC2-28170634968A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Debugging.Host", "..\Meadow.Debugging\Meadow.Debugging.Host\Meadow.Debugging.Host.csproj", "{C3D4E5F6-7890-1234-CDEF-123456789012}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.Debugging.DAP", "..\VSCode_Meadow_Extension\src\csharp\Meadow.Debugging.DAP\Meadow.Debugging.DAP.csproj", "{564386F8-42C5-0B78-3FB6-9975B808F079}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Debugging.DAP", "..\Meadow.Debugging\Meadow.Debugging.DAP\Meadow.Debugging.DAP.csproj", "{564386F8-42C5-0B78-3FB6-9975B808F079}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,10 +53,10 @@ Global
 		{FB1DF5C8-039B-46F0-80B2-650DEDFCDF27}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FB1DF5C8-039B-46F0-80B2-650DEDFCDF27}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FB1DF5C8-039B-46F0-80B2-650DEDFCDF27}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EF689E37-948C-1351-2EC2-28170634968A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EF689E37-948C-1351-2EC2-28170634968A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EF689E37-948C-1351-2EC2-28170634968A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EF689E37-948C-1351-2EC2-28170634968A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3D4E5F6-7890-1234-CDEF-123456789012}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3D4E5F6-7890-1234-CDEF-123456789012}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3D4E5F6-7890-1234-CDEF-123456789012}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3D4E5F6-7890-1234-CDEF-123456789012}.Release|Any CPU.Build.0 = Release|Any CPU
 		{564386F8-42C5-0B78-3FB6-9975B808F079}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{564386F8-42C5-0B78-3FB6-9975B808F079}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{564386F8-42C5-0B78-3FB6-9975B808F079}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -72,6 +72,8 @@ Global
 		{2CEDC952-4148-45BA-A6D7-F6997BFCAD86} = {D11E57EA-1FEB-40BF-9AEE-C67E8040AE3B}
 		{AD03F2D4-5341-414B-9F61-03C111AEF765} = {D11E57EA-1FEB-40BF-9AEE-C67E8040AE3B}
 		{FB1DF5C8-039B-46F0-80B2-650DEDFCDF27} = {D11E57EA-1FEB-40BF-9AEE-C67E8040AE3B}
+		{C3D4E5F6-7890-1234-CDEF-123456789012} = {D11E57EA-1FEB-40BF-9AEE-C67E8040AE3B}
+		{564386F8-42C5-0B78-3FB6-9975B808F079} = {D11E57EA-1FEB-40BF-9AEE-C67E8040AE3B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BF8000DF-DA09-4634-B870-07796C220A2F}
