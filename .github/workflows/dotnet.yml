@@ -62,6 +62,7 @@ jobs:
         repository: WildernessLabs/Meadow.Debugging
         path: Meadow.Debugging
         ref: main
+        submodules: true
 
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
