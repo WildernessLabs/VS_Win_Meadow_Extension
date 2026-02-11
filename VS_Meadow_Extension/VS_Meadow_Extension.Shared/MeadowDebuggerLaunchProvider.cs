@@ -52,7 +52,8 @@ namespace Meadow
         {
             if (launchOptions.HasFlag(DebugLaunchOptions.NoDebug))
             {
-                // "Start Without Debugging" — reset the flag so deploy provider works normally
+                // "Start Without Debugging" — let MeadowDeployProvider handle it
+                // (VS2022 doesn't properly use DAP Host for NoDebug scenarios)
                 MeadowDeployProvider.DapDebugPending = false;
                 return Array.Empty<IDebugLaunchSettings>();
             }
@@ -122,20 +123,10 @@ namespace Meadow
                 return Array.Empty<IDebugLaunchSettings>();
             }
 
-            outputLogger?.Log($"[DAP] Starting debug session");
-            outputLogger?.Log($"[DAP] Project: {projectPath}");
-            outputLogger?.Log($"[DAP] Configuration: {configuration}");
-            outputLogger?.Log($"[DAP] Output Path: {outputPath}");
-            outputLogger?.Log($"[DAP] MSBuild Props File: {propsFile}");
-            outputLogger?.Log($"[DAP] Serial: {serial}");
-            outputLogger?.Log($"[DAP] Adapter: {adapterPath}");
-
             // Build launch configuration JSON for the DAP adapter.
             // The adapter path is registered in MeadowDebugAdapter.pkgdef,
             // so VS2022's DAP Host knows where to find vscode-meadow.exe.
             // The properties below become the "arguments" in the DAP "launch" request.
-            //
-            // Build launch configuration with debugging enabled on the configured port
             var launchConfig = new JObject
             {
                 ["type"] = "meadow",
@@ -144,7 +135,7 @@ namespace Meadow
                 ["projectConfiguration"] = configuration,
                 ["serial"] = serial,
                 ["msbuildPropertyFile"] = propsFile,
-                ["debugPort"] = DebugPort  // Enable Mono soft debugger on port 55555
+                ["debugPort"] = DebugPort  // Enable Mono soft debugger
             };
 
             var settings = new DebugLaunchSettings(launchOptions)

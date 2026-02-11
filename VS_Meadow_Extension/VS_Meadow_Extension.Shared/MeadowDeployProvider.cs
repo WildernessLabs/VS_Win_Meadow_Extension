@@ -1,8 +1,4 @@
 ﻿using Meadow.CLI;
-using Meadow.CLI.Commands.DeviceManagement;
-using Meadow.Hcom;
-using Meadow.Package;
-using Meadow.Software;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Build;
 using System;
@@ -46,15 +42,12 @@ namespace Meadow
             }
         }
 
-        static IMeadowConnection meadowConnection = null;
         private readonly SettingsManager settingsManager = new SettingsManager();
-        private readonly MeadowConnectionManager connectionManager = null;
 
         [ImportingConstructor]
         public MeadowDeployProvider(ConfiguredProject configuredProject)
         {
             this.configuredProject = configuredProject;
-            this.connectionManager = new MeadowConnectionManager(settingsManager);
         }
 
         public async Task DeployAsync(CancellationToken cancellationToken, TextWriter textWriter)
@@ -75,12 +68,11 @@ namespace Meadow
             Globals.DebugOrDeployInProgress = true;
 
             await outputLogger?.ConnectTextWriter(textWriter);
-            await outputLogger.ShowBuildOutputPane();
+            await outputLogger.ShowDebugOutputPane();
 
             outputLogger.Log("Preparing to deploy Meadow application...");
 
             var filename = configuredProject.UnconfiguredProject.FullPath;
-
             var projFileContent = File.ReadAllText(filename);
 
             if (projFileContent.Contains(MeadowSDKVersion) == false)
@@ -90,6 +82,7 @@ namespace Meadow
                 return;
             }
 
+            var projectPath = Path.GetDirectoryName(filename);
             var outputPath = await GetOutputPathAsync(filename);
 
             outputLogger.Log($"Deploying from {outputPath}...");
@@ -101,66 +94,80 @@ namespace Meadow
                 return;
             }
 
-            if (meadowConnection != null)
+            // Get configuration
+            var configuration = "Debug";
+            if (configuredProject?.ProjectConfiguration?.Dimensions != null
+                && configuredProject.ProjectConfiguration.Dimensions.TryGetValue("Configuration", out var configVal))
             {
-                meadowConnection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
-                meadowConnection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
-                meadowConnection = null;
+                configuration = configVal;
             }
 
-            var route = settingsManager.GetSetting(SettingsManager.PublicSettings.Route);
-
-            outputLogger.Log("Connecting to Meadow...");
-            meadowConnection = connectionManager.GetConnection(route);
-
-            meadowConnection.FileWriteProgress += MeadowConnection_DeploymentProgress;
-            meadowConnection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
-
-            await meadowConnection.WaitForMeadowAttach(cancellationToken);
-
-            outputLogger.Log("Checking runtime state...");
-            if (await meadowConnection.IsRuntimeEnabled(cancellationToken))
+            // Get serial port
+            var serial = settingsManager.GetSetting(SettingsManager.PublicSettings.Route);
+            if (string.IsNullOrEmpty(serial))
             {
-                outputLogger.Log("Disabling runtime...");
-                await meadowConnection.RuntimeDisable(cancellationToken);
+                outputLogger?.Log("No Meadow device selected. Please select a device from the toolbar.");
+                Globals.DebugOrDeployInProgress = false;
+                return;
             }
 
-            var deviceInfo = await meadowConnection.GetDeviceInfo(cancellationToken);
+            // Generate MSBuild property file
+            var propsFile = GenerateMSBuildPropertyFile(outputPath, "App");
+            if (!File.Exists(propsFile))
+            {
+                outputLogger?.Log($"ERROR: Failed to create MSBuild property file at: {propsFile}");
+                Globals.DebugOrDeployInProgress = false;
+                return;
+            }
 
-            string osVersion = deviceInfo.OsVersion;
-            outputLogger.Log($"Found Meadow with OS v{osVersion}");
+            // Get DAP adapter path for validation
+            var adapterPath = GetAdapterPath();
+            if (!File.Exists(adapterPath))
+            {
+                outputLogger?.Log($"DAP adapter not found at: {adapterPath}");
+                Globals.DebugOrDeployInProgress = false;
+                return;
+            }
 
-            var fileManager = new FileManager(null);
-            await fileManager.Refresh();
-
-            bool includePdbs = configuredProject?.ProjectConfiguration?.Dimensions["Configuration"].Contains("Debug") ?? false;
             try
             {
-                var packageManager = new PackageManager(fileManager);
+                // Launch DAP adapter with debugPort: 0 for deploy-only
+                // Note: This spawns the adapter directly, not via VS DAP Host infrastructure,
+                // so progress bars won't appear automatically. For full DAP Host support
+                // (with automatic progress bars), use F5 or Ctrl+F5 instead.
+                var dapHelper = new DapDeploymentHelper(outputLogger, adapterPath);
+                
+                bool success = await dapHelper.DeployAsync(
+                    projectPath,
+                    configuration,
+                    serial,
+                    propsFile,
+                    cancellationToken);
 
-                outputLogger.Log("Trimming application binaries...");
-                await packageManager.TrimApplication(new FileInfo(Path.Combine(outputPath, "App.dll")), osVersion, includePdbs, cancellationToken: cancellationToken);
+                if (success)
+                {
+                    outputLogger.Log("Deployment completed successfully.");
+                }
+                else
+                {
+                    outputLogger.Log("Deployment failed.");
+                }
 
-                outputLogger.Log("Deploying application...");
-                await AppManager.DeployApplication(packageManager, meadowConnection, osVersion, outputPath, includePdbs, false, outputLogger, cancellationToken);
-
-                await Task.Delay(1500);
-
-                await meadowConnection.RuntimeEnable(cancellationToken);
-
-                await outputLogger.ShowBuildOutputPane();
+                await outputLogger.ShowDebugOutputPane();
             }
             finally
             {
-                // Clean up the connection — for standalone deploy we don't need it anymore.
-                // For DAP debug launches, the adapter creates its own connection.
-                if (meadowConnection != null)
+                Globals.DebugOrDeployInProgress = false;
+                
+                // Clean up temp MSBuild props file
+                try
                 {
-                    meadowConnection.FileWriteProgress -= MeadowConnection_DeploymentProgress;
-                    meadowConnection.DeviceMessageReceived -= MeadowConnection_DeviceMessageReceived;
-                    meadowConnection.Dispose();
-                    meadowConnection = null;
+                    if (File.Exists(propsFile))
+                    {
+                        File.Delete(propsFile);
+                    }
                 }
+                catch { /* Ignore cleanup errors */ }
             }
         }
 
@@ -181,25 +188,24 @@ namespace Meadow
             return outputPath;
         }
 
-        private static async void MeadowConnection_DeviceMessageReceived(object sender, (string message, string source) e)
+        private string GenerateMSBuildPropertyFile(string outputPath, string assemblyName)
         {
-            await outputLogger.ReportDeviceMessage(e.message);
+            var tempFile = Path.Combine(
+                Path.GetTempPath(),
+                $"meadow_deploy_{Guid.NewGuid():N}.props");
+
+            File.WriteAllText(tempFile,
+                $"OutputPath={outputPath}{Environment.NewLine}AssemblyName={assemblyName}");
+
+            return tempFile;
         }
 
-        private static async void MeadowConnection_DeploymentProgress(object sender, (string fileName, long completed, long total) e)
+        private string GetAdapterPath()
         {
-            uint p = 0;
-
-            if (e.total != 0)
-            {
-                p = (uint)(e.completed * 100f / e.total);
-            }
-            else
-            {
-                await outputLogger?.ResetProgressBar();
-            }
-
-            await outputLogger?.ReportFileProgress(e.fileName, p);
+            // Get path to DAP adapter bundled in the VSIX (same location as debug sessions use)
+            var assemblyPath = Path.GetDirectoryName(GetType().Assembly.Location);
+            var adapterPath = Path.Combine(assemblyPath, "DapAdapter", "meadow-debugging.exe");
+            return adapterPath;
         }
 
         public async void Commit()

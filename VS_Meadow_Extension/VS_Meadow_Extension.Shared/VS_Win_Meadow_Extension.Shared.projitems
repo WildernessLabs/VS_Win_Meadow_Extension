@@ -26,6 +26,8 @@
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MeadowDeployProvider.cs">
     </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)DapDeploymentHelper.cs">
+    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Globals.cs">
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MeadowSettings.cs">
