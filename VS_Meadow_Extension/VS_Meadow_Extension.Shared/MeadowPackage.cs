@@ -7,6 +7,7 @@ using Microsoft.VisualStudio.Shell;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
+using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -43,6 +44,7 @@ namespace Meadow
 
         private DTE2 _dte;
         private DebuggerEvents _debuggerEvents;
+        private volatile bool _isInitialized = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MeadowPackage"/> class.
@@ -58,31 +60,65 @@ namespace Meadow
         /// <returns>A task representing the async work of package initialization, or an already completed task if there is none. Do not return null from this method.</returns>
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
-            await base.InitializeAsync(cancellationToken, progress);
-
-            await InstallDependencies();
-
-            if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService mcs)
+            try
             {
-                CommandID menuMeadowDeviceListComboCommandID = new CommandID(GuidList.guidMeadowPackageCmdSet, (int)PkgCmdIDList.cmdidMeadowDeviceListCombo);
-                OleMenuCommand menuMeadowDeviceListComboCommand = new OleMenuCommand(new EventHandler(OnMeadowDeviceListCombo), menuMeadowDeviceListComboCommandID);
-                mcs.AddCommand(menuMeadowDeviceListComboCommand);
-
-                CommandID menuMeadowDeviceListComboGetListCommandID = new CommandID(GuidList.guidMeadowPackageCmdSet, (int)PkgCmdIDList.cmdidMeadowDeviceListComboGetList);
-                MenuCommand menuMeadowDeviceListComboGetListCommand = new OleMenuCommand(new EventHandler(OnMeadowDeviceListComboGetList), menuMeadowDeviceListComboGetListCommandID);
-                mcs.AddCommand(menuMeadowDeviceListComboGetListCommand);
-
-                // Hook up event to dynamically enable and disable the device comboBox 
-                menuMeadowDeviceListComboCommand.BeforeQueryStatus += UpdateDeviceListComboBoxState;
+                await base.InitializeAsync(cancellationToken, progress);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Meadow Package] ERROR in base.InitializeAsync: {ex.Message}");
+                throw;
             }
 
-            await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+            try
+            {
+                await InstallDependencies();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Meadow Package] ERROR in InstallDependencies: {ex.Message}");
+                // Don't throw - allow extension to continue loading
+            }
 
-            // Initialize DTE2 and subscribe to debugger events
-            _dte = await GetServiceAsync(typeof(DTE)) as DTE2;
-            Assumes.Present(_dte);
-            _debuggerEvents = _dte.Events.DebuggerEvents;
-            _debuggerEvents.OnEnterDesignMode += OnEnterDesignMode;
+            try
+            {
+                if (await GetServiceAsync(typeof(IMenuCommandService)) is OleMenuCommandService mcs)
+                {
+                    CommandID menuMeadowDeviceListComboCommandID = new CommandID(GuidList.guidMeadowPackageCmdSet, (int)PkgCmdIDList.cmdidMeadowDeviceListCombo);
+                    OleMenuCommand menuMeadowDeviceListComboCommand = new OleMenuCommand(new EventHandler(OnMeadowDeviceListCombo), menuMeadowDeviceListComboCommandID);
+                    mcs.AddCommand(menuMeadowDeviceListComboCommand);
+
+                    CommandID menuMeadowDeviceListComboGetListCommandID = new CommandID(GuidList.guidMeadowPackageCmdSet, (int)PkgCmdIDList.cmdidMeadowDeviceListComboGetList);
+                    MenuCommand menuMeadowDeviceListComboGetListCommand = new OleMenuCommand(new EventHandler(OnMeadowDeviceListComboGetList), menuMeadowDeviceListComboGetListCommandID);
+                    mcs.AddCommand(menuMeadowDeviceListComboGetListCommand);
+
+                    // Hook up event to dynamically enable and disable the device comboBox 
+                    menuMeadowDeviceListComboCommand.BeforeQueryStatus += UpdateDeviceListComboBoxState;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Meadow Package] ERROR in menu command registration: {ex.Message}\\n{ex.StackTrace}");
+                throw;
+            }
+
+            try
+            {
+                await JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
+
+                // Initialize DTE2 and subscribe to debugger events
+                _dte = await GetServiceAsync(typeof(DTE)) as DTE2;
+                Assumes.Present(_dte);
+                _debuggerEvents = _dte.Events.DebuggerEvents;
+                _debuggerEvents.OnEnterDesignMode += OnEnterDesignMode;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Meadow Package] ERROR in DTE initialization: {ex.Message}\\n{ex.StackTrace}");
+                throw;
+            }
+            
+            _isInitialized = true;
         }
 
         /// <summary>
@@ -100,117 +136,165 @@ namespace Meadow
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
-        private async void OnMeadowDeviceListCombo(object sender, EventArgs e)
+        private void OnMeadowDeviceListCombo(object sender, EventArgs e)
         {
-            if (!Globals.DebugOrDeployInProgress)
+            if (!_isInitialized)
             {
-                if (e is OleMenuCmdEventArgs eventArgs)
+                return;
+            }
+
+            try
+            {
+                // Use JoinableTaskFactory.Run to properly handle async work in event handlers
+                JoinableTaskFactory.Run(async () =>
                 {
-                    var portList = await MeadowConnectionManager.GetSerialPorts();
-
-                    IntPtr vOut = eventArgs.OutValue;
-
-                    if (vOut != IntPtr.Zero)
+                    if (!Globals.DebugOrDeployInProgress)
                     {
-                        if (portList.Count > 0)
+                        if (e is OleMenuCmdEventArgs eventArgs)
                         {
-                            string deviceTarget = string.Empty;
-
-                            var route = SettingsManager.GetSetting(SettingsManager.PublicSettings.Route);
-                            bool IsSavedValueInPortList = IsValueInPortList(portList, route);
-                            if (IsSavedValueInPortList)
+                            // Get detailed device information
+                            var devices = await MeadowDeviceDiscovery.GetDetailedDeviceInfoAsync();
+                            
+                            // Switch to main thread for UI operations (Marshal, Settings access)
+                            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                            
+                            if (devices == null)
                             {
-                                deviceTarget = route;
+                                devices = new List<MeadowDeviceInfo>();
                             }
 
-                            Marshal.GetNativeVariantForObject(deviceTarget, vOut);
-                        }
-                        else
-                        {
-                            Marshal.GetNativeVariantForObject(NoDevicesFound, vOut);
-                        }
-                    }
-                    else if (eventArgs.InValue is string newChoice)
-                    {
-                        bool valueInPortList = IsValueInPortList(portList, newChoice);
+                            IntPtr vOut = eventArgs.OutValue;
 
-                        if (valueInPortList)
-                        {
-                            SaveDeviceChoiceToSettings(newChoice);
-                        }
-                        else
-                        {
-                            if (!newChoice.Equals(NoDevicesFound))
+                            if (vOut != IntPtr.Zero)
                             {
-                                throw (new ArgumentException("Invalid Device Selected"));
+                                // Getting current selection - VS is asking what to display
+                                if (devices.Count > 0)
+                                {
+                                    string displayValue = string.Empty;
+
+                                    var savedPort = SettingsManager.GetSetting(SettingsManager.PublicSettings.Route);
+                                    if (!string.IsNullOrEmpty(savedPort))
+                                    {
+                                        var selectedDevice = devices.FirstOrDefault(d => 
+                                            d != null && 
+                                            !string.IsNullOrEmpty(d.Port) && 
+                                            d.Port.Equals(savedPort, StringComparison.OrdinalIgnoreCase));
+
+                                        if (selectedDevice != null)
+                                        {
+                                            // Return the formatted display string for the currently selected device
+                                            displayValue = MeadowDeviceDiscovery.GetDeviceDisplayString(selectedDevice) ?? string.Empty;
+                                        }
+                                    }
+
+                                    Marshal.GetNativeVariantForObject(displayValue, vOut);
+                                }
+                                else
+                                {
+                                    Marshal.GetNativeVariantForObject(NoDevicesFound, vOut);
+                                }
+                            }
+                            else if (eventArgs.InValue is string newChoice)
+                            {
+                                // User selected a new device
+                                if (!string.IsNullOrEmpty(newChoice) && !newChoice.Equals(NoDevicesFound))
+                                {
+                                    // Parse the COM port from the formatted display string
+                                    var selectedPort = MeadowDeviceDiscovery.ParsePortFromDisplayString(newChoice);
+
+                                    if (!string.IsNullOrEmpty(selectedPort) && devices.Count > 0)
+                                    {
+                                        var device = devices.FirstOrDefault(d => 
+                                            d != null && 
+                                            !string.IsNullOrEmpty(d.Port) && 
+                                            d.Port.Equals(selectedPort, StringComparison.OrdinalIgnoreCase));
+                                        
+                                        if (device != null)
+                                        {
+                                            // Save just the COM port (for DAP compatibility)
+                                            SaveDeviceChoiceToSettings(device.Port);
+                                            
+                                            // Mark device as recently used
+                                            MeadowDeviceDiscovery.MarkDeviceAsUsed(device.Port);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
-                }
-                else
-                {
-                    throw new ArgumentException("EventArgs Required");
-                }
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Meadow Package] ERROR in OnMeadowDeviceListCombo: {ex.Message}\n{ex.StackTrace}");
+                // Swallow exceptions to prevent crashes
             }
         }
 
         /// <summary>
         /// Event handler to get the list of Meadow devices for the combo box.
+        /// Provides rich device information with friendly names and status indicators.
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
-        private async void OnMeadowDeviceListComboGetList(object sender, EventArgs e)
+        private void OnMeadowDeviceListComboGetList(object sender, EventArgs e)
         {
-            if (!Globals.DebugOrDeployInProgress)
+            if (!_isInitialized)
             {
-                if (e is OleMenuCmdEventArgs eventArgs)
-                {
-                    object inParam = eventArgs.InValue;
-                    IntPtr vOut = eventArgs.OutValue;
-
-                    if (inParam != null)
-                    {
-                        throw new ArgumentException("InParam Invalid");
-                    }
-                    else if (vOut != IntPtr.Zero)
-                    {
-                        var portList = await MeadowConnectionManager.GetSerialPorts();
-                        if (portList.Count > 0)
-                        {
-                            Marshal.GetNativeVariantForObject(portList, vOut);
-                        }
-                        else
-                        {
-                            Marshal.GetNativeVariantForObject(new string[] { NoDevicesFound }, vOut);
-                        }
-                    }
-                    else
-                    {
-                        throw (new ArgumentException("OutParam Required"));
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Checks if a given value is in the port list.
-        /// </summary>
-        /// <param name="portList">The list of ports.</param>
-        /// <param name="newChoice">The new choice to check.</param>
-        /// <returns><c>true</c> if the value is in the port list; otherwise, <c>false</c>.</returns>
-        private static bool IsValueInPortList(IList<string> portList, string newChoice)
-        {
-            bool validInput = false;
-            for (int i = 0; i < portList.Count; i++)
-            {
-                if (string.Compare(portList[i], newChoice, StringComparison.CurrentCultureIgnoreCase) == 0)
-                {
-                    validInput = true;
-                    break;
-                }
+                return;
             }
 
-            return validInput;
+            try
+            {
+                // Use JoinableTaskFactory.Run to properly handle async work in event handlers
+                JoinableTaskFactory.Run(async () =>
+                {
+                    if (!Globals.DebugOrDeployInProgress)
+                    {
+                        if (e is OleMenuCmdEventArgs eventArgs)
+                        {
+                            object inParam = eventArgs.InValue;
+                            IntPtr vOut = eventArgs.OutValue;
+
+                            if (inParam == null && vOut != IntPtr.Zero)
+                            {
+                                // Force refresh when user opens the dropdown
+                                var devices = await MeadowDeviceDiscovery.GetDetailedDeviceInfoAsync(forceRefresh: true);
+                                
+                                // Switch to main thread for Marshal operations
+                                await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+                                
+                                if (devices != null && devices.Count > 0)
+                                {
+                                    // Convert to formatted display strings
+                                    var displayList = devices
+                                        .Where(d => d != null)
+                                        .Select(d => MeadowDeviceDiscovery.GetDeviceDisplayString(d) ?? "Unknown Device")
+                                        .ToArray();
+
+                                    if (displayList.Length > 0)
+                                    {
+                                        Marshal.GetNativeVariantForObject(displayList, vOut);
+                                    }
+                                    else
+                                    {
+                                        Marshal.GetNativeVariantForObject(new string[] { "⚠ " + NoDevicesFound + " - Check USB Connection" }, vOut);
+                                    }
+                                }
+                                else
+                                {
+                                    Marshal.GetNativeVariantForObject(new string[] { "⚠ " + NoDevicesFound + " - Check USB Connection" }, vOut);
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[Meadow Package] ERROR in OnMeadowDeviceListComboGetList: {ex.Message}\n{ex.StackTrace}");
+                // Swallow exceptions to prevent crashes
+            }
         }
 
         /// <summary>
@@ -295,9 +379,21 @@ namespace Meadow
         /// </remarks>
         private void UpdateDeviceListComboBoxState(object sender, EventArgs e)
         {
-            if (sender is OleMenuCommand command)
+            try
             {
-                command.Enabled = !Globals.DebugOrDeployInProgress;
+                if (!_isInitialized)
+                {
+                    return;
+                }
+
+                if (sender is OleMenuCommand command)
+                {
+                    command.Enabled = !Globals.DebugOrDeployInProgress;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error in UpdateDeviceListComboBoxState: {ex.Message}");
             }
         }
     }

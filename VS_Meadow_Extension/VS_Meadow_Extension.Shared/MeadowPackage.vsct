@@ -54,14 +54,14 @@
     </Groups>
 
     <Combos>
-      <Combo guid="guidMeadowPackageCmdSet" id="cmdidMeadowDeviceListCombo" priority="0x0010" type="DropDownCombo" defaultWidth="70" idCommandList="cmdidMeadowDeviceListComboGetList">
+      <Combo guid="guidMeadowPackageCmdSet" id="cmdidMeadowDeviceListCombo" priority="0x0010" type="DropDownCombo" defaultWidth="200" idCommandList="cmdidMeadowDeviceListComboGetList">
         <Parent guid="guidMeadowPackageCmdSet" id="MeadowMenuGroup"/>
         <CommandFlag>IconAndText</CommandFlag>
         <CommandFlag>CommandWellOnly</CommandFlag>
         <Strings>
           <MenuText>Meadow Devices: </MenuText>
           <ButtonText>Meadow Devices: </ButtonText>
-          <ToolTipText>Select Device</ToolTipText>
+          <ToolTipText>Select a Meadow device for debugging and deployment</ToolTipText>
           <CanonicalName>Meadow Devices</CanonicalName>
           <LocCanonicalName>Meadow Devices</LocCanonicalName>
           <CommandName>Meadow Devices</CommandName>
