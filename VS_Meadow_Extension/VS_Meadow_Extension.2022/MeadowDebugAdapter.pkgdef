@@ -7,5 +7,5 @@
 "CLSID"="{DAB324E9-7B35-454C-ACA8-F6BB0D5C8673}"
 "Name"="Meadow Debug Adapter"
 "Adapter"="$PackageFolder$\DapAdapter\meadow-debugging.exe"
-"AdapterArgs"="--trace --log-file=C:\temp\meadow_dap.log"
+"AdapterArgs"="--trace"
 "AlwaysLoadLocal"=dword:00000001
