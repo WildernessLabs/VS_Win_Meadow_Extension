@@ -53,22 +53,6 @@
       </Group>
     </Groups>
 
-    <Combos>
-      <Combo guid="guidMeadowPackageCmdSet" id="cmdidMeadowDeviceListCombo" priority="0x0010" type="DropDownCombo" defaultWidth="200" idCommandList="cmdidMeadowDeviceListComboGetList">
-        <Parent guid="guidMeadowPackageCmdSet" id="MeadowMenuGroup"/>
-        <CommandFlag>IconAndText</CommandFlag>
-        <CommandFlag>CommandWellOnly</CommandFlag>
-        <Strings>
-          <MenuText>Meadow Devices: </MenuText>
-          <ButtonText>Meadow Devices: </ButtonText>
-          <ToolTipText>Select a Meadow device for debugging and deployment</ToolTipText>
-          <CanonicalName>Meadow Devices</CanonicalName>
-          <LocCanonicalName>Meadow Devices</LocCanonicalName>
-          <CommandName>Meadow Devices</CommandName>
-        </Strings>
-      </Combo>
-    </Combos>
-
     <!--Buttons section. -->
     <!--This section defines the elements the user can interact with, like a menu command or a button
         or combo box in a toolbar. -->
@@ -115,8 +99,6 @@
       <IDSymbol name="MyToolbar" value="0x1000"/>
       <IDSymbol name="Command2Id" value="0x0100" />
       <IDSymbol name="cmdidMeadowWindowCommand" value="4129" />
-      <IDSymbol name="cmdidMeadowDeviceListCombo" value="0x101"/>
-      <IDSymbol name="cmdidMeadowDeviceListComboGetList" value="0x102"/>
     </GuidSymbol>
 
     <GuidSymbol name="guidImages" value="{1e20ddc7-e3f5-4951-9a20-397954732131}">

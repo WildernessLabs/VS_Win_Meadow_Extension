@@ -10,16 +10,9 @@ The Meadow VS2022 extension provides integrated project templates, build tasks, 
 
 ## Device Selection
 
-The toolbar includes a device dropdown showing your connected Meadow devices. Before you deploy or debug, just pick which device you want to use. The dropdown shows each device with a status icon and its COM port—for example: `✓ Meadow [COM11]`
+Use the **Debug Launch Targets dropdown** (between the project selector and green play button) to choose your Meadow device. The dropdown shows all connected devices with their names and COM ports—for example: `Meadow [COM11]`
 
-**Status Icons:**
-- ✓ **Available** - Ready to deploy and debug
-- ● **Connected** - Currently debugging
-- ⚠ **Busy** - In use by another app
-- ✗ **Error** - Something's wrong
-- ○ **Unknown** - Status unclear
-
-The list refreshes automatically when you open it, and it caches the device info so it loads fast.
+The list refreshes automatically when you open the dropdown, showing all available Meadow boards connected to your computer.
 
 ## Architecture
 

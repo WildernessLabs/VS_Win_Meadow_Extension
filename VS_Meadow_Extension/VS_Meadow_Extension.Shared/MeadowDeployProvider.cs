@@ -106,7 +106,7 @@ namespace Meadow
             var serial = settingsManager.GetSetting(SettingsManager.PublicSettings.Route);
             if (string.IsNullOrEmpty(serial))
             {
-                outputLogger?.Log("No Meadow device selected. Please select a device from the toolbar.");
+                outputLogger?.Log("No Meadow device selected. Please select a device from the Debug Launch Targets dropdown.");
                 Globals.DebugOrDeployInProgress = false;
                 return;
             }

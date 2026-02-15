@@ -43,6 +43,12 @@
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)VsixManifest.cs">
     </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)MeadowDebugPortSupplier.cs">
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)MeadowDebugPort.cs">
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)MeadowLaunchSettingsProvider.cs">
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="$(MSBuildThisFileDirectory)Resources\MeadowPackage.ico">
