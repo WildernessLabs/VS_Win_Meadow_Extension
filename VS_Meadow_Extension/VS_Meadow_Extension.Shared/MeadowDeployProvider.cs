@@ -99,7 +99,7 @@ namespace Meadow
             var route = settingsManager.GetSetting(SettingsManager.PublicSettings.Route);
 
             outputLogger.Log("Connecting to Meadow...");
-            meadowConnection = connectionManager.GetConnectionForRoute(route);
+            meadowConnection = connectionManager.GetConnection(route);
 
             meadowConnection.FileWriteProgress += MeadowConnection_DeploymentProgress;
             meadowConnection.DeviceMessageReceived += MeadowConnection_DeviceMessageReceived;
