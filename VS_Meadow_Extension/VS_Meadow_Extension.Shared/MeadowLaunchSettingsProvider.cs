@@ -84,8 +84,10 @@ namespace Meadow
                     Directory.CreateDirectory(propertiesPath);
                 }
 
-                // Write launchSettings.json
-                File.WriteAllText(launchSettingsPath, launchSettings.ToString(Formatting.Indented));
+                // Serialize via JsonConvert to avoid depending on JToken formatting overloads
+                // that may be unavailable in older Newtonsoft versions loaded by VS components.
+                var launchSettingsJson = JsonConvert.SerializeObject(launchSettings, Formatting.Indented);
+                File.WriteAllText(launchSettingsPath, launchSettingsJson);
             }
             catch (Exception ex)
             {
