@@ -24,6 +24,20 @@ namespace Meadow
         }
 
         /// <summary>
+        /// Clears the device cache to force a fresh discovery on next call.
+        /// Used when devices are connected/disconnected to ensure immediate detection.
+        /// </summary>
+        public static void ClearCache()
+        {
+            lock (_cacheLock)
+            {
+                _deviceCache?.Clear();
+                _lastCacheUpdate = DateTime.MinValue;
+                System.Diagnostics.Debug.WriteLine($"[MeadowDeviceDiscovery] Cache cleared");
+            }
+        }
+
+        /// <summary>
         /// Gets detailed information about all connected Meadow devices.
         /// </summary>
         /// <param name="forceRefresh">If true, bypasses the cache and queries devices directly.</param>
