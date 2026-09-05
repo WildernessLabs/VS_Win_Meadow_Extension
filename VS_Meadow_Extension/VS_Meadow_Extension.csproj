@@ -186,7 +186,6 @@
     <None Include="BuildSystem\DeployedBuildSystem\VS_Meadow_Extension.targets">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Directory.Build.props" />
   </ItemGroup>
   <ItemGroup>
     <XamlPropertyRule Include="BuildSystem\Rules\general.xaml">

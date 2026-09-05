@@ -217,5 +217,13 @@ namespace Meadow
                     break;
             }
         }
+
+        public static string GetAdapterPath()
+        {
+            // Get path to DAP adapter bundled in the VSIX (same location as debug sessions use)
+            var assemblyPath = Path.GetDirectoryName(typeof(DapDeploymentHelper).Assembly.Location);
+            var adapterPath = Path.Combine(assemblyPath, "DapAdapter", "meadow-debugging.exe");
+            return adapterPath;
+        }
     }
 }

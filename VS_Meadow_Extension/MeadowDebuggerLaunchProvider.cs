@@ -106,7 +106,7 @@ namespace Meadow
                 return Array.Empty<IDebugLaunchSettings>();
             }
 
-            var adapterPath = GetAdapterPath();
+            var adapterPath = DapDeploymentHelper.GetAdapterPath();
             if (!File.Exists(adapterPath))
             {
                 OutputLogger.Instance?.Log($"DAP adapter not found at: {adapterPath}");
@@ -159,14 +159,6 @@ namespace Meadow
                 $"OutputPath={outputPath}{Environment.NewLine}AssemblyName={assemblyName}");
 
             return tempFile;
-        }
-
-        private string GetAdapterPath()
-        {
-            var extensionDir = Path.GetDirectoryName(
-                typeof(MeadowDebuggerLaunchProvider).Assembly.Location);
-
-            return Path.Combine(extensionDir, "DapAdapter", "vscode-meadow.exe");
         }
 
         private async Task<string> GetOutputPathAsync(string filename)

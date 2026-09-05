@@ -121,7 +121,7 @@ namespace Meadow
             }
 
             // Get DAP adapter path for validation
-            var adapterPath = GetAdapterPath();
+            var adapterPath = DapDeploymentHelper.GetAdapterPath();
             if (!File.Exists(adapterPath))
             {
                 outputLogger?.Log($"DAP adapter not found at: {adapterPath}");
@@ -198,14 +198,6 @@ namespace Meadow
                 $"OutputPath={outputPath}{Environment.NewLine}AssemblyName={assemblyName}");
 
             return tempFile;
-        }
-
-        private string GetAdapterPath()
-        {
-            // Get path to DAP adapter bundled in the VSIX (same location as debug sessions use)
-            var assemblyPath = Path.GetDirectoryName(GetType().Assembly.Location);
-            var adapterPath = Path.Combine(assemblyPath, "DapAdapter", "meadow-debugging.exe");
-            return adapterPath;
         }
 
         public async void Commit()
