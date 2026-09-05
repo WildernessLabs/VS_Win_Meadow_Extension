@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio;
 using Microsoft.VisualStudio.Debugger.Interop;
+using Microsoft.VisualStudio.Shell;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,7 +36,7 @@ namespace Meadow
         {
             try
             {
-                var devices = GetMeadowDevices().Result;
+                var devices = ThreadHelper.JoinableTaskFactory.Run(async () => await GetMeadowDevices());
                 var ports = devices
                     .Select(d => (IDebugPort2)new MeadowDebugPort(d))
                     .ToArray();
