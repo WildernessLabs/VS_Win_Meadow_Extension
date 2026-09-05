@@ -3,12 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.31911.260
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS_Meadow_Extension.2022", "VS_Meadow_Extension\VS_Meadow_Extension.2022\VS_Meadow_Extension.2022.csproj", "{103D69C2-B61C-4E0B-B3EA-C85C6F831988}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{D11E57EA-1FEB-40BF-9AEE-C67E8040AE3B}"
-EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "VS_Win_Meadow_Extension.Shared", "VS_Meadow_Extension\VS_Meadow_Extension.Shared\VS_Win_Meadow_Extension.Shared.shproj", "{6BD8A462-77A3-442D-97C8-36CBDA794DC9}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.HCom", "..\Meadow.CLI\Source\Meadow.Hcom\Meadow.HCom.csproj", "{10F00ED3-2DCA-41FD-9BF8-23A9CE1510BD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Tooling.Core", "..\Meadow.CLI\Source\Meadow.Tooling.Core\Meadow.Tooling.Core.csproj", "{A631D6CB-B93F-472F-8D3B-48FDA054F164}"
@@ -21,16 +15,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Meadow.Cloud.Client", "..\M
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meadow.Contracts", "..\Meadow.Contracts\Source\Meadow.Contracts\Meadow.Contracts.csproj", "{FD0AFE4D-4192-8845-BED3-066D613C929E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VS_Meadow_Extension", "VS_Meadow_Extension\VS_Meadow_Extension.csproj", "{103D69C2-B61C-4E0B-B3EA-C85C6F831988}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{103D69C2-B61C-4E0B-B3EA-C85C6F831988}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{103D69C2-B61C-4E0B-B3EA-C85C6F831988}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{103D69C2-B61C-4E0B-B3EA-C85C6F831988}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{103D69C2-B61C-4E0B-B3EA-C85C6F831988}.Release|Any CPU.Build.0 = Release|Any CPU
 		{10F00ED3-2DCA-41FD-9BF8-23A9CE1510BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{10F00ED3-2DCA-41FD-9BF8-23A9CE1510BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10F00ED3-2DCA-41FD-9BF8-23A9CE1510BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -55,24 +47,15 @@ Global
 		{FD0AFE4D-4192-8845-BED3-066D613C929E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FD0AFE4D-4192-8845-BED3-066D613C929E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FD0AFE4D-4192-8845-BED3-066D613C929E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{103D69C2-B61C-4E0B-B3EA-C85C6F831988}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{103D69C2-B61C-4E0B-B3EA-C85C6F831988}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{103D69C2-B61C-4E0B-B3EA-C85C6F831988}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{103D69C2-B61C-4E0B-B3EA-C85C6F831988}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{6BD8A462-77A3-442D-97C8-36CBDA794DC9} = {D11E57EA-1FEB-40BF-9AEE-C67E8040AE3B}
-		{10F00ED3-2DCA-41FD-9BF8-23A9CE1510BD} = {D11E57EA-1FEB-40BF-9AEE-C67E8040AE3B}
-		{A631D6CB-B93F-472F-8D3B-48FDA054F164} = {D11E57EA-1FEB-40BF-9AEE-C67E8040AE3B}
-		{2CEDC952-4148-45BA-A6D7-F6997BFCAD86} = {D11E57EA-1FEB-40BF-9AEE-C67E8040AE3B}
-		{AD03F2D4-5341-414B-9F61-03C111AEF765} = {D11E57EA-1FEB-40BF-9AEE-C67E8040AE3B}
-		{FB1DF5C8-039B-46F0-80B2-650DEDFCDF27} = {D11E57EA-1FEB-40BF-9AEE-C67E8040AE3B}
-		{FD0AFE4D-4192-8845-BED3-066D613C929E} = {D11E57EA-1FEB-40BF-9AEE-C67E8040AE3B}
-	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BF8000DF-DA09-4634-B870-07796C220A2F}
-	EndGlobalSection
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		VS_Meadow_Extension\VS_Meadow_Extension.Shared\VS_Win_Meadow_Extension.Shared.projitems*{103d69c2-b61c-4e0b-b3ea-c85c6f831988}*SharedItemsImports = 4
-		VS_Meadow_Extension\VS_Meadow_Extension.Shared\VS_Win_Meadow_Extension.Shared.projitems*{6bd8a462-77a3-442d-97c8-36cbda794dc9}*SharedItemsImports = 13
 	EndGlobalSection
 EndGlobal
