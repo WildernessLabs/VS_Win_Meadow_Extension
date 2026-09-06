@@ -14,13 +14,16 @@ namespace Meadow
     internal static class MeadowDeviceDiscovery
     {
         private static readonly object _cacheLock = new object();
+        private static readonly object _probeLock = new object();
         private static Dictionary<string, MeadowDeviceInfo> _deviceCache;
+        private static Dictionary<string, DateTime> _portProbeNotBeforeUtc;
         private static DateTime _lastCacheUpdate = DateTime.MinValue;
         private static readonly TimeSpan CacheExpiration = TimeSpan.FromSeconds(5);
 
         static MeadowDeviceDiscovery()
         {
             _deviceCache = new Dictionary<string, MeadowDeviceInfo>();
+            _portProbeNotBeforeUtc = new Dictionary<string, DateTime>(StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -73,7 +76,16 @@ namespace Meadow
                             if (string.IsNullOrEmpty(port))
                                 continue;
 
-                            var deviceInfo = await GetDeviceInfoForPortAsync(port);
+                            MeadowDeviceInfo cachedInfo = null;
+                            lock (_cacheLock)
+                            {
+                                if (_deviceCache != null && _deviceCache.TryGetValue(port, out var existing))
+                                {
+                                    cachedInfo = existing;
+                                }
+                            }
+
+                            var deviceInfo = await GetDeviceInfoForPortAsync(port, cachedInfo);
                             if (deviceInfo != null)
                             {
                                 devices.Add(deviceInfo);
@@ -111,6 +123,10 @@ namespace Meadow
                                 foreach (var port in disconnectedPorts)
                                 {
                                     _deviceCache.Remove(port);
+                                    lock (_probeLock)
+                                    {
+                                        _portProbeNotBeforeUtc?.Remove(port);
+                                    }
                                 }
                             }
                         }
@@ -133,7 +149,7 @@ namespace Meadow
         /// <summary>
         /// Gets detailed information for a specific COM port.
         /// </summary>
-        private static async Task<MeadowDeviceInfo> GetDeviceInfoForPortAsync(string port)
+        private static async Task<MeadowDeviceInfo> GetDeviceInfoForPortAsync(string port, MeadowDeviceInfo cachedInfo)
         {
             if (string.IsNullOrEmpty(port))
             {
@@ -144,8 +160,19 @@ namespace Meadow
             {
                 Port = port,
                 DeviceName = "Meadow",
-                Status = DeviceStatus.Available
+                Status = cachedInfo?.Status ?? DeviceStatus.Available
             };
+
+            var utcNow = DateTime.UtcNow;
+            lock (_probeLock)
+            {
+                if (_portProbeNotBeforeUtc != null
+                    && _portProbeNotBeforeUtc.TryGetValue(port, out var notBefore)
+                    && utcNow < notBefore)
+                {
+                    return deviceInfo;
+                }
+            }
 
             try
             {
@@ -163,23 +190,39 @@ namespace Meadow
                                 serialPort.Open();
                                 serialPort.Close();
                                 deviceInfo.Status = DeviceStatus.Available;
+                                lock (_probeLock)
+                                {
+                                    _portProbeNotBeforeUtc[port] = DateTime.UtcNow.AddSeconds(5);
+                                }
                             }
                         }
                         catch (UnauthorizedAccessException)
                         {
                             // Port exists but is in use
                             deviceInfo.Status = DeviceStatus.Busy;
+                            lock (_probeLock)
+                            {
+                                _portProbeNotBeforeUtc[port] = DateTime.UtcNow.AddSeconds(15);
+                            }
                         }
                         catch (Exception)
                         {
                             // Port exists but has issues
                             deviceInfo.Status = DeviceStatus.Unknown;
+                            lock (_probeLock)
+                            {
+                                _portProbeNotBeforeUtc[port] = DateTime.UtcNow.AddSeconds(8);
+                            }
                         }
                     }
                     catch (Exception ex)
                     {
                         System.Diagnostics.Debug.WriteLine($"Error getting device info for {port}: {ex.Message}");
                         deviceInfo.Status = DeviceStatus.Unknown;
+                        lock (_probeLock)
+                        {
+                            _portProbeNotBeforeUtc[port] = DateTime.UtcNow.AddSeconds(8);
+                        }
                     }
                 });
             }
@@ -187,6 +230,10 @@ namespace Meadow
             {
                 System.Diagnostics.Debug.WriteLine($"Error in GetDeviceInfoForPortAsync for {port}: {ex.Message}");
                 deviceInfo.Status = DeviceStatus.Unknown;
+                lock (_probeLock)
+                {
+                    _portProbeNotBeforeUtc[port] = DateTime.UtcNow.AddSeconds(8);
+                }
             }
 
             return deviceInfo;

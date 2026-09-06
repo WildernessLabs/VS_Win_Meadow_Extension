@@ -26,9 +26,15 @@ namespace Meadow
         private FileSystemWatcher _launchSettingsWatcher;
         private Timer _devicePollTimer;
         private DateTime _lastRefreshTime = DateTime.MinValue;
+        private DateTime _nextRefreshAllowedUtc = DateTime.MinValue;
+        private DateTime _ignoreWatcherEventsUntilUtc = DateTime.MinValue;
+        private int _consecutiveRefreshFailures;
         private int _isRefreshing;
         private volatile bool _suppressWatcherEvents;
         private string _lastDeviceSignature = string.Empty;
+
+        private static readonly TimeSpan RefreshDebounce = TimeSpan.FromSeconds(2);
+        private static readonly TimeSpan SelfWriteWatcherQuietPeriod = TimeSpan.FromSeconds(2);
 
         [ImportingConstructor]
         public MeadowDebuggerLaunchProvider(
@@ -89,6 +95,16 @@ namespace Meadow
                 return;
             }
 
+            if (DateTime.UtcNow < _ignoreWatcherEventsUntilUtc)
+            {
+                return;
+            }
+
+            if (Globals.DebugOrDeployInProgress || MeadowDeployProvider.DapDebugPending)
+            {
+                return;
+            }
+
             System.Diagnostics.Debug.WriteLine($"[MeadowDebuggerLaunchProvider] launchSettings.json changed: {e.ChangeType}");
             _ = RefreshDevicesIfNeededAsync();
         }
@@ -106,6 +122,12 @@ namespace Meadow
                 return;
             }
 
+            var utcNow = DateTime.UtcNow;
+            if (utcNow < _nextRefreshAllowedUtc)
+            {
+                return;
+            }
+
             if (Interlocked.Exchange(ref _isRefreshing, 1) == 1)
             {
                 return;
@@ -119,26 +141,29 @@ namespace Meadow
                     return;
                 }
 
+                _nextRefreshAllowedUtc = DateTime.UtcNow.Add(RefreshDebounce);
                 _lastRefreshTime = DateTime.Now;
                 System.Diagnostics.Debug.WriteLine($"[MeadowDebuggerLaunchProvider] Refreshing device list...");
 
-                // Force clear the device discovery cache to detect new/removed devices
-                MeadowDeviceDiscovery.ClearCache();
-
                 // Regenerate launchSettings.json with updated device list
                 _suppressWatcherEvents = true;
+                _ignoreWatcherEventsUntilUtc = DateTime.UtcNow.Add(SelfWriteWatcherQuietPeriod);
                 await launchSettingsProvider.UpdateLaunchSettingsAsync();
-                _suppressWatcherEvents = false;
+                _consecutiveRefreshFailures = 0;
+                _nextRefreshAllowedUtc = DateTime.UtcNow.Add(RefreshDebounce);
 
                 System.Diagnostics.Debug.WriteLine($"[MeadowDebuggerLaunchProvider] Device list refreshed");
             }
             catch (Exception ex)
             {
-                _suppressWatcherEvents = false;
+                _consecutiveRefreshFailures = Math.Min(_consecutiveRefreshFailures + 1, 5);
+                var retryDelaySeconds = Math.Min(2 << (_consecutiveRefreshFailures - 1), 30);
+                _nextRefreshAllowedUtc = DateTime.UtcNow.AddSeconds(retryDelaySeconds);
                 System.Diagnostics.Debug.WriteLine($"[MeadowDebuggerLaunchProvider] Error during device refresh: {ex.Message}");
             }
             finally
             {
+                _suppressWatcherEvents = false;
                 Interlocked.Exchange(ref _isRefreshing, 0);
             }
         }
@@ -158,7 +183,6 @@ namespace Meadow
 
             try
             {
-                MeadowDeviceDiscovery.ClearCache();
                 var devices = await MeadowDeviceDiscovery.GetDetailedDeviceInfoAsync(forceRefresh: true);
 
                 var signature = string.Join("|", (devices ?? new System.Collections.Generic.List<MeadowDeviceInfo>())
