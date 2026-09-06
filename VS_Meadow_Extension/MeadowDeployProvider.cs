@@ -5,8 +5,10 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel.Composition;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Task = System.Threading.Tasks.Task;
 
 namespace Meadow
@@ -30,6 +32,9 @@ namespace Meadow
         private ProjectProperties Properties { get; set; }
 
         private readonly ConfiguredProject configuredProject;
+        private readonly object deploySupportLock = new object();
+        private DateTime deploySupportCacheStampUtc = DateTime.MinValue;
+        private bool cachedDeploySupported;
 
         const string MeadowSDKVersion = "Sdk=\"Meadow.Sdk/1.1.0\"";
 
@@ -37,9 +42,12 @@ namespace Meadow
         {
             get
             {
-                return true;
+                if (DapDebugPending)
+                {
+                    return true;
+                }
 
-                //  IsProjectAMeadowApp().ContinueWith(t => IsDeploySupported = t.Result);
+                return EvaluateIsDeploySupported();
             }
         }
 
@@ -59,7 +67,13 @@ namespace Meadow
                 return;
             }
 
-            if (cancellationToken.IsCancellationRequested || !await IsProjectAMeadowApp())
+            if (cancellationToken.IsCancellationRequested || !IsDeploySupported)
+            {
+                return;
+            }
+
+            // Keep the evaluated-property check as a secondary guard for runtime safety.
+            if (!await IsProjectAMeadowApp())
             {
                 return;
             }
@@ -214,21 +228,118 @@ namespace Meadow
             Console.Write("Rolling Back");
         }
 
+        private bool EvaluateIsDeploySupported()
+        {
+            var projectFile = configuredProject?.UnconfiguredProject?.FullPath;
+            if (string.IsNullOrWhiteSpace(projectFile) || !File.Exists(projectFile))
+            {
+                return false;
+            }
+
+            var projectDirectory = Path.GetDirectoryName(projectFile);
+            if (string.IsNullOrWhiteSpace(projectDirectory))
+            {
+                return false;
+            }
+
+            var cacheStampUtc = GetDeploySupportCacheStampUtc(projectFile, projectDirectory);
+
+            lock (deploySupportLock)
+            {
+                if (cacheStampUtc == deploySupportCacheStampUtc)
+                {
+                    return cachedDeploySupported;
+                }
+
+                cachedDeploySupported = LooksLikeMeadowAppProject(projectFile, projectDirectory);
+                deploySupportCacheStampUtc = cacheStampUtc;
+                return cachedDeploySupported;
+            }
+        }
+
+        private static DateTime GetDeploySupportCacheStampUtc(string projectFile, string projectDirectory)
+        {
+            var stamp = File.GetLastWriteTimeUtc(projectFile);
+
+            var meadowConfigPath = Path.Combine(projectDirectory, "meadow.config.yaml");
+            if (File.Exists(meadowConfigPath))
+            {
+                var meadowStamp = File.GetLastWriteTimeUtc(meadowConfigPath);
+                if (meadowStamp > stamp)
+                {
+                    stamp = meadowStamp;
+                }
+            }
+
+            var appConfigPath = Path.Combine(projectDirectory, "app.config.yaml");
+            if (File.Exists(appConfigPath))
+            {
+                var appStamp = File.GetLastWriteTimeUtc(appConfigPath);
+                if (appStamp > stamp)
+                {
+                    stamp = appStamp;
+                }
+            }
+
+            return stamp;
+        }
+
+        private static bool LooksLikeMeadowAppProject(string projectFile, string projectDirectory)
+        {
+            var hasMeadowConfig = File.Exists(Path.Combine(projectDirectory, "meadow.config.yaml"));
+            var hasAppConfig = File.Exists(Path.Combine(projectDirectory, "app.config.yaml"));
+
+            if (!hasMeadowConfig || !hasAppConfig)
+            {
+                return false;
+            }
+
+            try
+            {
+                var doc = XDocument.Load(projectFile);
+                var sdk = doc.Root?.Attribute("Sdk")?.Value;
+
+                var hasMeadowSdk = !string.IsNullOrWhiteSpace(sdk)
+                    && sdk.IndexOf("Meadow.Sdk", StringComparison.OrdinalIgnoreCase) >= 0;
+
+                if (!hasMeadowSdk)
+                {
+                    hasMeadowSdk = doc
+                        .Descendants()
+                        .Any(x => x.Name.LocalName == "Import"
+                            && x.Attribute("Sdk")?.Value?.IndexOf("Meadow.Sdk", StringComparison.OrdinalIgnoreCase) >= 0);
+                }
+
+                var assemblyName = doc
+                    .Descendants()
+                    .FirstOrDefault(x => x.Name.LocalName == "AssemblyName")
+                    ?.Value
+                    ?.Trim();
+
+                var isAppAssembly = string.Equals(assemblyName, "App", StringComparison.OrdinalIgnoreCase);
+
+                return hasMeadowSdk && isAppAssembly;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private async Task<bool> IsProjectAMeadowApp()
         {
-            // Assume configuredProject is your ConfiguredProject object
-            var properties = configuredProject.Services.ProjectPropertiesProvider.GetCommonProperties();
-
-            // We need to retrieve the AssemblyName property because we need both
-            // the configuredProject to be a start-up project, and also an App (not library)
-            string assemblyName = await properties.GetEvaluatedPropertyValueAsync("AssemblyName");
-
-            if (!string.IsNullOrEmpty(assemblyName) &&
-                assemblyName.Equals("App", StringComparison.OrdinalIgnoreCase))
+            try
             {
-                return true;
+                var properties = configuredProject.Services.ProjectPropertiesProvider.GetCommonProperties();
+                string assemblyName = await properties.GetEvaluatedPropertyValueAsync("AssemblyName");
+
+                return !string.IsNullOrEmpty(assemblyName)
+                    && assemblyName.Equals("App", StringComparison.OrdinalIgnoreCase);
             }
-            return false;
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>
