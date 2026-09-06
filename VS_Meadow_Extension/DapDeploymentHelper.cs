@@ -118,68 +118,190 @@ namespace Meadow
             await stdin.FlushAsync();
         }
 
+        private class DeploymentState
+        {
+            public bool LaunchSucceeded { get; set; }
+            public bool DeploymentComplete { get; set; }
+        }
+
         private async Task<bool> MonitorDeploymentAsync(Process process, CancellationToken cancellationToken)
         {
-            bool deploymentComplete = false;
-            bool deploymentSuccess = true;
-            var buffer = new StringBuilder();
+            const int DeploymentTimeoutSeconds = 30;
+            var deploymentState = new DeploymentState();
+            bool deploymentSuccess = false;
+            var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(DeploymentTimeoutSeconds));
+            var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
 
-            while (!process.HasExited && !cancellationToken.IsCancellationRequested)
+            try
             {
-                var line = await process.StandardOutput.ReadLineAsync();
-                if (line == null) break;
+                // Monitor both stdout and stderr
+                var stdoutTask = MonitorStdoutAsync(process, linkedCts.Token, deploymentState);
+                var stderrTask = MonitorStderrAsync(process, linkedCts.Token);
 
-                // DAP messages are preceded by Content-Length header
-                if (line.StartsWith("Content-Length:", StringComparison.OrdinalIgnoreCase))
+                await Task.WhenAny(stdoutTask, stderrTask);
+
+                // If stdout completed normally, deploymentComplete flag was set
+                if (deploymentState.DeploymentComplete)
                 {
-                    // Skip header line and blank line
-                    await process.StandardOutput.ReadLineAsync();
-                    var contentLength = int.Parse(line.Substring(15).Trim());
+                    deploymentSuccess = deploymentState.LaunchSucceeded;
+                }
+                else if (timeoutCts.Token.IsCancellationRequested)
+                {
+                    _logger?.Log($"ERROR: Deployment timed out after {DeploymentTimeoutSeconds} seconds. Adapter did not complete.");
+                    deploymentSuccess = false;
+                }
+                else if (cancellationToken.IsCancellationRequested)
+                {
+                    _logger?.Log("ERROR: Deployment was cancelled by user.");
+                    deploymentSuccess = false;
+                }
 
-                    // Read JSON message
-                    var messageBuffer = new char[contentLength];
-                    await process.StandardOutput.ReadAsync(messageBuffer, 0, contentLength);
-                    var messageJson = new string(messageBuffer);
+                return deploymentSuccess;
+            }
+            finally
+            {
+                timeoutCts?.Dispose();
+                linkedCts?.Dispose();
+            }
+        }
 
-                    try
+        private async Task MonitorStdoutAsync(Process process, CancellationToken cancellationToken, DeploymentState deploymentState)
+        {
+            try
+            {
+                while (!process.HasExited && !cancellationToken.IsCancellationRequested)
+                {
+                    var line = await process.StandardOutput.ReadLineAsync();
+                    if (line == null) break;
+
+                    // DAP messages are preceded by Content-Length header
+                    if (line.StartsWith("Content-Length:", StringComparison.OrdinalIgnoreCase))
                     {
-                        var message = JObject.Parse(messageJson);
-                        var messageType = message["type"]?.ToString();
-
-                        if (messageType == "event")
+                        try
                         {
-                            var eventType = message["event"]?.ToString();
-                            HandleDapEvent(eventType, message["body"] as JObject);
+                            // Skip blank line after header
+                            await process.StandardOutput.ReadLineAsync();
+                            var contentLength = int.Parse(line.Substring(15).Trim());
 
-                            // Check for deployment completion
-                            if (eventType == "terminated" || eventType == "exited")
+                            if (contentLength <= 0 || contentLength > 1024 * 1024)
                             {
-                                deploymentComplete = true;
-                                break;
+                                _logger?.Log($"WARNING: Invalid DAP message length: {contentLength}");
+                                continue;
+                            }
+
+                            // Read JSON message
+                            var messageBuffer = new char[contentLength];
+                            int bytesRead = await process.StandardOutput.ReadAsync(messageBuffer, 0, contentLength);
+                            if (bytesRead != contentLength)
+                            {
+                                _logger?.Log($"WARNING: Expected {contentLength} bytes, got {bytesRead}");
+                                continue;
+                            }
+
+                            var messageJson = new string(messageBuffer);
+
+                            try
+                            {
+                                var message = JObject.Parse(messageJson);
+                                var messageType = message["type"]?.ToString();
+
+                                if (messageType == "event")
+                                {
+                                    var eventType = message["event"]?.ToString();
+                                    HandleDapEvent(eventType, message["body"] as JObject);
+
+                                    // Check for deployment completion (terminated = success, exited = check code)
+                                    if (eventType == "terminated")
+                                    {
+                                        deploymentState.DeploymentComplete = true;
+                                        deploymentState.LaunchSucceeded = true;
+                                        break;
+                                    }
+                                    else if (eventType == "exited")
+                                    {
+                                        var code = message["body"]?["exitCode"]?.ToObject<int>() ?? -1;
+                                        if (code == 0)
+                                        {
+                                            deploymentState.DeploymentComplete = true;
+                                            deploymentState.LaunchSucceeded = true;
+                                        }
+                                        else
+                                        {
+                                            _logger?.Log($"ERROR: Adapter exited with code {code}");
+                                            deploymentState.DeploymentComplete = true;
+                                            deploymentState.LaunchSucceeded = false;
+                                        }
+                                        break;
+                                    }
+                                }
+                                else if (messageType == "response")
+                                {
+                                    var command = message["command"]?.ToString();
+                                    var success = message["success"]?.ToObject<bool>() ?? false;
+
+                                    if (command == "launch")
+                                    {
+                                        if (success)
+                                        {
+                                            _logger?.Log("Launch request accepted by adapter");
+                                            deploymentState.LaunchSucceeded = true;
+                                        }
+                                        else
+                                        {
+                                            var errorMsg = message["message"]?.ToString() ?? "Unknown error";
+                                            _logger?.Log($"ERROR: Launch failed: {errorMsg}");
+                                            deploymentState.LaunchSucceeded = false;
+                                            deploymentState.DeploymentComplete = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            catch (JsonException ex)
+                            {
+                                _logger?.Log($"WARNING: Failed to parse DAP message: {ex.Message}");
                             }
                         }
-                        else if (messageType == "response")
+                        catch (FormatException ex)
                         {
-                            var command = message["command"]?.ToString();
-                            var success = message["success"]?.ToObject<bool>() ?? false;
-
-                            if (command == "launch" && !success)
-                            {
-                                var errorMsg = message["message"]?.ToString() ?? "Unknown error";
-                                _logger?.Log($"ERROR: Launch failed: {errorMsg}");
-                                deploymentSuccess = false;
-                                break;
-                            }
+                            _logger?.Log($"WARNING: Invalid Content-Length header: {ex.Message}");
                         }
-                    }
-                    catch (JsonException ex)
-                    {
-                        _logger?.Log($"WARNING: Failed to parse DAP message: {ex.Message}");
                     }
                 }
             }
+            catch (OperationCanceledException)
+            {
+                // Timeout or cancellation
+            }
+            catch (Exception ex)
+            {
+                _logger?.Log($"ERROR: Exception while monitoring stdout: {ex.Message}");
+            }
+        }
 
-            return deploymentSuccess && deploymentComplete;
+        private async Task MonitorStderrAsync(Process process, CancellationToken cancellationToken)
+        {
+            try
+            {
+                while (!process.HasExited && !cancellationToken.IsCancellationRequested)
+                {
+                    var line = await process.StandardError.ReadLineAsync();
+                    if (line == null) break;
+
+                    if (!string.IsNullOrWhiteSpace(line))
+                    {
+                        _logger?.Log($"[Adapter] {line}");
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Timeout or cancellation
+            }
+            catch (Exception ex)
+            {
+                _logger?.Log($"WARNING: Exception while monitoring stderr: {ex.Message}");
+            }
         }
 
         private void HandleDapEvent(string eventType, JObject body)

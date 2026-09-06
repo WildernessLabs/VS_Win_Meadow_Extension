@@ -233,21 +233,27 @@
        The MSBuild task ensures the adapter (and its Meadow.Debugging.DAP dependency) is compiled
        before we copy, so changes to adapter code are always picked up by the VS2022 extension. -->
   <PropertyGroup>
-    <DapAdapterProject Condition="'$(DapAdapterProject)' == ''">$(MSBuildProjectDirectory)\..\..\..\Meadow.Debugging.Host\Meadow.Debugging.Host.csproj</DapAdapterProject>
-    <DapAdapterSourceDir Condition="'$(DapAdapterSourceDir)' == ''">$(MSBuildProjectDirectory)\..\..\..\Meadow.Debugging.Host\bin\$(Configuration)\net8.0\</DapAdapterSourceDir>
+    <DapAdapterProject Condition="'$(DapAdapterProject)' == ''">$(MSBuildProjectDirectory)\..\..\Meadow.Debugging\Meadow.Debugging.Host\Meadow.Debugging.Host.csproj</DapAdapterProject>
+    <DapAdapterSourceDir Condition="'$(DapAdapterSourceDir)' == ''">$(MSBuildProjectDirectory)\..\..\Meadow.Debugging\Meadow.Debugging.Host\bin\$(Configuration)\net8.0\</DapAdapterSourceDir>
   </PropertyGroup>
-  <Target Name="BuildDapAdapter" BeforeTargets="CopyDapAdapter" Condition="Exists('$(DapAdapterProject)')">
+  <Target Name="BuildDapAdapter" BeforeTargets="CopyDapAdapter;GetVsixSourceItems" Condition="Exists('$(DapAdapterProject)')">
     <Message Text="Building DAP adapter from: $(DapAdapterProject)" Importance="high" />
     <!-- Use Restore;Build to ensure dependency changes (e.g. Meadow.Debugging.DAP) are detected.
          The VS2022 MSBuild host may cache project state, causing incremental builds to miss
          changes in transitive ProjectReference dependencies. -->
     <Exec Command="dotnet build &quot;$(DapAdapterProject)&quot; -c $(Configuration) --no-incremental" />
   </Target>
-  <Target Name="CopyDapAdapter" BeforeTargets="Build" Condition="Exists('$(DapAdapterSourceDir)meadow-debugging.exe')">
+  <Target Name="CopyDapAdapter" BeforeTargets="GetVsixSourceItems;Build" Condition="Exists('$(DapAdapterSourceDir)meadow-debugging.exe')">
     <ItemGroup>
       <DapAdapterFiles Include="$(DapAdapterSourceDir)**\*.*" />
     </ItemGroup>
     <Copy SourceFiles="@(DapAdapterFiles)" DestinationFolder="$(ProjectDir)DapAdapter\%(RecursiveDir)" SkipUnchangedFiles="true" />
+    <ItemGroup>
+      <Content Include="$(ProjectDir)DapAdapter\**\*.*">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        <IncludeInVSIX>true</IncludeInVSIX>
+      </Content>
+    </ItemGroup>
     <Message Text="Copied DAP adapter files to DapAdapter/" Importance="high" />
   </Target>
   <Target Name="AfterBuild">

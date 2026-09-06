@@ -1,5 +1,3 @@
-using Meadow.CLI;
-using Meadow.CLI.Commands.DeviceManagement;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Debug;
 using Microsoft.VisualStudio.ProjectSystem.VS.Debug;
@@ -9,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,8 +24,11 @@ namespace Meadow
         private readonly ConfiguredProject configuredProject;
         private readonly MeadowLaunchSettingsProvider launchSettingsProvider;
         private FileSystemWatcher _launchSettingsWatcher;
-        private Timer _safetyRefreshTimer;
+        private Timer _devicePollTimer;
         private DateTime _lastRefreshTime = DateTime.MinValue;
+        private int _isRefreshing;
+        private volatile bool _suppressWatcherEvents;
+        private string _lastDeviceSignature = string.Empty;
 
         [ImportingConstructor]
         public MeadowDebuggerLaunchProvider(
@@ -41,12 +43,12 @@ namespace Meadow
             // Initialize file system watcher for launchSettings.json changes (real-time device detection)
             InitializeFileSystemWatcher();
 
-            // Safety timer: poll every 3 seconds in case file watcher misses events
-            _safetyRefreshTimer = new Timer(
-                _ => _ = RefreshDevicesIfNeededAsync(),
+            // Poll connected Meadow devices and refresh launch settings only when device list changes.
+            _devicePollTimer = new Timer(
+                _ => _ = PollDevicesAndRefreshIfChangedAsync(),
                 null,
-                TimeSpan.FromSeconds(3),
-                TimeSpan.FromSeconds(3));
+                TimeSpan.FromSeconds(2),
+                TimeSpan.FromSeconds(2));
         }
 
         private void InitializeFileSystemWatcher()
@@ -69,6 +71,9 @@ namespace Meadow
                 };
 
                 _launchSettingsWatcher.Changed += OnLaunchSettingsChanged;
+                _launchSettingsWatcher.Created += OnLaunchSettingsChanged;
+                _launchSettingsWatcher.Deleted += OnLaunchSettingsChanged;
+                _launchSettingsWatcher.Renamed += OnLaunchSettingsChanged;
                 System.Diagnostics.Debug.WriteLine($"[MeadowDebuggerLaunchProvider] FileSystemWatcher initialized for {propertiesPath}");
             }
             catch (Exception ex)
@@ -79,40 +84,109 @@ namespace Meadow
 
         private void OnLaunchSettingsChanged(object sender, FileSystemEventArgs e)
         {
+            if (_suppressWatcherEvents)
+            {
+                return;
+            }
+
             System.Diagnostics.Debug.WriteLine($"[MeadowDebuggerLaunchProvider] launchSettings.json changed: {e.ChangeType}");
             _ = RefreshDevicesIfNeededAsync();
         }
 
         private async Task RefreshDevicesIfNeededAsync()
         {
-            // Debounce: only refresh if at least 1 second has passed since last refresh
-            if (DateTime.Now - _lastRefreshTime < TimeSpan.FromSeconds(1))
+            // Never rewrite launch settings while a deploy/debug operation is active.
+            if (Globals.DebugOrDeployInProgress || MeadowDeployProvider.DapDebugPending)
             {
                 return;
             }
 
-            _lastRefreshTime = DateTime.Now;
+            if (_suppressWatcherEvents)
+            {
+                return;
+            }
 
+            if (Interlocked.Exchange(ref _isRefreshing, 1) == 1)
+            {
+                return;
+            }
+
+            // Debounce: only refresh if at least 1 second has passed since last refresh
             try
             {
+                if (DateTime.Now - _lastRefreshTime < TimeSpan.FromSeconds(1))
+                {
+                    return;
+                }
+
+                _lastRefreshTime = DateTime.Now;
                 System.Diagnostics.Debug.WriteLine($"[MeadowDebuggerLaunchProvider] Refreshing device list...");
 
                 // Force clear the device discovery cache to detect new/removed devices
                 MeadowDeviceDiscovery.ClearCache();
 
                 // Regenerate launchSettings.json with updated device list
+                _suppressWatcherEvents = true;
                 await launchSettingsProvider.UpdateLaunchSettingsAsync();
+                _suppressWatcherEvents = false;
 
                 System.Diagnostics.Debug.WriteLine($"[MeadowDebuggerLaunchProvider] Device list refreshed");
             }
             catch (Exception ex)
             {
+                _suppressWatcherEvents = false;
                 System.Diagnostics.Debug.WriteLine($"[MeadowDebuggerLaunchProvider] Error during device refresh: {ex.Message}");
+            }
+            finally
+            {
+                Interlocked.Exchange(ref _isRefreshing, 0);
+            }
+        }
+
+        private async Task PollDevicesAndRefreshIfChangedAsync()
+        {
+            // Avoid touching device discovery during active deploy/debug to prevent contention.
+            if (Globals.DebugOrDeployInProgress || MeadowDeployProvider.DapDebugPending)
+            {
+                return;
+            }
+
+            if (_suppressWatcherEvents)
+            {
+                return;
+            }
+
+            try
+            {
+                MeadowDeviceDiscovery.ClearCache();
+                var devices = await MeadowDeviceDiscovery.GetDetailedDeviceInfoAsync(forceRefresh: true);
+
+                var signature = string.Join("|", (devices ?? new System.Collections.Generic.List<MeadowDeviceInfo>())
+                    .Where(d => d != null && !string.IsNullOrWhiteSpace(d.Port))
+                    .Select(d => d.Port)
+                    .OrderBy(p => p));
+
+                if (string.Equals(signature, _lastDeviceSignature, StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                _lastDeviceSignature = signature;
+                await RefreshDevicesIfNeededAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[MeadowDebuggerLaunchProvider] PollDevicesAndRefreshIfChangedAsync error: {ex.Message}");
             }
         }
 
         public void EnableFileSystemWatcher()
         {
+            if (_launchSettingsWatcher == null)
+            {
+                InitializeFileSystemWatcher();
+            }
+
             if (_launchSettingsWatcher != null)
             {
                 _launchSettingsWatcher.EnableRaisingEvents = true;
@@ -122,7 +196,7 @@ namespace Meadow
 
         public void Dispose()
         {
-            _safetyRefreshTimer?.Dispose();
+            _devicePollTimer?.Dispose();
             _launchSettingsWatcher?.Dispose();
             System.Diagnostics.Debug.WriteLine($"[MeadowDebuggerLaunchProvider] Disposed");
         }
@@ -135,12 +209,13 @@ namespace Meadow
                 EnableFileSystemWatcher();
             }
 
+            // Trigger an on-demand poll to reduce stale dropdown state.
+            _ = PollDevicesAndRefreshIfChangedAsync();
+
             if (profile?.CommandName != "Meadow")
             {
                 return false;
             }
-
-            MeadowDeployProvider.DapDebugPending = true;
             return true;
         }
 
@@ -231,17 +306,23 @@ namespace Meadow
                 Options = launchConfig.ToString()
             };
 
-            MeadowDeployProvider.DapDebugPending = true;
             return new[] { settings };
         }
 
         public Task OnBeforeLaunchAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
         {
+            if (profile?.CommandName == "Meadow" && !launchOptions.HasFlag(DebugLaunchOptions.NoDebug))
+            {
+                // Only mark pending at actual launch time, not during profile discovery.
+                MeadowDeployProvider.DapDebugPending = true;
+            }
+
             return Task.CompletedTask;
         }
 
         public async Task OnAfterLaunchAsync(DebugLaunchOptions launchOptions, ILaunchProfile profile)
         {
+            MeadowDeployProvider.DapDebugPending = false;
             Globals.DebugOrDeployInProgress = false;
             await OutputLogger.Instance.ShowDebugOutputPane();
         }
