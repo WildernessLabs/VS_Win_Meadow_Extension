@@ -40,7 +40,6 @@ namespace Meadow
     public sealed class MeadowPackage : AsyncPackage
     {
         private const string NoDevicesFound = "No Devices Found";
-        private static SettingsManager SettingsManager { get; set; } = new SettingsManager();
 
         private DTE2 _dte;
         private DebuggerEvents _debuggerEvents;

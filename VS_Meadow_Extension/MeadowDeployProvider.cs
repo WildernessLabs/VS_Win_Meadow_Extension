@@ -1,6 +1,7 @@
 ﻿using Meadow.CLI;
 using Microsoft.VisualStudio.ProjectSystem;
 using Microsoft.VisualStudio.ProjectSystem.Build;
+using Newtonsoft.Json.Linq;
 using System;
 using System.ComponentModel.Composition;
 using System.IO;
@@ -41,8 +42,6 @@ namespace Meadow
                 //  IsProjectAMeadowApp().ContinueWith(t => IsDeploySupported = t.Result);
             }
         }
-
-        private readonly SettingsManager settingsManager = new SettingsManager();
 
         [ImportingConstructor]
         public MeadowDeployProvider(ConfiguredProject configuredProject)
@@ -102,11 +101,11 @@ namespace Meadow
                 configuration = configVal;
             }
 
-            // Get serial port
-            var serial = settingsManager.GetSetting(SettingsManager.PublicSettings.Route);
+            // Get serial port from launchSettings.json (single source of truth)
+            var serial = await GetMeadowDeviceFromLaunchSettingsAsync(projectPath);
             if (string.IsNullOrEmpty(serial))
             {
-                outputLogger?.Log("No Meadow device selected. Please select a device from the Debug Launch Targets dropdown.");
+                outputLogger?.Log("No Meadow device configured. Please select a device from the Debug Launch Targets dropdown and try again.");
                 Globals.DebugOrDeployInProgress = false;
                 return;
             }
@@ -230,6 +229,59 @@ namespace Meadow
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Reads the currently configured Meadow device from launchSettings.json.
+        /// This is the single source of truth for which device to target.
+        /// </summary>
+        private async Task<string> GetMeadowDeviceFromLaunchSettingsAsync(string projectPath)
+        {
+            try
+            {
+                var propertiesPath = Path.Combine(projectPath, "Properties");
+                var launchSettingsPath = Path.Combine(propertiesPath, "launchSettings.json");
+
+                if (!File.Exists(launchSettingsPath))
+                {
+                    return null;
+                }
+
+                var launchSettingsJson = File.ReadAllText(launchSettingsPath);
+                var launchSettings = JObject.Parse(launchSettingsJson);
+                var profiles = launchSettings["profiles"] as JObject;
+
+                if (profiles == null || profiles.Count == 0)
+                {
+                    return null;
+                }
+
+                // Find the first Meadow profile and extract the device port
+                foreach (var profile in profiles.Properties())
+                {
+                    var profileObj = profile.Value as JObject;
+                    if (profileObj != null)
+                    {
+                        var commandName = profileObj["commandName"]?.ToString();
+                        if (commandName == "Meadow")
+                        {
+                            var device = profileObj["meadowDevice"]?.ToString();
+                            if (!string.IsNullOrEmpty(device))
+                            {
+                                outputLogger?.Log($"Using device from launch profile: {device}");
+                                return device;
+                            }
+                        }
+                    }
+                }
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                outputLogger?.Log($"WARNING: Failed to read device from launchSettings.json: {ex.Message}");
+                return null;
+            }
         }
     }
 }

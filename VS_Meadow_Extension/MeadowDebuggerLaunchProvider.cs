@@ -23,7 +23,6 @@ namespace Meadow
         private const int DebugPort = 55555;
 
         private readonly ConfiguredProject configuredProject;
-        private readonly SettingsManager settingsManager = new SettingsManager();
         private readonly MeadowLaunchSettingsProvider launchSettingsProvider;
         private FileSystemWatcher _launchSettingsWatcher;
         private Timer _safetyRefreshTimer;
