@@ -245,7 +245,7 @@
           like VS_Meadow_Extension.2022 as a side effect. -->
         <Exec Command="dotnet build &quot;$(DapAdapterProject)&quot; -c $(Configuration) --no-incremental -p:TargetIDE=none" />
   </Target>
-  <Target Name="CopyDapAdapter" BeforeTargets="GetVsixSourceItems;Build" Condition="Exists('$(DapAdapterSourceDir)meadow-debugging.exe')">
+  <Target Name="CopyDapAdapter" BeforeTargets="GetVsixSourceItems;Build" Condition="Exists('$(DapAdapterSourceDir)meadow-debugging.dll')">
     <ItemGroup>
       <DapAdapterFiles Include="$(DapAdapterSourceDir)**\*.*" />
     </ItemGroup>

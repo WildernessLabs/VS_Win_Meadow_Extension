@@ -31,6 +31,7 @@ namespace Meadow
         private int _consecutiveRefreshFailures;
         private int _isRefreshing;
         private volatile bool _suppressWatcherEvents;
+        private volatile bool _devicePollTimerStarted;
         private string _lastDeviceSignature = string.Empty;
 
         private static readonly TimeSpan RefreshDebounce = TimeSpan.FromSeconds(2);
@@ -49,12 +50,10 @@ namespace Meadow
             // Initialize file system watcher for launchSettings.json changes (real-time device detection)
             InitializeFileSystemWatcher();
 
-            // Poll connected Meadow devices and refresh launch settings only when device list changes.
-            _devicePollTimer = new Timer(
-                _ => _ = PollDevicesAndRefreshIfChangedAsync(),
-                null,
-                TimeSpan.FromSeconds(2),
-                TimeSpan.FromSeconds(2));
+            // Device polling timer is lazily initialized on first user interaction with debug dropdown
+            // to reduce solution load time and resource contention on multi-project solutions.
+            _devicePollTimerStarted = false;
+            _devicePollTimer = null;
         }
 
         private void InitializeFileSystemWatcher()
@@ -216,6 +215,29 @@ namespace Meadow
                 _launchSettingsWatcher.EnableRaisingEvents = true;
                 System.Diagnostics.Debug.WriteLine($"[MeadowDebuggerLaunchProvider] FileSystemWatcher enabled");
             }
+
+            // Lazy-start device polling timer on first access to debug dropdown
+            StartDevicePollTimerIfNeeded();
+        }
+
+        private void StartDevicePollTimerIfNeeded()
+        {
+            if (_devicePollTimerStarted)
+            {
+                return;
+            }
+
+            _devicePollTimerStarted = true;
+
+            // Poll connected Meadow devices and refresh launch settings only when device list changes.
+            // Timer starts with 2-second initial delay to allow solution load to complete.
+            _devicePollTimer = new Timer(
+                _ => _ = PollDevicesAndRefreshIfChangedAsync(),
+                null,
+                TimeSpan.FromSeconds(2),
+                TimeSpan.FromSeconds(2));
+
+            System.Diagnostics.Debug.WriteLine($"[MeadowDebuggerLaunchProvider] Device polling timer started");
         }
 
         public void Dispose()
