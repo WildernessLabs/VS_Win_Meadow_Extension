@@ -26,7 +26,7 @@ jobs:
       with:
         repository: WildernessLabs/Meadow.CLI
         path: Meadow.CLI
-        ref: develop
+        ref: meadow-3.0
 
     - name: Checkout Meadow.Contracts side-by-side
       uses: actions/checkout@v4
