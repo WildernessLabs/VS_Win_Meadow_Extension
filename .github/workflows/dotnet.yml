@@ -87,7 +87,7 @@ jobs:
     - name: Build Meadow.Debugging
       run: |
         dotnet restore Meadow.Debugging/Meadow.Debugging.sln
-        dotnet build Meadow.Debugging/Meadow.Debugging.sln -c Debug --no-restore -p:TargetIDE=vs2022
+        dotnet build Meadow.Debugging/Meadow.Debugging.sln -c Release --no-restore -p:TargetIDE=vs2022
 
     - if: ${{ github.event_name == 'workflow_dispatch' }}
       name: Update VS Version Numbers
