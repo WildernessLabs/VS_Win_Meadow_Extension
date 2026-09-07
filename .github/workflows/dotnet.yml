@@ -81,13 +81,7 @@ jobs:
     - name: Add MSBuild to Path
       uses: microsoft/setup-msbuild@v2
       with:
-        vs-version: '[17.0, 19.0)'
-
-    # Build Meadow.Debugging (copies DAP files to sibling extension repos)
-    - name: Build Meadow.Debugging
-      run: |
-        dotnet restore Meadow.Debugging/Meadow.Debugging.sln
-        dotnet build Meadow.Debugging/Meadow.Debugging.sln -c Release --no-restore -p:TargetIDE=vs2022
+        vs-version: '[17.0, 18.0)'
 
     - if: ${{ github.event_name == 'workflow_dispatch' }}
       name: Update VS Version Numbers
