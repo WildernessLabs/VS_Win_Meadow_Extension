@@ -238,22 +238,18 @@
   </PropertyGroup>
   <Target Name="BuildDapAdapter" BeforeTargets="CopyDapAdapter;GetVsixSourceItems" Condition="Exists('$(DapAdapterProject)')">
     <Message Text="Building DAP adapter from: $(DapAdapterProject)" Importance="high" />
-    <!-- Use Restore;Build to ensure dependency changes (e.g. Meadow.Debugging.DAP) are detected.
+        <!-- Use Restore;Build to ensure dependency changes (e.g. Meadow.Debugging.DAP) are detected.
          The VS2022 MSBuild host may cache project state, causing incremental builds to miss
-         changes in transitive ProjectReference dependencies. -->
-    <Exec Command="dotnet build &quot;$(DapAdapterProject)&quot; -c $(Configuration) --no-incremental" />
+          changes in transitive ProjectReference dependencies.
+          Pass TargetIDE=none to prevent Meadow.Debugging.Host from copying into legacy IDE folders
+          like VS_Meadow_Extension.2022 as a side effect. -->
+        <Exec Command="dotnet build &quot;$(DapAdapterProject)&quot; -c $(Configuration) --no-incremental -p:TargetIDE=none" />
   </Target>
   <Target Name="CopyDapAdapter" BeforeTargets="GetVsixSourceItems;Build" Condition="Exists('$(DapAdapterSourceDir)meadow-debugging.exe')">
     <ItemGroup>
       <DapAdapterFiles Include="$(DapAdapterSourceDir)**\*.*" />
     </ItemGroup>
-    <Copy SourceFiles="@(DapAdapterFiles)" DestinationFolder="$(ProjectDir)DapAdapter\%(RecursiveDir)" SkipUnchangedFiles="true" />
-    <ItemGroup>
-      <Content Include="$(ProjectDir)DapAdapter\**\*.*">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        <IncludeInVSIX>true</IncludeInVSIX>
-      </Content>
-    </ItemGroup>
+    <Copy SourceFiles="@(DapAdapterFiles)" DestinationFolder="$(MSBuildProjectDirectory)\DapAdapter\%(RecursiveDir)" SkipUnchangedFiles="true" />
     <Message Text="Copied DAP adapter files to DapAdapter/" Importance="high" />
   </Target>
   <Target Name="AfterBuild">
